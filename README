@@ -1,0 +1,5 @@
+
+Web server, realtime async cgi and wsgi versions.
+For run, monitor web server components use supervisor or puppet.
+
+Need to generate only config.py, handlers.py, urls.py

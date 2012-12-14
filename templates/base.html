@@ -1,0 +1,205 @@
+<!DOCTYPE HTML>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="msvalidate.01" content="A88827AA03A4AA5F24D885AB8519B91F" />
+  <meta name='yandex-verification' content='4e0a67e444e2e1f0' />
+  <meta name="google-site-verification" content="wLoZT6VXrH9yMt0ttuMDnbe6kyZVJykmUVXMJClrCcA" />
+  <script type="text/javascript">
+    WebFontConfig = {
+        google: { families: [ 'EB+Garamond::latin,cyrillic' ] }
+        };
+    (function() {
+      var wf = document.createElement('script');
+      wf.src = ('https:' == document.location.protocol ? 'https' : 'http') +
+      '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
+      wf.type = 'text/javascript';
+      wf.async = 'true';
+      var s = document.getElementsByTagName('script')[0];
+      s.parentNode.insertBefore(wf, s);
+    })();
+  </script>
+  {% block js %}{% end %}
+  <style type="text/css">
+    html, body {
+      overflow: hidden;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    html, body, #page {
+      height: 100%;
+    }
+    #page {
+      overflow: auto;
+      overflow-y: scroll;
+    }
+    #page-wrapper {
+      background: url('/static/img/background.png') #f5e9df repeat;
+      min-height: 100%;
+    }
+    #page-center {
+      position: relative;
+      width: 1200px;
+      margin: 0 auto;
+    }
+    #header {
+      position: relative;
+      width: 100%;
+      height: 168px;
+    }
+    #nav {
+      position: absolute;
+      overflow: hidden;
+      width: 100%;
+      height: 48px;
+      left: 0;
+      top: 8px;
+      /*background-color: #6d513b;*/
+      background: url('/static/img/nav_bg.png') no-repeat left top transparent;
+    }
+    #nav-main {
+      margin-left: 24px;
+      width: 80px;
+      background: url('/static/img/nav-main.png') no-repeat left top transparent;
+    }
+    #nav-main:hover {
+      background-image: url('/static/img/nav-main-hover.png');
+    }
+    #nav-menu {
+      width: 136px;
+      background: url('/static/img/nav-menu.png') no-repeat left top transparent;
+    }
+    #nav-menu:hover {
+      background-image: url('/static/img/nav-menu-hover.png');
+    }
+    #nav-order {
+      width: 128px;
+      background: url('/static/img/nav-order.png') no-repeat left top transparent;
+    }
+    #nav-order:hover {
+      background-image: url('/static/img/nav-order-hover.png');
+    }
+    #nav-contact {
+      width: 192px;
+      background: url('/static/img/nav-contact.png') no-repeat left top transparent;
+    }
+    #nav-contact:hover {
+      background-image: url('/static/img/nav-contact-hover.png');
+    }
+    #nav-about {
+      width: 120px;
+      background: url('/static/img/nav-about.png') no-repeat left top transparent;
+    }
+    #nav-about:hover {
+      background-image: url('/static/img/nav-about-hover.png');
+    }
+    #nav a {
+      float: left;
+      height: 48px;
+      text-indent: -1000px;
+      /*
+      font-size: 16px;
+      font-weight: bold;
+      line-height: 1;
+      padding: 16px;
+      */
+      /*color: #ffff00;*/
+      text-decoration: none;
+    }
+    #nav a:hover {
+      /*background-color: #544027;*/
+    }
+    #banner {
+      position: absolute;
+      width: 100%;
+      height: 80px;
+      left: 0;
+      bottom: 16px;
+      background-color: #666666;
+    }
+    #center {
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    #footer {
+      /*background-color: #6d513b;*/
+      background: url('/static/img/footer-bg.png') no-repeat left top transparent;
+      padding: 16px;
+    }
+    body {
+      font-family: 'EB Garamond', serif;
+      font-size: 18px;
+      color: #261c1d;
+    }
+    h1, h2, strong {
+      font-weight: normal;
+    }
+    #main-content, #about-content, #contact-content {
+      padding: 0 16px;
+    }
+    #page.main #header {
+      height: 582px;
+    }
+    #main-slider {
+      position: absolute;
+      width: 100%;
+      height: 400px;
+      left: 0;
+      top: 72px;
+      background-color: #676767;
+    }
+
+    #menu-miniorder, #order-miniorder {
+      float: right;
+      width: 264px;
+      background-color: #7f7f7f;
+    }
+    #menu-miniorder h2 {
+      padding: 0 8px 16px 8px;
+      margin-top: 0;
+    }
+    #menu-content, #order-content {
+      margin-right: 280px;
+    }
+
+    #contact-map {
+      height: 480px;
+    }
+  </style>
+  <title>{% block title %}{% end %} | Кафе "РУССКОЕ ПОДВОРЬЕ" Саратов</title>
+</head>
+<body>
+  <div id="page" class="{% block page %}{% end %}">
+    <div id="page-wrapper">
+    <div id="page-center">
+    <div id="header">
+      <div id="nav">
+        <a href="/" id="nav-main">РУССКОЕ ПОДВОРЬЕ</a>
+        <a href="/menu" id="nav-menu">МЕНЮ</a>
+        <a href="/order" id="nav-order">ЗАКАЗ</a>
+        <a href="/contact" id="nav-contact">КОНТАКТЫ</a>
+        <a href="/about" id="nav-about">О НАС</a>
+      </div>
+      <div id="banner"><img src="{{ static_url('img/banner.png') }}" alt="русская кухня саратов, кафе русское подворье"/></div>
+    </div>
+    <div id="center">
+      {% block content %}{% end %}
+    </div>
+    <div id="footer">copyright &copy 2012 Кафе "РУССКОЕ ПОДВОРЬЕ" Саратов</div>
+  </div>
+  </div>
+  </div>
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-27774892-4']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+     var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+     })();
+  </script>
+</body>
+</html>

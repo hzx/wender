@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block js %}
+  <script src="http://api-maps.yandex.ru/2.0/?load=package.full&lang=ru-RU" type="text/javascript"></script>
+  <script type="text/javascript">
+      // Как только будет загружен API и готов DOM, выполняем инициализацию
+      ymaps.ready(init);
+
+      function init () {
+          var point = [51.531441, 46.020711];
+          var map = new ymaps.Map("contact-map", {
+                  center: point,
+                  zoom: 16,
+                  type: "yandex#map"
+              }),
+              // При создании метки указываем ее свойства:  текст для отображения в иконке и содержимое балуна,
+              // который откроется при нажатии на эту метку
+              myPlacemark = new ymaps.Placemark(point, {
+                  // Свойства
+                  iconContent: 'РП',
+                  //balloonContentHeader: 'Кафе "РУССКОЕ ПОДВОРЬЕ"'//,
+                  //balloonContentBody: '',
+                  //balloonContentFooter: 'Подвал'
+              }, {
+                  // Опции
+                  preset: 'twirl#blueStretchyIcon' // иконка растягивается под контент
+              });
+
+          // Добавим контролы на карту
+          map.controls.add("zoomControl");
+
+          // Добавляем метку на карту
+          map.geoObjects.add(myPlacemark);
+      }
+  </script>
+{% end %}
+
+{% block title %}Контакты{% end %}
+
+{% block page %}contact{% end %}
+
+{% block content %}
+  <div id="contact-content">
+    <h1>Контакты</h1>
+    <p>тел.: 21-23-24</p>
+    <p>адрес: ул.Чапаева, 60 (угол Сакко и Ванцетти)</p>
+    <p>режим работы: 11.00 - 2.00</p>
+  </div>
+  <div id="contact-map"></div>
+{% end %}
