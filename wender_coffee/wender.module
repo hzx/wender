@@ -1,0 +1,8 @@
+source namespace.coffee
+source List.coffee
+source Observable.coffee
+source ObservableValue.coffee
+source ObservableList.coffee
+source DomNode.coffee
+source DomElement.coffee
+source DomText.coffee
