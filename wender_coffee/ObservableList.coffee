@@ -20,8 +20,12 @@ class ns.ObservableList
     @deleteObservable.removeListener(listener)
 
   notifyInsert: (obj, beforeId) ->
+    for hsh, listener in @insertObservable
+      listener(obj, beforeId)
 
   notifyDelete: (obj) ->
+    for hsh, listener in @deleteObservable
+      listener(obj)
 
   insert: (obj) ->
     node = @list.insert(obj)

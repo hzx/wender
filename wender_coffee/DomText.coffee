@@ -3,7 +3,15 @@
 class ns.DomText extends ns.DomNode
   @kind = 'text'
 
-  constructor: (text) ->
+  constructor: (values, renderText) ->
     @node = document.createTextNode(text)
+    @values = values
+    @renderText = renderText
 
-  setText: (text) ->
+  enterDocument: ->
+
+  exitDocument: ->
+
+  onValueChanged: ->
+    # or @node.nodeValue = 
+    @node.textContent = @renderText(@values)
