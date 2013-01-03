@@ -1,31 +1,200 @@
 
 
 class ns.DomElement extends ns.DomNode
-  @kind = 'element'
+  kind: 'element'
+  eventNamePattern: /^on([a-z]+)/i
 
-  constructor: (tagName, attributes, childs, list, render) ->
-    @tagName = tagName
-    @attributes = attributes
-    @node = document.createElement(tagName)
-    # child collection
+  constructor: (name, attributes, childs, list, render) ->
+    @name = name
     @list = list
-    # function for render follection item
     @render = render
-    # object rendered by render function
-    @renderedObject = null
-    # map object id from list to rendered node by render function
-    @nodeItemMap = {}
 
-  setAttribute: (name, value) ->
+    @id = null 
+    @events = {}
+
+    # create dom element
+    @node = document.createElement(name)
+
+    # childs
+    @hashGenerator = new ns.HashGenerator()
+    @childs = new ns.List()
+    # store here obj id to child
+    @objChilds = {}
+
+    # for rmap
+    @obj = null
+
+    # class list
+    @classList = {}
+
+  setAttributes: (attributes) ->
+    for name, value of attributes
+      if name is 'id'
+        @setId(value)
+        continue
+      if name is 'class'
+        for cn in value
+          @addClass(cn)
+        continue
+      # TODO(dem) need style attribute
+      # events
+      eventMatch = @eventNamePattern.exec(name)
+      if eventMatch isnt null
+        shortName = eventMatch[1]
+        @events[shortName] = value
+        continue
+      throw "unknown attribute name '" + name + "'"
+
+  # manipulate DOM
+  
+  # register id in browser
+  registerId: (id, node) ->
+    ns.browser.addIdElement(id, node)
+
+  # unregister id in browser
+  unregisterId: (id) ->
+    ns.browser.removeIdElement(id)
+
+  setId: (id) ->
+    # unregister old id
+    if @isInDocument and (@id isnt null)
+      @unregisterId(id)
+    @id = id
+    @node.id = id
+    # register id
+    if @isInDocument
+      @registerId(id, @node)
+
+  # internal method
+  classListToString: ->
+    cn = ''
+    cn = cn + ' ' + name for name of @classList
+    @node.className = cn
+
+  addClass: (name) ->
+    if not (name of @classList)
+      @classList[name] = null
+      @classListToString()
+
+  removeClass: (name) ->
+    if name of @classList
+      delete @classList[name]
+      @classListToString()
+
+  prepareNode: (node) ->
+    node.parent = this
+    node.hash = @hashGenerator.generate()
+    # add to obj id to childs map
+    if node.obj isnt null
+      @objChilds[node.obj.getHash()] = node
+
+  insert: (node) ->
+    @prepareNode(node)
+    @childs.insert(node)
+    if @isInDocument
+      node.enterDocument()
+
+  append: (node) ->
+    @prepareNode(node)
+    @childs.insert(node)
+    # add to document
+    @node.appendChild(node.node)
+    # listen events
+    if @isInDocument
+      node.enterDocument()
+
+  insertBefore: (node, beforeNode) ->
+    @prepareNode(node)
+    @childs.insertBefore(node, beforeNode)
+    # add to document
+    @node.insertBefore(node.node, beforeNode.node)
+    # listen events
+    if @isInDocument
+      node.enterDocument()
+
+  insertAfter: (node, afterNode) ->
+    @prepareNode(node)
+    @childs.insertAfter(node, afterNode)
+    # add to document
+    @node.insertBefore(node.node, afterNode.next.node)
+    # listen events
+    if @isInDocument
+      node.enterDocument()
+
+  removeChild: (node) ->
+    removed = @childs.remove(node.getHash())
+    if removed isnt null
+      # update first and last
+      @first = @childs.first.obj
+      @last = @childs.last.obj
+      removed.parent = null
+      removed.hash = null
+      # remove from obj id to child map
+      if removed.obj isnt null
+        delete @objChilds[removed.obj.getHash()]
+      # unlisten events
+      if @isInDocument
+        removed.exitDocument()
+      # remove from document
+      @node.removeChild(removed.node)
+
+  addEvent: (name, handler) ->
+    ns.addEvent(@node, name, handler)
+
+  removeEvent: (name, handler) ->
+    ns.removeEvent(@node, name, handler)
+
+  # private
 
   enterDocument: ->
-    # listen list events
-    # call super method
+    # listen events
+    for name, handler of @events
+      @addEvent(name, handler)
+
+    if @id isnt null
+      @registerId(@id, @node)
+
+    # listen list changes
+    @list.addInsertListener(@onListInsert)
+    @list.addDeleteListener(@onListDelete)
+
+    # enterDocument for childs
+    @childs.forEach (child) ->
+      child.enterDocument()
+
     super()
 
   exitDocument: ->
-    # unlisten list events
-    # call super method
+    # unlisten events
+    for name, handler of @events
+      @removeEvent(name, handler)
+
+    if @id isnt null
+      @unregisterId(@id)
+
+    # unlisten list changes
+    @list.removeInsertListener(@onListInsert)
+    @list.removeDeleteListener(@onListDelete)
+
+    # exitDocument for childs
+    @childs.forEach (child) ->
+      child.exitDocument()
+
     super()
 
-  onListAppend: (obj) ->
+  # events
+  
+  onListInsert: (obj, beforeId) =>
+    node = @render(obj)
+    node.obj = obj
+    if beforeId isnt null and beforeId of @objChilds
+      before = @objChilds[beforeId]
+      @insertBefore(node, before)
+    else
+      @append(node)
+
+  onListDelete: (obj) =>
+    if obj.getHash() of @objChilds
+      node = @objChilds[obj.getHash()]
+      @removeChild(node)
+

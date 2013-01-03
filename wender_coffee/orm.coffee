@@ -1,29 +1,29 @@
 
 
-class ns.OrmStruct:
+class ns.OrmStruct
 
-  constructor: () ->
+  constructor: ->
 
 
-class ns.OrmVariable:
+class ns.OrmVariable
 
-  constructor: () ->
+  constructor: ->
 
-class ns.Orm:
+class ns.Orm
 
-  constructor: () ->
+  constructor: ->
     @srtucts = {}
 
   # public methods
 
-  insert: () ->
+  insert: ->
 
-  selectOne: () ->
+  selectOne: ->
 
-  selectFrom: () ->
+  selectFrom: ->
 
-  selectConcat: () ->
+  selectConcat: ->
 
-  update: () ->
+  update: ->
 
-  delete: () ->
+  delete: ->

@@ -4,8 +4,8 @@ class ns.ObservableList
 
   constructor: ->
     @list = ns.List()
-    @insertObservable = ns.Observable
-    @deleteObservable = ns.Observable
+    @insertObservable = new ns.Observable()
+    @deleteObservable = new ns.Observable()
 
   addInsertListener: (listener) ->
     @insertObservable.addListener(listener)
@@ -19,79 +19,45 @@ class ns.ObservableList
   removeDeleteListener: (listener) ->
     @deleteObservable.removeListener(listener)
 
-  notifyInsert: (obj, beforeId) ->
-    for hsh, listener in @insertObservable
-      listener(obj, beforeId)
+  notifyInsert: (obj, beforeObj) ->
+    for hash, listener in @insertObservable
+      listener(obj, beforeObj)
 
   notifyDelete: (obj) ->
-    for hsh, listener in @deleteObservable
+    for hash, listener in @deleteObservable
       listener(obj)
 
   insert: (obj) ->
     node = @list.insert(obj)
-    beforeId = if node.nextNode isnt null
-      node.nextNode.obj.id
+    before = if node.next isnt null
+      node.next.obj
     else
       null
-    @notifyInsert(obj, beforeId)
-
-  insertNode: (node) ->
-    @list.insertNode(node)
-    beforeId = if node.nextNode isnt null
-      node.nextNode.obj.id
-    else
-      null
-    @notifyInsert(node.obj, beforeId)
+    @notifyInsert(obj, before)
 
   append: (obj) ->
     node = @list.append(obj)
     @notifyInsert(obj, null)
 
-  appendNode: (node) ->
-    @list.appendNode(node)
-    @notifyInsert(node.obj, null)
-
-  insertAfter: (obj, id) ->
-    node = @list.insertAfter(obj, id)
-    beforeId = if node.nextNode isnt null
-      node.nextNode.obj.id
+  insertAfter: (obj, afterObj) ->
+    node = @list.insertAfter(obj, afterObj)
+    before = if node.next isnt null
+      node.next.obj
     else
       null
-    @notifyInsert(obj, beforeId)
+    @notifyInsert(obj, before)
 
-  insertAfterNode: (node, id) ->
-    beforeId = if node.nextNode isnt null
-      node.nextNode.obj.id
-    else
-      null
-    @notifyInsert(node.obj, beforeId)
+  insertBefore: (obj, beforeObj) ->
+    node = @list.insertBefore(obj, beforeObj)
+    @notifyInsert(obj, beforeObj)
 
-  insertBefore: (obj, id) ->
-    node = @list.insertBefore(obj, id)
-    beforeId = if node.nextNode isnt null
-      node.nextNode.obj.id
-    else
-      null
-    @notifyInsert(obj, beforeId)
+  get: (hash) ->
+    @list.get(hash)
 
-  insertBeforeNode: (node, id) ->
-    @list.insertBeforeNode(node, id)
-    beforeId = if node.nextNode isnt null
-      node.nextNode.obj.id
-    else
-      null
-    @notifyInsert(node.obj, beforeId)
-
-  getNodeById: (id) ->
-    @list.getNodeById(id)
-
-  getById: (id) ->
-    @list.getById(id)
-
-  deleteById: (id) ->
-    node = @list.deleteById(id)
-    if node isnt null
-      @notifyDelete(node.obj)
+  remove: (hash) ->
+    removed = @list.remove(hash)
+    if removed isnt null
+      @notifyDelete(removed)
 
   forEach: (func) ->
     @list.forEach(func)

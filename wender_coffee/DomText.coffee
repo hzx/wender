@@ -1,17 +1,37 @@
 
 
 class ns.DomText extends ns.DomNode
-  @kind = 'text'
+  kind: 'text'
 
-  constructor: (values, renderText) ->
-    @node = document.createTextNode(text)
+  # Params:
+  #   values - array of ObservableValue
+  #   render - function for rendering values to text
+  constructor: (values, render) ->
+    @node = document.createTextNode('')
     @values = values
-    @renderText = renderText
+    @render = render
+
+  setText: (text) ->
+    @node.textContent = text
+
+  # private
 
   enterDocument: ->
+    # listen values change
+    for value in @values
+      value.addListener(@onValueChange)
+
+    super()
 
   exitDocument: ->
+    # unlisten values change
+    for value in @values
+      value.removeListener(@onValueChange)
 
-  onValueChanged: ->
-    # or @node.nodeValue = 
-    @node.textContent = @renderText(@values)
+    super()
+
+  # events
+
+  onValueChange: (oldValue, newValue) =>
+    @setText(@render(@values))
+

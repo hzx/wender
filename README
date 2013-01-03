@@ -1,3 +1,5 @@
+Prerequisites
+sudo gem install jasmine-headless-webkit
 
 Web server, realtime async cgi and wsgi versions.
 For run, monitor web server components use supervisor or puppet.
