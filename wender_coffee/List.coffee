@@ -42,6 +42,8 @@ class ns.List
       @last = node
     node
 
+  appendNode: (node) ->
+
   insertAfter: (obj, afterObj) ->
     node = new ns.ListNode(obj)
     if afterObj.getHash() of @nodes
@@ -105,6 +107,15 @@ class ns.List
       node.obj
     else
       null
+
+  empty: ->
+    for hash, node of @nodes
+      node.prev = null
+      node.next = null
+      delete @nodes[hash]
+    @first = null
+    @last = null
+    @count = 0
 
   forEach: (func) ->
     cursor = @first

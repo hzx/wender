@@ -1,5 +1,13 @@
 
 
+class TestUser
+  constructor: ->
+    @id = null
+    @name = new window.wender.ObservableValue()
+
+  getHash: ->
+    @id
+
 describe "Dom tests", ->
 
   beforeEach ->
@@ -10,7 +18,7 @@ describe "Dom tests", ->
     # if page isnt null
     #   wender.browser.removeElement(page)
 
-  it "create element childs", ->
+  xit "create element childs", ->
     w = window.wender
 
     copyright = new w.ObservableValue()
@@ -57,3 +65,28 @@ describe "Dom tests", ->
     copyrightText = footerElement.childs.first.obj
     expect(copyrightText).not.toEqual(null)
     expect(copyrightText.text).toEqual('copyright 2013 rubear')
+
+  it "listen observable list", ->
+    w = window.wender
+
+    list = new w.ObservableList()
+    u1 = new TestUser()
+    u1.id = '1'
+    u1.name.setValue('mercedes')
+    u2 = new TestUser()
+    u2.id = '2'
+    list.append(u1)
+
+    list.addInsertListener (obj, before) ->
+
+    page = new w.DomElement 'div', {'id': 'page'}, [], list, (item) ->
+      new wender.DomElement 'div', {'class': ['user']}, [
+        new wender.DomText [item.name], (values) ->
+          values[0].value
+      ], null, null
+
+    w.browser.appendElement(page)
+
+    list.append(u2)
+    u2.name.setValue('bmw')
+

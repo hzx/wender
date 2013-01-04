@@ -1,5 +1,6 @@
 
 
+# TODO(dem) reimplement NODE without List
 class ns.DomElement extends ns.DomNode
   kind: 'element'
   eventNamePattern: /^on([a-z]+)/i
@@ -14,8 +15,14 @@ class ns.DomElement extends ns.DomNode
     super()
 
     @name = name
+
+    # for reactive behavior
     @list = list
     @render = render
+    # store here obj id to child
+    @objChilds = {}
+    # for rmap binded object
+    @obj = null
 
     @id = null 
     @events = {}
@@ -26,11 +33,6 @@ class ns.DomElement extends ns.DomNode
     # childs
     @hashGenerator = new ns.HashGenerator()
     @childs = new ns.List()
-    # store here obj id to child
-    @objChilds = {}
-
-    # for rmap
-    @obj = null
 
     # class list
     @classList = {}
@@ -168,6 +170,17 @@ class ns.DomElement extends ns.DomNode
       # remove from document
       @node.removeChild(removed.node)
 
+  empty: ->
+    for hash, node in @childs.nodes
+      node.obj.exitDocument()
+      node.obj.parent = null
+      node.prev = null
+      node.next = null
+      node.parent = null
+    @childs.empty()
+    @first = null
+    @last = null
+
   addEvent: (name, handler) ->
     ns.addEvent(@node, name, handler)
 
@@ -187,6 +200,9 @@ class ns.DomElement extends ns.DomNode
     if @list?
       @list.addInsertListener(@onListInsert)
       @list.addDeleteListener(@onListDelete)
+      # add childs
+      @list.forEach (item) =>
+        @onListInsert(item, null)
 
     # enterDocument for childs
     @childs.forEach (child) ->
@@ -205,6 +221,9 @@ class ns.DomElement extends ns.DomNode
     if @list?
       @list.removeInsertListener(@onListInsert)
       @list.removeDeleteListener(@onListDelete)
+      # remove childs
+      @list.forEach (item) =>
+        @onListDelete(item)
 
     # exitDocument for childs
     @childs.forEach (child) ->
@@ -214,11 +233,10 @@ class ns.DomElement extends ns.DomNode
 
   # events
   
-  onListInsert: (obj, beforeId) =>
+  onListInsert: (obj, before) =>
     node = @render(obj)
     node.obj = obj
-    if beforeId isnt null and beforeId of @objChilds
-      before = @objChilds[beforeId]
+    if before isnt null
       @insertBefore(node, before)
     else
       @append(node)

@@ -1,9 +1,9 @@
 
 
-class ns.ObservableList
+class ns.ObservableList extends ns.List
 
   constructor: ->
-    @list = ns.List()
+    super()
     @insertObservable = new ns.Observable()
     @deleteObservable = new ns.Observable()
 
@@ -20,15 +20,15 @@ class ns.ObservableList
     @deleteObservable.removeListener(listener)
 
   notifyInsert: (obj, beforeObj) ->
-    for hash, listener in @insertObservable
+    for hash, listener of @insertObservable.listeners
       listener(obj, beforeObj)
 
   notifyDelete: (obj) ->
-    for hash, listener in @deleteObservable
+    for hash, listener of @deleteObservable.listeners
       listener(obj)
 
   insert: (obj) ->
-    node = @list.insert(obj)
+    node = super(obj)
     before = if node.next isnt null
       node.next.obj
     else
@@ -36,11 +36,11 @@ class ns.ObservableList
     @notifyInsert(obj, before)
 
   append: (obj) ->
-    node = @list.append(obj)
+    node = super(obj)
     @notifyInsert(obj, null)
 
   insertAfter: (obj, afterObj) ->
-    node = @list.insertAfter(obj, afterObj)
+    node = super(obj, afterObj)
     before = if node.next isnt null
       node.next.obj
     else
@@ -48,20 +48,10 @@ class ns.ObservableList
     @notifyInsert(obj, before)
 
   insertBefore: (obj, beforeObj) ->
-    node = @list.insertBefore(obj, beforeObj)
+    node = super(obj, beforeObj)
     @notifyInsert(obj, beforeObj)
 
-  get: (hash) ->
-    @list.get(hash)
-
   remove: (hash) ->
-    removed = @list.remove(hash)
+    removed = super(hash)
     if removed isnt null
       @notifyDelete(removed)
-
-  forEach: (func) ->
-    @list.forEach(func)
-
-  filter: (func) ->
-    @list.filter(func)
-

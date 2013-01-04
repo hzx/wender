@@ -18,12 +18,19 @@ class ns.DomText extends ns.DomNode
     @text = text
     @node.textContent = text
 
+  renderText: ->
+    @setText(@render(@values))
+
   # private
 
   enterDocument: ->
     # listen values change
     for value in @values
       value.addListener(@onValueChange)
+
+    # autorender values
+    if @values.length > 0
+      @renderText()
 
     super()
 
@@ -37,5 +44,5 @@ class ns.DomText extends ns.DomNode
   # events
 
   onValueChange: (oldValue, newValue) =>
-    @setText(@render(@values))
+    @renderText()
 

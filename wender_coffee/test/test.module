@@ -1,2 +1,3 @@
 source List.coffee
+source ObservableList.coffee
 source Dom.coffee
