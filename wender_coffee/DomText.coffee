@@ -9,11 +9,13 @@ class ns.DomText extends ns.DomNode
   constructor: (values, render) ->
     super()
 
-    @node = document.createTextNode('')
+    @text = ''
+    @node = document.createTextNode(@text)
     @values = values
     @render = render
 
   setText: (text) ->
+    @text = text
     @node.textContent = text
 
   # private

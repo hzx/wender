@@ -73,7 +73,7 @@ class ns.DomElement extends ns.DomNode
 
   setId: (id) ->
     # unregister old id
-    if @isInDocument and (@id isnt null)
+    if @isInDocument and @id isnt null
       @unregisterId(id)
     @id = id
     @node.id = id
@@ -84,11 +84,11 @@ class ns.DomElement extends ns.DomNode
   # internal method
   classListToString: ->
     cn = ''
-    cn = cn + ' ' + name for name of @classList
+    cn = cn + name + ' ' for name of @classList
     @node.className = cn
 
   addClass: (name) ->
-    if not (name of @classList)
+    unless name of @classList
       @classList[name] = null
       @classListToString()
 
@@ -96,6 +96,9 @@ class ns.DomElement extends ns.DomNode
     if name of @classList
       delete @classList[name]
       @classListToString()
+
+  hasClass: (name) ->
+    name of @classList
 
   prepareNode: (node) ->
     node.parent = this

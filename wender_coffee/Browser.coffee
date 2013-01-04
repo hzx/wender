@@ -54,13 +54,11 @@ class ns.Browser
 
   appendElement: (element) ->
     @body.append(element)
-    # document.body.appendChild(element.node)
     element.enterDocument()
 
   removeElement: (element) ->
     element.exitDocument()
     @body.removeChild(element)
-    # document.body.removeChild(element.node)
 
 
 ns.initTasks.push ->

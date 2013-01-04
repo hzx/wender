@@ -78,7 +78,6 @@ class ns.List
     else
       null
 
-  # TODO(dem) fix bug
   remove: (hash) ->
     if hash of @nodes
       node = @nodes[hash]
