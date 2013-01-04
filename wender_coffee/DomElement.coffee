@@ -107,12 +107,15 @@ class ns.DomElement extends ns.DomNode
   insert: (node) ->
     @prepareNode(node)
     @childs.insert(node)
+    # add to document
+    @node.insertBefore(node.node, @node.firstChild)
+    # listen events
     if @isInDocument
       node.enterDocument()
 
   append: (node) ->
     @prepareNode(node)
-    @childs.insert(node)
+    @childs.append(node)
     # add to document
     @node.appendChild(node.node)
     # listen events
@@ -141,10 +144,18 @@ class ns.DomElement extends ns.DomNode
     removed = @childs.remove(node.getHash())
     if removed isnt null
       # update first and last
-      @first = @childs.first.obj
-      @last = @childs.last.obj
+      @first = if @childs.first isnt null
+        @childs.first.obj
+      else
+        null
+      @last = if @childs.last isnt null
+        @childs.last.obj
+      else
+        null
+
       removed.parent = null
       removed.hash = null
+    
       # remove from obj id to child map
       if removed.obj isnt null and removed.obj.getHash() of @objChilds
         delete @objChilds[removed.obj.getHash()]
@@ -152,7 +163,7 @@ class ns.DomElement extends ns.DomNode
       if @isInDocument
         removed.exitDocument()
       # remove from document
-      @node.removeChild(removed.node.hash)
+      @node.removeChild(removed.node)
 
   addEvent: (name, handler) ->
     ns.addEvent(@node, name, handler)

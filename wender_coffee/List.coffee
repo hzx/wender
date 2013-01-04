@@ -82,22 +82,27 @@ class ns.List
   remove: (hash) ->
     if hash of @nodes
       node = @nodes[hash]
+
       if node.next isnt null
         node.next.prev = node.prev
       else
         @last = node.prev
+
       if node.prev isnt null
         node.prev.next = node.next
       else
         @first = node.next
-      if @last is node.prev
+
+      if @last isnt null and @last is node.prev
         @last.next = null
-      if @first is node.next
+      if @first isnt null and @first is node.next
         @first.prev = null
+
       delete @nodes[hash]
       node.next = null
       node.prev = null
       @count = @count - 1
+
       node.obj
     else
       null
