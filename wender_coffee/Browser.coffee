@@ -4,6 +4,8 @@ class ns.Browser
 
   constructor: ->
     @ids = {}
+    @body = new ns.DomElement('div', {}, [], null, null)
+    @body.node = document.body
 
   loadScript: (url, callback) ->
     script = document.createElement("script")
@@ -51,5 +53,15 @@ class ns.Browser
     document.location.hash = url
 
   appendElement: (element) ->
-    document.body.appendChild(element.node)
+    @body.append(element)
+    # document.body.appendChild(element.node)
     element.enterDocument()
+
+  removeElement: (element) ->
+    element.exitDocument()
+    @body.removeChild(element)
+    # document.body.removeChild(element.node)
+
+
+ns.initTasks.push ->
+  ns.browser = new ns.Browser()

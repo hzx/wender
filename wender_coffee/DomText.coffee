@@ -7,6 +7,8 @@ class ns.DomText extends ns.DomNode
   #   values - array of ObservableValue
   #   render - function for rendering values to text
   constructor: (values, render) ->
+    super()
+
     @node = document.createTextNode('')
     @values = values
     @render = render

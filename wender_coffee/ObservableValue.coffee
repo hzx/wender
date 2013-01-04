@@ -4,6 +4,7 @@ class ns.ObservableValue extends ns.Observable
 
   constructor: ->
     @value = null
+    super()
 
   setValue: (value) ->
     if @value isnt value

@@ -4,7 +4,15 @@ class ns.DomElement extends ns.DomNode
   kind: 'element'
   eventNamePattern: /^on([a-z]+)/i
 
+  # Params:
+  #   name - tagName
+  #   attributes - dictionary of attribute name, value
+  #   childs - array of DomElement or DomText
+  #   list - ObservableList where stored data
+  #   render - render item from ObservableList
   constructor: (name, attributes, childs, list, render) ->
+    super()
+
     @name = name
     @list = list
     @render = render
@@ -27,6 +35,12 @@ class ns.DomElement extends ns.DomNode
     # class list
     @classList = {}
 
+    # add childs
+    for child in childs
+      @append(child)
+
+    @setAttributes(attributes)
+
   setAttributes: (attributes) ->
     for name, value of attributes
       if name is 'id'
@@ -48,12 +62,14 @@ class ns.DomElement extends ns.DomNode
   # manipulate DOM
   
   # register id in browser
-  registerId: (id, node) ->
-    ns.browser.addIdElement(id, node)
+  registerId: ->
+    if @id isnt null
+      ns.browser.addIdElement(@id, this)
 
   # unregister id in browser
-  unregisterId: (id) ->
-    ns.browser.removeIdElement(id)
+  unregisterId: ->
+    if @id isnt null
+      ns.browser.removeIdElement(@id)
 
   setId: (id) ->
     # unregister old id
@@ -86,7 +102,7 @@ class ns.DomElement extends ns.DomNode
     node.hash = @hashGenerator.generate()
     # add to obj id to childs map
     if node.obj isnt null
-      @objChilds[node.obj.getHash()] = node
+      @objChilds[node.hash] = node
 
   insert: (node) ->
     @prepareNode(node)
@@ -130,13 +146,13 @@ class ns.DomElement extends ns.DomNode
       removed.parent = null
       removed.hash = null
       # remove from obj id to child map
-      if removed.obj isnt null
+      if removed.obj isnt null and removed.obj.getHash() of @objChilds
         delete @objChilds[removed.obj.getHash()]
       # unlisten events
       if @isInDocument
         removed.exitDocument()
       # remove from document
-      @node.removeChild(removed.node)
+      @node.removeChild(removed.node.hash)
 
   addEvent: (name, handler) ->
     ns.addEvent(@node, name, handler)
@@ -151,12 +167,12 @@ class ns.DomElement extends ns.DomNode
     for name, handler of @events
       @addEvent(name, handler)
 
-    if @id isnt null
-      @registerId(@id, @node)
+    @registerId()
 
     # listen list changes
-    @list.addInsertListener(@onListInsert)
-    @list.addDeleteListener(@onListDelete)
+    if @list?
+      @list.addInsertListener(@onListInsert)
+      @list.addDeleteListener(@onListDelete)
 
     # enterDocument for childs
     @childs.forEach (child) ->
@@ -169,12 +185,12 @@ class ns.DomElement extends ns.DomNode
     for name, handler of @events
       @removeEvent(name, handler)
 
-    if @id isnt null
-      @unregisterId(@id)
+    @unregisterId()
 
     # unlisten list changes
-    @list.removeInsertListener(@onListInsert)
-    @list.removeDeleteListener(@onListDelete)
+    if @list?
+      @list.removeInsertListener(@onListInsert)
+      @list.removeDeleteListener(@onListDelete)
 
     # exitDocument for childs
     @childs.forEach (child) ->

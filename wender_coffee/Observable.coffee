@@ -16,7 +16,7 @@ class ns.Observable
       hash = @hashGenerator.generate()
       listener.hash = hash
     
-    if not (hash of @listeners)
+    unless hash of @listeners
       @listeners[hash] = listener
 
   removeListener: (listener) ->

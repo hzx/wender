@@ -10,4 +10,3 @@ source Browser.coffee
 source DomNode.coffee
 source DomElement.coffee
 source DomText.coffee
-source main.coffee
