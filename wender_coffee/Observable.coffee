@@ -4,27 +4,23 @@ class ns.Observable
 
   constructor: ->
     @listeners = {}
-    @hshCounter = 0
-
-  generateHsh: ->
-    @hshCounter = @hshCounter + 1
-    @hshCounter
+    @hashGenerator = new ns.HashGenerator()
 
   addListener: (listener) ->
     # get listener hash
-    hsh = null
-    if 'hsh' of listener
-      hsh = listener.hsh
+    hash = null
+    if 'hash' of listener
+      hash = listener.hash
     else
       # mark listener by hsh
-      hsh = @generateHsh()
-      listener.hsh = hsh
+      hash = @hashGenerator.generate()
+      listener.hash = hash
     
-    if not (hsh of @listeners)
-      @listeners[hsh] = listener
+    if not (hash of @listeners)
+      @listeners[hash] = listener
 
   removeListener: (listener) ->
     # get listener hash
-    if 'hsh' of listener
-      hsh = listener.hsh
-      delete @listeners[hsh]
+    if 'hash' of listener
+      hash = listener.hash
+      delete @listeners[hash]
