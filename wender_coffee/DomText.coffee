@@ -6,10 +6,10 @@ class ns.DomText extends ns.DomNode
   # Params:
   #   values - array of ObservableValue
   #   render - function for rendering values to text
-  constructor: (values, render) ->
+  constructor: (text, values, render) ->
     super()
 
-    @text = ''
+    @text = text
     @node = document.createTextNode(@text)
     @values = values
     @render = render
@@ -25,19 +25,21 @@ class ns.DomText extends ns.DomNode
 
   enterDocument: ->
     # listen values change
-    for value in @values
-      value.addListener(@onValueChange)
+    if @values isnt null
+      for value in @values
+        value.addListener(@onValueChange)
 
-    # autorender values
-    if @values.length > 0
-      @renderText()
+      # autorender values
+      if @values.length > 0
+        @renderText()
 
     super()
 
   exitDocument: ->
     # unlisten values change
-    for value in @values
-      value.removeListener(@onValueChange)
+    if @values isnt null
+      for value in @values
+        value.removeListener(@onValueChange)
 
     super()
 
