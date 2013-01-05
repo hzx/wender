@@ -18,7 +18,7 @@ describe "Dom tests", ->
     # if page isnt null
     #   wender.browser.removeElement(page)
 
-  xit "create element childs", ->
+  it "create element childs", ->
     w = window.wender
 
     copyright = new w.ObservableValue()
@@ -36,33 +36,28 @@ describe "Dom tests", ->
 
     copyright.setValue('copyright 2013 rubear')
 
-    expect(w.browser.body.childs.count).toEqual(1)
-    pageElement = w.browser.body.childs.first.obj
+    pageElement = w.browser.body.first
     expect(pageElement).not.toEqual(null)
     expect(pageElement.id).toEqual('page')
-    expect(pageElement.childs.count).toEqual(3)
 
-    headerElement = pageElement.childs.first.obj
+    headerElement = pageElement.first
     expect(headerElement).not.toEqual(null)
     expect(headerElement.id).toEqual('header')
-    expect(headerElement.childs.count).toEqual(0)
     expect(headerElement.hash).not.toEqual(null)
     
-    contentElement = pageElement.childs.first.next.obj
+    contentElement = pageElement.first.next
     expect(contentElement).not.toEqual(null)
     expect(contentElement.id).toEqual('content')
-    expect(contentElement.childs.count).toEqual(0)
     expect(contentElement.hash).not.toEqual(null)
     expect(contentElement.hasClass('common-content')).toEqual(true)
     expect(contentElement.hasClass('rounded-box')).toEqual(true)
 
-    footerElement = pageElement.childs.last.obj
+    footerElement = pageElement.last
     expect(footerElement).not.toEqual(null)
     expect(footerElement.id).toEqual('footer')
-    expect(footerElement.childs.count).toEqual(1)
     expect(footerElement.hash).not.toEqual(null)
 
-    copyrightText = footerElement.childs.first.obj
+    copyrightText = footerElement.first
     expect(copyrightText).not.toEqual(null)
     expect(copyrightText.text).toEqual('copyright 2013 rubear')
 
@@ -111,3 +106,14 @@ describe "Dom tests", ->
 
     expect(page.first).toEqual(null)
 
+  it "event test", ->
+    page = new wender.DomElement 'div', {'id': 'page', 'onclick': (e) =>
+      console.log e
+      e.element.append(new wender.DomElement 'div', {'class': ['message']}, [
+        new wender.DomText('you clicked me', null, null)
+      ], null, null)
+    }, [
+      new wender.DomText 'CLICK ME', null, null
+    ], null, null
+
+    wender.browser.appendElement(page)

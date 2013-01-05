@@ -54,12 +54,17 @@ class ns.DomElement extends ns.DomNode
           @addClass(cn)
         continue
       # TODO(dem) need style attribute
+      # if name is 'style'
       # events
-      eventMatch = @eventNamePattern.exec(name)
-      if eventMatch isnt null
-        shortName = eventMatch[1]
-        @events[shortName] = value
+      if ns.isIe
+        @events[name] = value
         continue
+      else
+        eventMatch = @eventNamePattern.exec(name)
+        if eventMatch isnt null
+          shortName = eventMatch[1]
+          @events[shortName] = value
+          continue
       throw "unknown attribute name '" + name + "'"
 
   # manipulate DOM
@@ -238,10 +243,10 @@ class ns.DomElement extends ns.DomNode
       cursor = cursor.next
 
   addEvent: (name, handler) ->
-    ns.addEvent(@node, name, handler)
+    ns.addEvent(@node, name, @onEvent)
 
   removeEvent: (name, handler) ->
-    ns.removeEvent(@node, name, handler)
+    ns.removeEvent(@node, name, @onEvent)
 
   # private
 
@@ -302,6 +307,11 @@ class ns.DomElement extends ns.DomNode
       node = @objChilds[obj.getHash()]
       @removeChild(node)
 
-  # element event wrapper
+  # event wrapper
   onEvent: (event) =>
-    throw 'not implemented'
+    event = event || window.event
+    target = event.target || event.srcElement
+
+    handler = @events[event.type]
+    # TODO(dem) make more specific params depending on event type
+    handler({'type': event.type, 'event': event, 'element': this, 'target': target })
