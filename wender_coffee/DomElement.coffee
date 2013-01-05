@@ -21,8 +21,6 @@ class ns.DomElement extends ns.DomNode
     @render = render
     # store here obj id to child
     @objChilds = {}
-    # for rmap binded object
-    @obj = null
 
     @id = null 
     @events = {}
@@ -32,7 +30,10 @@ class ns.DomElement extends ns.DomNode
 
     # childs
     @hashGenerator = new ns.HashGenerator()
-    @childs = new ns.List()
+    # @childs = new ns.List()
+    @childs = {}
+    @first = null
+    @last = null
 
     # class list
     @classList = {}
@@ -105,81 +106,136 @@ class ns.DomElement extends ns.DomNode
   prepareNode: (node) ->
     node.parent = this
     node.hash = @hashGenerator.generate()
-    # add to obj id to childs map
+    # add to obj id to childs node map
     if node.obj isnt null
-      @objChilds[node.hash] = node
+      @objChilds[node.obj.getHash()] = node
+
+  postAddNode: (node) ->
+    # add node to childs
+    @childs[node.hash] = node
+
+    # listen events
+    if @isInDocument
+      node.enterDocument()
 
   insert: (node) ->
     @prepareNode(node)
-    @childs.insert(node)
-    # add to document
-    @node.insertBefore(node.node, @node.firstChild)
-    # listen events
-    if @isInDocument
-      node.enterDocument()
+
+    # insert to begin in empty childs
+    if @first is null
+      # add to document
+      @node.appendChild(node.node)
+
+      @first = node
+      @last = node
+    else # insert before first
+      # add to document
+      @node.insertBefore(node.node, @first.node)
+
+      @first.prev = node
+      node.next = @first
+      @first = node
+
+    @postAddNode(node)
 
   append: (node) ->
     @prepareNode(node)
-    @childs.append(node)
+
+    # insert to end in empty childs
+    if @last is null
+      @first = node
+      @last = node
+    else # insert after last
+      @last.next = node
+      node.prev = @last
+      @last = node
+
     # add to document
     @node.appendChild(node.node)
-    # listen events
-    if @isInDocument
-      node.enterDocument()
 
-  insertBefore: (node, beforeNode) ->
-    @prepareNode(node)
-    @childs.insertBefore(node, beforeNode)
-    # add to document
-    @node.insertBefore(node.node, beforeNode.node)
-    # listen events
-    if @isInDocument
-      node.enterDocument()
+    @postAddNode(node)
 
-  insertAfter: (node, afterNode) ->
-    @prepareNode(node)
-    @childs.insertAfter(node, afterNode)
-    # add to document
-    @node.insertBefore(node.node, afterNode.next.node)
-    # listen events
-    if @isInDocument
-      node.enterDocument()
+  insertBefore: (node, before) ->
+    if before is null
+      @append(node)
+    else
+      # insert to begin
+      if before.prev is null
+        @insert(node)
+      else # insert between two nodes
+        @prepareNode(node)
+
+        # add to document
+        @node.insertBefore(node.node, before.node)
+
+        # link refs
+        before.prev.next = node
+        node.prev = before.prev
+        before.prev = node
+        node.next = before
+
+        @postAddNode(node)
+
+  insertAfter: (node, after) ->
+    if after is null
+      @append(node)
+    else
+      if after.next is null
+        @append(node)
+      else # insert between two nodes
+        @prepareNode(node)
+
+        # add to document
+        @node.insertBefore(node.node, after.next.node)
+
+        # link refs
+        after.next.prev = node
+        node.next = after.next
+        after.next = node
+        node.prev = after
+
+        @postAddNode(node)
 
   removeChild: (node) ->
-    removed = @childs.remove(node.getHash())
-    if removed isnt null
-      # update first and last
-      @first = if @childs.first isnt null
-        @childs.first.obj
-      else
-        null
-      @last = if @childs.last isnt null
-        @childs.last.obj
-      else
-        null
+    if @isInDocument
+      node.exitDocument()
 
-      removed.parent = null
-      removed.hash = null
-    
-      # remove from obj id to child map
-      if removed.obj isnt null and removed.obj.getHash() of @objChilds
-        delete @objChilds[removed.obj.getHash()]
-      # unlisten events
-      if @isInDocument
-        removed.exitDocument()
-      # remove from document
-      @node.removeChild(removed.node)
+    # remove from document
+    @node.removeChild(node.node)
+
+    # move right refs 
+    if node.next isnt null
+      node.next.prev = node.prev
+    else
+      @last = node.prev
+
+    # move left refs
+    if node.prev isnt null
+      node.prev.next = node.next
+    else
+      @first = node.next
+
+    # unlink all refs
+    node.parent = null
+    node.next = null
+    node.prev = null
+    # removed node must have hash == null
+    node.hash = null
+
+    if node.obj isnt null
+      delete @objChilds[node.obj.getHash()]
+
+    delete @childs[node.hash]
 
   empty: ->
-    for hash, node in @childs.nodes
-      node.obj.exitDocument()
-      node.obj.parent = null
-      node.prev = null
-      node.next = null
-      node.parent = null
-    @childs.empty()
-    @first = null
-    @last = null
+    while @first isnt null
+      @removeChild(@first)
+
+  forEachChild: (func) ->
+    cursor = @first
+    while cursor isnt null
+      func(cursor)
+      cursor = cursor.next
 
   addEvent: (name, handler) ->
     ns.addEvent(@node, name, handler)
@@ -205,7 +261,7 @@ class ns.DomElement extends ns.DomNode
         @onListInsert(item, null)
 
     # enterDocument for childs
-    @childs.forEach (child) ->
+    @forEachChild (child) ->
       child.enterDocument()
 
     super()
@@ -226,7 +282,7 @@ class ns.DomElement extends ns.DomNode
         @onListDelete(item)
 
     # exitDocument for childs
-    @childs.forEach (child) ->
+    @forEachChild (child) ->
       child.exitDocument()
 
     super()
@@ -246,3 +302,6 @@ class ns.DomElement extends ns.DomNode
       node = @objChilds[obj.getHash()]
       @removeChild(node)
 
+  # element event wrapper
+  onEvent: (event) =>
+    throw 'not implemented'

@@ -75,12 +75,17 @@ describe "Dom tests", ->
     u1.name.setValue('mercedes')
     u2 = new TestUser()
     u2.id = '2'
+    u3 = new TestUser()
+    u3.id = '3'
+    u3.name.setValue('lamborgini')
+
     list.append(u1)
+    list.append(u3)
 
     list.addInsertListener (obj, before) ->
 
     page = new w.DomElement 'div', {'id': 'page'}, [], list, (item) ->
-      new wender.DomElement 'div', {'class': ['user']}, [
+      new wender.DomElement 'div', {'class': ['auto']}, [
         new wender.DomText [item.name], (values) ->
           values[0].value
       ], null, null
@@ -89,4 +94,20 @@ describe "Dom tests", ->
 
     list.append(u2)
     u2.name.setValue('bmw')
+
+    mercedes = page.first
+    expect(mercedes).not.toEqual(null)
+    expect(mercedes.first.text).toEqual('mercedes')
+
+    lamborgini = mercedes.next
+    expect(lamborgini).not.toEqual(null)
+    expect(lamborgini.first.text).toEqual('lamborgini')
+
+    bmw = lamborgini.next
+    expect(bmw).not.toEqual(null)
+    expect(bmw.first.text).toEqual('bmw')
+
+    page.empty()
+
+    expect(page.first).toEqual(null)
 

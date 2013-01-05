@@ -12,6 +12,8 @@ class ns.DomNode
     @hash = null
     # for enter/exitDocument
     @isInDocument = false
+    # for rmap binded object
+    @obj = null
 
   getHash: ->
     @hash
