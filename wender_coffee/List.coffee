@@ -120,8 +120,9 @@ class ns.List
   forEach: (func) ->
     cursor = @first
     while cursor isnt null
-      func(cursor.obj)
+      obj = cursor.obj
       cursor = cursor.next
+      func(obj)
 
   filter: (func) ->
     filtered = List()

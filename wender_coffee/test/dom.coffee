@@ -102,6 +102,9 @@ describe "Dom tests", ->
     expect(bmw).not.toEqual(null)
     expect(bmw.first.text).toEqual('bmw')
 
+    u2.name.setValue('new bmw')
+    expect(bmw.first.text).toEqual('new bmw')
+
     page.empty()
 
     expect(page.first).toEqual(null)
