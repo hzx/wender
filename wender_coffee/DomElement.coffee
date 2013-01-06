@@ -257,6 +257,10 @@ class ns.DomElement extends ns.DomNode
 
     @registerId()
 
+    # unlisten obj hash change
+    if @obj isnt null
+      @obj.addHashListener(@onObjHashChange)
+
     # listen list changes
     if @list?
       @list.addInsertListener(@onListInsert)
@@ -278,6 +282,10 @@ class ns.DomElement extends ns.DomNode
 
     @unregisterId()
 
+    # unlisten obj hash change
+    if @obj isnt null
+      @obj.removeHashListener(@onObjHashChange)
+
     # unlisten list changes
     if @list?
       @list.removeInsertListener(@onListInsert)
@@ -293,6 +301,12 @@ class ns.DomElement extends ns.DomNode
     super()
 
   # events
+
+  onObjHashChange: (oldValue, newValue) =>
+    # move node of objChilds from old to new
+    node = @objChilds[oldValue]
+    delete @objChilds[oldValue]
+    @objChilds[newValue] = node
   
   onListInsert: (obj, before) =>
     node = @render(obj)
