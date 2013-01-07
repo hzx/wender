@@ -65,6 +65,8 @@ describe "Dom tests", ->
     expect(copyrightText).not.toEqual(null)
     expect(copyrightText.text).toEqual('copyright 2013 rubear')
 
+    page.remove()
+
   it "listen observable list", ->
     w = window.wender
 
@@ -113,12 +115,14 @@ describe "Dom tests", ->
 
     expect(page.first).toEqual(null)
 
+    page.remove()
+
   it "event test", ->
     onClickMessage = (e) ->
       e.element.remove()
+      false
 
     page = new wender.DomElement 'div', {'id': 'page', 'onclick': (e) =>
-      console.log e
       e.element.append(new wender.DomElement 'div', {'class': ['message'], 'onclick': onClickMessage }, [
         new wender.DomText('clicked me to remove', null, null)
       ], null, null)
