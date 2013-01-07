@@ -8,6 +8,10 @@ class TestUser
   getHash: ->
     @id
 
+  addHashListener: (listener) ->
+
+  removeHashListener: (listener) ->
+
 describe "Dom tests", ->
 
   beforeEach ->
@@ -110,10 +114,13 @@ describe "Dom tests", ->
     expect(page.first).toEqual(null)
 
   it "event test", ->
+    onClickMessage = (e) ->
+      e.element.remove()
+
     page = new wender.DomElement 'div', {'id': 'page', 'onclick': (e) =>
       console.log e
-      e.element.append(new wender.DomElement 'div', {'class': ['message']}, [
-        new wender.DomText('you clicked me', null, null)
+      e.element.append(new wender.DomElement 'div', {'class': ['message'], 'onclick': onClickMessage }, [
+        new wender.DomText('clicked me to remove', null, null)
       ], null, null)
     }, [
       new wender.DomText 'CLICK ME', null, null

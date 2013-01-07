@@ -109,6 +109,10 @@ class ns.DomElement extends ns.DomNode
     name of @classList
 
   prepareNode: (node) ->
+    # debug(dem)
+    console.log 'prepareNode node:'
+    console.log node
+
     node.parent = this
     node.hash = @hashGenerator.generate()
     # add to obj id to childs node map
@@ -328,4 +332,17 @@ class ns.DomElement extends ns.DomNode
 
     handler = @events[event.type]
     # TODO(dem) make more specific params depending on event type
-    handler({'type': event.type, 'event': event, 'element': this, 'target': target })
+    isStopPropagation = handler({
+      'type': event.type,
+      'event': event,
+      'element': this,
+      'target': target
+    })
+
+    # stop event propagation (bubbling)
+    if isStopPropagation is true
+      if event.stopPropagation
+        event.stopPropagation()
+      else
+        event.preventDefault()
+
