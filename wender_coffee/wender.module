@@ -5,8 +5,14 @@ source Observable.coffee
 source ObservableValue.coffee
 source ObservableList.coffee
 source events.coffee
-source orm.coffee
+source animation.coffee
+source Net.coffee
+source Validator.coffee
+source OrmValue.coffee
+source OrmList.coffee
+source Orm.coffee
 source Browser.coffee
 source DomNode.coffee
 source DomElement.coffee
 source DomText.coffee
+source main.coffee

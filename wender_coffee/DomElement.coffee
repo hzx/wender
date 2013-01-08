@@ -44,6 +44,12 @@ class ns.DomElement extends ns.DomNode
 
     @setAttributes(attributes)
 
+  setAttribute: (name, value) ->
+    @node.setAttribute(name, value)
+
+  removeAttribute: (name) ->
+    @node.removeAttribute(name)
+
   setAttributes: (attributes) ->
     for name, value of attributes
       if name is 'id'
@@ -53,19 +59,23 @@ class ns.DomElement extends ns.DomNode
         for cn in value
           @addClass(cn)
         continue
+
       # TODO(dem) need style attribute
       # if name is 'style'
+      
       # events
-      if ns.isIe
-        @events[name] = value
-        continue
-      else
-        eventMatch = @eventNamePattern.exec(name)
-        if eventMatch isnt null
+      eventMatch = @eventNamePattern.exec(name)
+      if eventMatch isnt null
+        if ns.isIe
+          @events[name] = value
+          continue
+        else
           shortName = eventMatch[1]
           @events[shortName] = value
           continue
-      throw "unknown attribute name '" + name + "'"
+
+      # other values
+      @setAttribute(name, value)
 
   # manipulate DOM
   
@@ -337,8 +347,5 @@ class ns.DomElement extends ns.DomNode
 
     # stop event propagation (bubbling)
     if isPropagation is false
-      if event.stopPropagation
-        event.stopPropagation()
-      else
-        event.preventDefault()
+      ns.stopPropagation(event)
 

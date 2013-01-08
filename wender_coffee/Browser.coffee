@@ -60,6 +60,3 @@ class ns.Browser
     element.exitDocument()
     @body.removeChild(element)
 
-
-ns.initTasks.push ->
-  ns.browser = new ns.Browser()

@@ -1,5 +1,6 @@
 
-ns.initTasks.push ->
+
+initEvents = ->
   ns.addEvent = if document.body.addEventListener
     ns.isIe = false
     (target, eventType, handler) ->
@@ -17,3 +18,10 @@ ns.initTasks.push ->
     (target, eventType, handler) ->
       # target.detachEvent("on" + eventType, handler)
       target.detachEvent(eventType, handler)
+
+  ns.stopPropagation = if ns.isIe
+    (event) ->
+      event.preventDefault()
+  else
+    (event) ->
+      event.stopPropagation()

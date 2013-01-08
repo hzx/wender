@@ -53,9 +53,9 @@ class ns.ObservableList extends ns.List
       @notifyChange(oldCount, @count)
     @notifyInsert(obj, null)
 
-  insertAfter: (obj, afterObj) ->
+  insertAfter: (obj, after) ->
     oldCount = @count
-    node = super(obj, afterObj)
+    node = super(obj, after)
     before = if node.next isnt null
       node.next.obj
     else
@@ -64,12 +64,12 @@ class ns.ObservableList extends ns.List
       @notifyChange(oldCount, @count)
     @notifyInsert(obj, before)
 
-  insertBefore: (obj, beforeObj) ->
+  insertBefore: (obj, before) ->
     oldCount = @count
-    node = super(obj, beforeObj)
+    node = super(obj, before)
     if oldCount isnt @count
       @notifyChange(oldCount, @count)
-    @notifyInsert(obj, beforeObj)
+    @notifyInsert(obj, before)
 
   remove: (hash) ->
     oldCount = @count
@@ -78,3 +78,4 @@ class ns.ObservableList extends ns.List
       if oldCount isnt @count
         @notifyChange(oldCount, @count)
       @notifyDelete(removed)
+
