@@ -24,7 +24,7 @@ initNet = ->
 
 
 class ns.Net
-  maxOpenXhr: 8
+  maxConnections: 8
 
   constructor: ->
 
@@ -36,9 +36,19 @@ class ns.Net
   # get: (url, success, fail, stream) ->
   get: (url, success, fail) ->
     xhr = @getFreeXhr()
+
     # TODO(dem) place onreadystatechange method
-    xhr.onreadystatechange = =>
+    xhr.onreadystatechange = ->
+      if xhr.readyState is 4
+        if xhr.status is 200
+          success(xhr.responseText)
+        else
+          fail(xhr.status)
+      # stream
+      # else if xhr.readyState is 3
+
     nocacheUrl = url + (if (/\?/).test(url) then "&" else "?") + (new Date()).getTime()
+
     xhr.open("GET", nocacheUrl, true)
     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest')
     xhr.send(null)
@@ -47,8 +57,15 @@ class ns.Net
   # post: (url, data, success, fail, stream) ->
   post: (url, data, success, fail) ->
     xhr = @getFreeXhr()
+
     # TODO(dem) place onreadystatechange method
-    xhr.onreadystatechange = =>
+    xhr.onreadystatechange = ->
+      if xhr.readyState is 4
+        if xhr.status is 200
+          success(xhr.responseText)
+        else
+          fail(xhr.status)
+
     xhr.open("POST", url, true)
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
     xhr.setRequestHeader('Content-Length', data.length)

@@ -16,3 +16,4 @@ encodeDict = (dict) ->
     if isFirst then isFirst = false else result = result + "&"
     result = result + key + "=" + encodeURIComponent(value)
   result
+

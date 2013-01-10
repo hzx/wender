@@ -73,9 +73,12 @@ class ns.ObservableList extends ns.List
 
   remove: (hash) ->
     oldCount = @count
-    removed = super(hash)
-    if removed isnt null
+    orphan = super(hash)
+    if orphan isnt null
       if oldCount isnt @count
         @notifyChange(oldCount, @count)
-      @notifyDelete(removed)
+      @notifyDelete(orphan)
+      orphan
+    else
+      null
 

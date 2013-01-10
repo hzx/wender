@@ -2,9 +2,10 @@
 
 class ns.OrmList extends ns.ObservableList
 
-  constructor: (name) ->
+  constructor: (name, parent) ->
     super()
     @ormName = name
+    @ormParent = parent
     @hashGenerator = new ns.HashGenerator()
 
   setTemporaryId: (obj) ->
@@ -12,24 +13,35 @@ class ns.OrmList extends ns.ObservableList
       obj.id.value = @hashGenerator.generate().toString()
 
   insert: (obj) ->
+    setTemporaryId(obj)
+    obj.ormParent = this
     super(obj)
-    ns.orm.insert(@ormName, obj)
+    getOrmNames(obj)
+    ns.orm.insert(obj)
 
   append: (obj) ->
     setTemporaryId(obj)
+    obj.ormParent = this
     super(obj)
-    ns.orm.append(@ormName, obj)
+    ns.orm.append(obj)
 
   insertAfter: (obj, after) ->
     setTemporaryId(obj)
+    obj.ormParent = this
     super(obj, after)
-    ns.orm.insertAfter(@ormName, obj, after)
+    ns.orm.insertAfter(obj, after)
 
   insertBefore: (obj, before) ->
     setTemporaryId(obj)
+    obj.ormParent = this
     super(obj, before)
-    ns.orm.insertBefore(@ormName, obj, before)
+    ns.orm.insertBefore(obj, before)
 
   remove: (hash) ->
-    super(hash)
-    ns.orm.remove(@ormName, hash)
+    orphan = super(hash)
+    if orphan isnt null
+      ns.orm.remove(orphan)
+      orphan.ormParent = null
+      orphan
+    else 
+      null

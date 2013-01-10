@@ -1,7 +1,24 @@
 
+# get array of orm names from parent to child
+getOrmNames: (obj) ->
+  names = []
+  cursor = obj
+  while obj.ormName isnt null
+    names.push(obj.ormName)
+    cursor = cursor.ormParent
+  names.reverse()
+  names
+
+# base class for struct
+class ns.OrmStruct
+
+  constructor: (name, parent) ->
+    @ormName = name
+    @ormParent = parent
+
 
 # Base class for struct with id
-class ns.HashStruct
+class ns.OrmHashStruct extends ns.OrmStruct
 
   setHash: (hash) ->
     # set value directly
@@ -16,30 +33,28 @@ class ns.HashStruct
   removeHashListener: (listener) ->
     @id.removeListener(listener)
 
-class ns.OrmField
-
-  constructor: (name, type, params) ->
-    @name = name
-    @type = type
-    @params = params
-
-class ns.OrmStruct
-
-  constructor: (name, fields) ->
-    @name = name
-    @fields = fields
+# class ns.OrmField
+# 
+#   constructor: (name, type, params) ->
+#     @name = name
+#     @type = type
+#     @params = params
+# 
+# class ns.OrmStruct
+# 
+#   constructor: (name, fields) ->
+#     @name = name
+#     @fields = fields
 
 # Change, validate values of types OrmValue, OrmList
 # Send/receive datao by Net
 class ns.Orm
 
   constructor: ->
-    # map struct name to OrmStruct
+    # map struct name to params (fields, create structClass method)
     @srtucts = {}
-    # map structName.fieldName to params
-    @fields = {}
-    # map structName.fieldName to validator functions array.
-    @fieldValidates = {}
+
+    @validator = new ns.Validator()
 
   addStruct: (struct) ->
     # add struct
@@ -49,20 +64,60 @@ class ns.Orm
 
   # Validate value
   
-  validate: (value) ->
+  validate: (obj) ->
+    names = getOrmNames(obj)
+
+    # obj maybe struct, list or value
+    
+    # need struct or struct, field name to get validate params
+    
+    # validate obj
 
   # work with structs
 
-  setValue: (name, value) ->
+  setValue: (obj) ->
+    names = getOrmNames(obj)
+
     # validate
+    
+    # change referenced values
+    
     # send changes by net
 
-  insert: (name, obj) ->
+  insert: (obj) ->
+    names = getOrmNames(obj)
 
-  append: (name, obj) ->
+    # validate
+    # change referenced values
+    # send changes by net
 
-  insertAfter: (name, obj, after) ->
+  append: (obj) ->
+    names = getOrmNames(obj)
 
-  insertBefore: (name, obj, before) ->
+    # validate
+    # change referenced values
+    # send changes by net
 
-  remove: (name, hash) ->
+  insertAfter: (obj, after) ->
+    names = getOrmNames(obj)
+
+    # validate
+    # change referenced values
+    # send changes by net
+
+  insertBefore: (obj, before) ->
+    names = getOrmNames(obj)
+
+    # validate
+    # change referenced values
+    # send changes by net
+
+  remove: (obj) ->
+    names = getOrmNames(obj)
+
+    # change referenced values
+    # send changes by net
+
+  # private
+  
+

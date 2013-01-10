@@ -12,8 +12,8 @@ class ns.Browser
     script.type = "text/javascript"
 
     if script.readyState
-      script.onreadystatechange = () ->
-        if script.readyState == "loaded" or script.readyState == "complete"
+      script.onreadystatechange = ->
+        if script.readyState is "loaded" or script.readyState is "complete"
           script.onreadystatechange = null
           callback()
     else
