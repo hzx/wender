@@ -49,9 +49,6 @@ class ns.Browser
   setTitle: (text) ->
     window.title = text
 
-  setUrl: (url) ->
-    document.location.hash = url
-
   appendElement: (element) ->
     @body.append(element)
     element.enterDocument()
@@ -59,4 +56,22 @@ class ns.Browser
   removeElement: (element) ->
     element.exitDocument()
     @body.removeChild(element)
+
+  # common methods
+  
+  addTimeoutWork: (work, time) ->
+    id = window.setTimeout(work, time)
+    work.hash = id
+
+  removeTimeoutWork: (work) ->
+    window.clearTimeout(work.hash)
+    delete work.hash
+
+  addRender: (render, time) ->
+    id = window.setInterval(render, time)
+    render.hash = id
+
+  removeRender: (render) ->
+    window.clearInterval(render.hash)
+    delete render.hash
 

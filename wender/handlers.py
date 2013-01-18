@@ -36,9 +36,23 @@ class BaseHandler(RequestHandler):
   def set_default_headers(self):
     self.set_header('Server', 'wender')
 
-  def isAjax(self):
-    return self.request.headers.get('X-Requested-With', '') == 'XMLHttpRequest'
+  def isXhr(self):
+    return self.request.headers.get('X-Requested-With', None) == 'XMLHttpRequest'
 
   def writeJson(self, obj):
     self.set_header('Content-Type', 'application/json;charset=UTF-8')
     self.finish(toJson(obj))
+
+
+class LoginHandler(BaseHandler):
+  def post(self):
+    self.set_secure_cookie('user', self.get_argument('name'))
+
+
+
+class NotFoundHandler(BaseHandler):
+  def get(self):
+    if self.isXhr():
+      # return response for xhr request
+      return
+    self.render('404.html')

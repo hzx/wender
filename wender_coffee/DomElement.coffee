@@ -22,11 +22,12 @@ class ns.DomElement extends ns.DomNode
     # store here obj id to child
     @objChilds = {}
 
-    @id = null 
+    @id = null
     @events = {}
 
     # create dom element
     @node = document.createElement(name)
+
 
     # childs
     @hashGenerator = new ns.HashGenerator()
@@ -58,6 +59,9 @@ class ns.DomElement extends ns.DomNode
       if name is 'class'
         for cn in value
           @addClass(cn)
+        continue
+      if name is 'obj'
+        @obj = value
         continue
 
       # TODO(dem) need style attribute
@@ -253,9 +257,12 @@ class ns.DomElement extends ns.DomNode
       cursor = cursor.next
 
   addEvent: (name, handler) ->
+    @events[name] = handler
     ns.addEvent(@node, name, @onEvent)
 
   removeEvent: (name, handler) ->
+    if name of @events
+      delete @events[name]
     ns.removeEvent(@node, name, @onEvent)
 
   # private

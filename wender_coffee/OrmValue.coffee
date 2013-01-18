@@ -1,9 +1,11 @@
 
 
 class ns.OrmValue extends ns.ObservableValue
+  ormKind: 'value'
 
-  constructor: (name, parent) ->
+  constructor: (type, name, parent) ->
     super()
+    @ormType = type
     @ormName = name
     @ormParent = parent
 

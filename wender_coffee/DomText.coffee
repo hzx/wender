@@ -10,7 +10,7 @@ class ns.DomText extends ns.DomNode
     super()
 
     @text = text
-    @node = document.createTextNode(@text)
+    @node = document.createTextNode(text)
     @values = values
     @render = render
 

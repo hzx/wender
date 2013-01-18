@@ -1,0 +1,8 @@
+
+
+class Toolbar extends View {
+
+  tag render() {
+  }
+
+}

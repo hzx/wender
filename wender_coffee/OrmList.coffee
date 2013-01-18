@@ -1,9 +1,11 @@
 
 
 class ns.OrmList extends ns.ObservableList
+  ormKind: 'list'
 
-  constructor: (name, parent) ->
+  constructor: (type, name, parent) ->
     super()
+    @ormType = type
     @ormName = name
     @ormParent = parent
     @hashGenerator = new ns.HashGenerator()

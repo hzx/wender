@@ -1,6 +1,40 @@
 
+###
+Download order:
+- at once all no lazy
+- lazy list download only count
+
+Changes:
+- value change, find if parent list then check ref to this or from this
+
+ORM params
+common:
+- access for users, consist of 2 symbols for every user, user order: owner, user
+  "r" - read, "w" - write, "-" - forbidden
+  access:'rwrw'
+  access:'r-rw'
+  access:'r-r-'
+for value:
+- index:asc|desc
+- maxLength:value
+- lt:value - <
+- lte:value - <=
+- gt:value - >
+- gte:value - >=
+- regex:litstring
+- thumbSizes:['160x120', 320x240']
+- imageSizes:['1200x400', '2400x800']
+for list:
+- lazy:true|false, by default lazy:true, list download at once or by query request
+- ref:'structName.collName' contains only id's, may be ordered,
+- link:'structName.collName' contains only id's, work like ordered copy
+  affect only object changes
+###
+
+
 # get array of orm names from parent to child
-getOrmNames: (obj) ->
+# obj is OrmValue, OrmList, struct class from base OrmStruct or OrmHashStruct
+getOrmNames = (obj) ->
   names = []
   cursor = obj
   while obj.ormName isnt null
@@ -11,6 +45,7 @@ getOrmNames: (obj) ->
 
 # base class for struct
 class ns.OrmStruct
+  ormKind: 'struct'
 
   constructor: (name, parent) ->
     @ormName = name
@@ -19,6 +54,9 @@ class ns.OrmStruct
 
 # Base class for struct with id
 class ns.OrmHashStruct extends ns.OrmStruct
+
+  constructor: (name, parent) ->
+    super(name, parent)
 
   setHash: (hash) ->
     # set value directly
@@ -55,6 +93,10 @@ class ns.Orm
     @srtucts = {}
 
     @validator = new ns.Validator()
+
+  load: (callback) ->
+    @loadCallback = callback
+    ns.net.get('/init', )
 
   addStruct: (struct) ->
     # add struct
@@ -118,6 +160,9 @@ class ns.Orm
     # change referenced values
     # send changes by net
 
-  # private
-  
+  # events
 
+  onLoadSuccess: (response) =>
+    # parse all response
+
+  onLoadFail: (status) =>

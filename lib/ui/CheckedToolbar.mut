@@ -1,0 +1,10 @@
+
+
+class CheckedToolbar extends View {
+
+  tag element = this.render();
+
+  tag render() {
+  }
+
+}

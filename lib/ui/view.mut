@@ -1,0 +1,23 @@
+
+
+class View {
+
+  void enterDocument() {
+    this.element.exitDocument();
+  }
+
+  void exitDocument() {
+    this.element.exitDocument();
+  }
+
+  void addToDocument(var parent) {
+    parent.append(this.element);
+    this.enterDocument();
+  }
+
+  void removeFromDocument() {
+    this.exitDocument();
+    this.element.remove();
+  }
+
+}
