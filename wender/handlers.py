@@ -1,7 +1,6 @@
 from tornado.web import RequestHandler
 from wender.utils.mongodb import toJson
 
-
 class BaseHandler(RequestHandler):
 
   # may stop processing if calls finish or send_error
@@ -44,10 +43,21 @@ class BaseHandler(RequestHandler):
     self.finish(toJson(obj))
 
 
+class AppHandler(BaseHandler):
+
+  def get(self, appName):
+    # load orm data
+    if self.isXhr():
+      self.writeJson({})
+    # load app template
+    else:
+      templateName = 'app-%s.html' % appName
+      self.render(templateName, lang='ru', title='', message='')
+
+
 class LoginHandler(BaseHandler):
   def post(self):
     self.set_secure_cookie('user', self.get_argument('name'))
-
 
 
 class NotFoundHandler(BaseHandler):
