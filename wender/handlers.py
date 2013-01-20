@@ -45,14 +45,39 @@ class BaseHandler(RequestHandler):
 
 class AppHandler(BaseHandler):
 
+  def initialize(self, appName):
+    self.appName = appName
+
+  def get(self):
+    # load app template
+    templateName = 'app-%s.html' % self.appName
+    msg = 'Loading application...'
+    self.render(templateName, lang='ru', title=msg, message=msg)
+
+
+class OrmLoadHandler(BaseHandler):
+
   def get(self, appName):
     # load orm data
-    if self.isXhr():
-      self.writeJson({})
-    # load app template
+    if not self.isXhr():
+      self.finish('')
     else:
-      templateName = 'app-%s.html' % appName
-      self.render(templateName, lang='ru', title='', message='')
+      self.writeJson({})
+
+
+class OrmOpHandler(BaseHandler):
+
+  def get(self, appName):
+    if not self.isXhr():
+      self.finish('')
+    else:
+      self.writeJson({})
+
+  def get(self, appName):
+    if not self.isXhr():
+      self.finish('')
+    else:
+      self.writeJson({})
 
 
 class LoginHandler(BaseHandler):

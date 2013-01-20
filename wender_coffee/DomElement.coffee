@@ -23,6 +23,7 @@ class ns.DomElement extends ns.DomNode
     @objChilds = {}
 
     @id = null
+    @data = null
     @events = {}
 
     # create dom element
@@ -62,6 +63,9 @@ class ns.DomElement extends ns.DomNode
         continue
       if name is 'obj'
         @obj = value
+        continue
+      if name is 'data'
+        @data = value
         continue
 
       # TODO(dem) need style attribute

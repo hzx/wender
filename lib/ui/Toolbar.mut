@@ -2,7 +2,10 @@
 
 class Toolbar extends View {
 
+  tag element = this.render();
+
   tag render() {
+    return <div></div>;
   }
 
 }

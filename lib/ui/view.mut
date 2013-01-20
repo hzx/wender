@@ -1,6 +1,9 @@
 
 
 class View {
+  () {
+    this.element = none;
+  }
 
   void enterDocument() {
     this.element.exitDocument();
