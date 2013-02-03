@@ -1,6 +1,5 @@
 
 
-# TODO(dem) reimplement NODE without List
 class ns.DomElement extends ns.DomNode
   kind: 'element'
   eventNamePattern: /^on([a-z]+)/i
@@ -122,6 +121,10 @@ class ns.DomElement extends ns.DomNode
     if name of @classList
       delete @classList[name]
       @classListToString()
+
+  emptyClasses: ->
+    @classList = {}
+    @classListToString()
 
   hasClass: (name) ->
     name of @classList
@@ -272,6 +275,8 @@ class ns.DomElement extends ns.DomNode
   # private
 
   enterDocument: ->
+    if @isInDocument then return
+
     # listen events
     for name, handler of @events
       @addEvent(name, handler)
@@ -283,7 +288,7 @@ class ns.DomElement extends ns.DomNode
       @obj.addHashListener(@onObjHashChange)
 
     # listen list changes
-    if @list?
+    if @list isnt null
       @list.addInsertListener(@onListInsert)
       @list.addDeleteListener(@onListDelete)
       # add childs
@@ -297,6 +302,8 @@ class ns.DomElement extends ns.DomNode
     super()
 
   exitDocument: ->
+    if @isInDocument is false then return
+
     # unlisten events
     for name, handler of @events
       @removeEvent(name, handler)

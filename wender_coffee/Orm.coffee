@@ -47,7 +47,8 @@ getOrmNames = (obj) ->
 class ns.OrmStruct
   ormKind: 'struct'
 
-  constructor: (name, parent) ->
+  constructor: (type, name, parent) ->
+    @ormType = type
     @ormName = name
     @ormParent = parent
 
@@ -55,8 +56,8 @@ class ns.OrmStruct
 # Base class for struct with id
 class ns.OrmHashStruct extends ns.OrmStruct
 
-  constructor: (name, parent) ->
-    super(name, parent)
+  constructor: (type, name, parent) ->
+    super(type, name, parent)
 
   setHash: (hash) ->
     # set value directly
@@ -96,7 +97,7 @@ class ns.Orm
 
   load: (callback) ->
     @loadCallback = callback
-    ns.net.get('/init', )
+    ns.net.get('/load', @onLoadSuccess, @onLoadFail)
 
   addStruct: (struct) ->
     # add struct
@@ -164,5 +165,7 @@ class ns.Orm
 
   onLoadSuccess: (response) =>
     # parse all response
+    # call callback
+    @loadCallback()
 
   onLoadFail: (status) =>

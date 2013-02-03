@@ -57,7 +57,10 @@ class AppHandler(BaseHandler):
 
 class OrmLoadHandler(BaseHandler):
 
-  def get(self, appName):
+  def initialize(self, appName):
+    self.appName = appName
+
+  def get(self):
     # load orm data
     if not self.isXhr():
       self.finish('')
@@ -91,3 +94,10 @@ class NotFoundHandler(BaseHandler):
       # return response for xhr request
       return
     self.render('404.html')
+
+
+handlers = [
+    ('/load', OrmLoadHandler, {'appName': 'test'}),
+    ('/login', LoginHandler),
+    # ('/logout', LogoutHandler),
+    ]

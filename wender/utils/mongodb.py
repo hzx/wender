@@ -1,6 +1,6 @@
-from pymongo.objectid import ObjectId
 from datetime import datetime
-import pymongo.json_util
+from bson.objectid import ObjectId
+import bson.json_util
 import json
 
 
@@ -14,7 +14,7 @@ def jsonDefault(obj):
   if isinstance(obj, datetime):
     return obj.strftime("%Y-%m-%d %H:%M:%S")
   # call default serialization
-  return pymongo.json_util.default(obj)
+  return bson.json_util.default(obj)
 
 
 def toJson(item):

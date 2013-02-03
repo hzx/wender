@@ -6,6 +6,7 @@ class ns.Browser
     @ids = {}
     @body = new ns.DomElement('div', {}, [], null, null)
     @body.node = document.body
+    @router = new ns.Router()
 
   loadScript: (url, callback) ->
     script = document.createElement("script")
@@ -38,12 +39,12 @@ class ns.Browser
 
   addIdElement: (id, element) ->
     if id of @ids
-      throw 'element with id "#{id}" already exists'
+      throw Error('element with id "' + id + '" already exists')
     @ids[id] = element
 
   removeIdElement: (id) ->
     if not (id of @ids)
-      throw 'element with id "#{id}" not exists'
+      throw Error('element with id "' + id + '" not exists')
     delete @ids[id]
 
   setTitle: (text) ->

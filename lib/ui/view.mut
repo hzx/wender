@@ -3,10 +3,27 @@
 class View {
   () {
     this.element = none;
+    this.isInDocument = false;
+  }
+
+  bool tryEnterDocument() {
+    if this.isInDocument {
+      return false;
+    }
+    this.isInDocument = true;
+    return true;
+  }
+
+  bool tryExitDocument() {
+    if this.isInDocument is false {
+      return false;
+    }
+    this.isInDocument = false;
+    return true;
   }
 
   void enterDocument() {
-    this.element.exitDocument();
+    this.element.enterDocument();
   }
 
   void exitDocument() {
