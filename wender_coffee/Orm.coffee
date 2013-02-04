@@ -15,6 +15,7 @@ common:
   access:'r-rw'
   access:'r-r-'
 for value:
+- default:value
 - index:asc|desc
 - maxLength:value
 - lt:value - <
