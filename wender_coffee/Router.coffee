@@ -48,10 +48,6 @@ class ns.Router
     url = window.location.hash.replace(/^#(.*)\s*/gi, '$1')
     url = '/' if url.length is 0
 
-    # debug
-    console.log 'Router.init, url:'
-    console.log url
-
     # route
     @routeUrl(url)
 
@@ -68,10 +64,6 @@ class ns.Router
 
     for pattern in @urlpatterns
       params = pattern[0].exec(url)
-
-      # debug
-      console.log 'Router.routeUrl params'
-      console.log params
 
       if params is null then continue
       args = (params[1...params.length] if params.length >= 2) or []
