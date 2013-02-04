@@ -11,4 +11,4 @@ class ns.World extends ns.OrmStruct
     ns.orm.validate(ob)
 
   getImageUrl: (filename) ->
-    '/static/img/' + filename
+    '/static/img/' + filename.value

@@ -12,7 +12,7 @@ class ns.Router
     # compile regex in 0 item
     compiled = []
     for pattern in patterns
-      re = new RegExp(pattern[0], 'i')
+      re = new RegExp('^' + pattern[0] + '$', 'i')
       handler = pattern[1]
       name = pattern[2]
       compiled.push([re, handler, name])
@@ -47,6 +47,11 @@ class ns.Router
     # get url from window hash
     url = window.location.hash.replace(/^#(.*)\s*/gi, '$1')
     url = '/' if url.length is 0
+
+    # debug
+    console.log 'Router.init, url:'
+    console.log url
+
     # route
     @routeUrl(url)
 
@@ -63,6 +68,11 @@ class ns.Router
 
     for pattern in @urlpatterns
       params = pattern[0].exec(url)
+
+      # debug
+      console.log 'Router.routeUrl params'
+      console.log params
+
       if params is null then continue
       args = (params[1...params.length] if params.length >= 2) or []
       @routePattern(pattern, args)
