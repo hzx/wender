@@ -48,7 +48,7 @@ class ns.Browser
     delete @ids[id]
 
   setTitle: (text) ->
-    window.title = text
+    document.title = text
 
   appendElement: (element) ->
     @body.append(element)
