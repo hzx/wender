@@ -72,14 +72,11 @@ class ns.DomElement extends ns.DomNode
       
       # events
       eventMatch = @eventNamePattern.exec(name)
+      # we have event attribute
       if eventMatch isnt null
-        if ns.isIe
-          @events[name] = value
-          continue
-        else
-          shortName = eventMatch[1]
-          @events[shortName] = value
-          continue
+        shortName = eventMatch[1]
+        @events[shortName] = value
+        continue
 
       # other values
       @setAttribute(name, value)

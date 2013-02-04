@@ -8,16 +8,14 @@ initEvents = ->
   else
     ns.isIe = true
     (target, eventType, handler) ->
-      # target.attachEvent("on" + eventType, handler)
-      target.attachEvent(eventType, handler)
+      target.attachEvent("on" + eventType, handler)
 
   ns.removeEvent = if document.body.removeEventListener
     (target, eventType, handler) ->
       target.removeEventListener(eventType, handler, false)
   else
     (target, eventType, handler) ->
-      # target.detachEvent("on" + eventType, handler)
-      target.detachEvent(eventType, handler)
+      target.detachEvent("on" + eventType, handler)
 
   ns.stopPropagation = if ns.isIe
     (event) ->
