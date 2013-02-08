@@ -1,6 +1,7 @@
 
 
-class View {
+class View extends tag {
+/*class View {*/
   () {
     this.element = none;
     this.isInDocument = false;
