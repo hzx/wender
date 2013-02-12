@@ -13,6 +13,7 @@ source Validator.coffee
 source OrmValue.coffee
 source OrmList.coffee
 source Orm.coffee
+source Statistic.coffee
 source Browser.coffee
 source DomNode.coffee
 source DomElement.coffee

@@ -21,10 +21,10 @@ class ns.DomElement extends ns.DomNode
     # store here obj id to child
     @objChilds = {}
 
-    @id = null
-    @data = null
     @events = {}
 
+    @id = null
+    @data = null
     # create dom element
     @node = document.createElement(name)
 

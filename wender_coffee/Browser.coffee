@@ -7,6 +7,10 @@ class ns.Browser
     @body = new ns.DomElement('div', {}, [], null, null)
     @body.node = document.body
     @router = new ns.Router()
+    @statistic = new ns.Statistic()
+
+    # subscribe to router.urlChange
+    @router.url.addListener(this.onRouterUrlChange)
 
   loadScript: (url, callback) ->
     script = document.createElement("script")
@@ -76,3 +80,7 @@ class ns.Browser
     window.clearInterval(render.hash)
     delete render.hash
 
+  # events
+
+  onRouterUrlChange: (oldValue, newValue) =>
+    @statistic.track('Source', 'Visit', newValue)

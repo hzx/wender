@@ -4,6 +4,7 @@ class ns.Router
 
   constructor: ->
     @enter()
+    @url = new ns.ObservableValue()
 
   isRouterChangeUrl: false
 
@@ -38,9 +39,12 @@ class ns.Router
     
   _setWindowUrl: (pattern, args) ->
     @isRouterChangeUrl = true
-    window.location.hash = @_patternToUrl(pattern, args)
+    url = @_patternToUrl(pattern, args)
+    window.location.hash = url
+    return url
 
-  routePattern: (pattern, args) ->
+  routePattern: (url, pattern, args) ->
+    @url.setValue(url)
     pattern[1](args...)
 
   init: ->
@@ -55,8 +59,8 @@ class ns.Router
     unless args? then args = []
     for pattern in @urlpatterns
       if pattern[2]? and pattern[2] == name
-        @_setWindowUrl(pattern, args)
-        @routePattern(pattern, args)
+        url = @_setWindowUrl(pattern, args)
+        @routePattern(url, pattern, args)
         break
 
   routeUrl: (url) ->
@@ -67,7 +71,7 @@ class ns.Router
 
       if params is null then continue
       args = (params[1...params.length] if params.length >= 2) or []
-      @routePattern(pattern, args)
+      @routePattern(url, pattern, args)
       break
 
   # Events
