@@ -147,13 +147,13 @@ class ns.DomElement extends ns.DomNode
     # insert to begin in empty childs
     if @first is null
       # add to document
-      @node.appendChild(node.node)
+      @node.appendChild(node.getNode())
 
       @first = node
       @last = node
     else # insert before first
       # add to document
-      @node.insertBefore(node.node, @first.node)
+      @node.insertBefore(node.getNode(), @first.getNode())
 
       @first.prev = node
       node.next = @first
@@ -174,7 +174,7 @@ class ns.DomElement extends ns.DomNode
       @last = node
 
     # add to document
-    @node.appendChild(node.node)
+    @node.appendChild(node.getNode())
 
     @postAddNode(node)
 
@@ -189,7 +189,7 @@ class ns.DomElement extends ns.DomNode
         @prepareNode(node)
 
         # add to document
-        @node.insertBefore(node.node, before.node)
+        @node.insertBefore(node.getNode(), before.getNode())
 
         # link refs
         before.prev.next = node
@@ -209,7 +209,7 @@ class ns.DomElement extends ns.DomNode
         @prepareNode(node)
 
         # add to document
-        @node.insertBefore(node.node, after.next.node)
+        @node.insertBefore(node.getNode(), after.next.getNode())
 
         # link refs
         after.next.prev = node
@@ -224,7 +224,7 @@ class ns.DomElement extends ns.DomNode
       node.exitDocument()
 
     # remove from document
-    @node.removeChild(node.node)
+    @node.removeChild(node.getNode())
 
     # move right refs 
     if node.next isnt null

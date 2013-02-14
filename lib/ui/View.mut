@@ -1,11 +1,60 @@
 
 
-class View extends tag {
-/*class View {*/
-  () {
-    this.element = none;
-    this.isInDocument = false;
+/*
+View is DomElement wrapper, behavior like DomElement, but consists
+of tag structure and behavior.
+*/
+class View {
+  # View members
+  tag element = none;
+
+  # DomNode implementation members
+  tag parent = none;
+  tag next = none;
+  tag prev = none;
+  string hash = none;
+  bool isInDocument = false;
+  var obj = none;
+
+  # DomElement wrap methods
+  
+  void getNode() {
+    return this.element.getNode();
   }
+
+  string getHash() {
+    return this.element.getHash();
+  }
+
+  void insert(tag node) {
+    this.element.insert(node);
+  }
+
+  void append(tag node) {
+    this.element.append(node);
+  }
+
+  void insertBefore(tag node, tag before) {
+    this.element.insertBefore(node, before);
+  }
+
+  void insertAfter(tag node, tag after) {
+    this.element.insertAfter(node, after);
+  }
+
+  void remove() {
+    this.element.remove();
+  }
+
+  void enterDocument() {
+    this.element.enterDocument();
+  }
+
+  void exitDocument() {
+    this.element.exitDocument();
+  }
+
+  # View methods
 
   bool tryEnterDocument() {
     if this.isInDocument {
@@ -21,14 +70,6 @@ class View extends tag {
     }
     this.isInDocument = false;
     return true;
-  }
-
-  void enterDocument() {
-    this.element.enterDocument();
-  }
-
-  void exitDocument() {
-    this.element.exitDocument();
   }
 
   void addToDocument(var parent) {

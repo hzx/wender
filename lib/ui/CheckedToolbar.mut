@@ -1,11 +1,22 @@
 
 
 class CheckedToolbar extends View {
+  () {
+    super();
+  }
 
-  tag element = this.render();
+  var element = this.render();
 
   tag render() {
-    return <div></div>;
+    return <div class=['checked_toolbar']></div>;
+  }
+
+  void enterDocument() {
+    super();
+  }
+
+  void exitDocument() {
+    super();
   }
 
 }

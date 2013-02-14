@@ -15,6 +15,9 @@ class ns.DomNode
     # for rmap binded object
     @obj = null
 
+  getNode: ->
+    return @node
+
   getHash: ->
     @hash
 

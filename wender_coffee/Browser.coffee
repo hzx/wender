@@ -35,6 +35,13 @@ class ns.Browser
     link.href = url
     document.getElementsByTagName("head")[0].appendChild(link)
 
+  loadCssDeferred: (url, ms) ->
+    me = this
+    tmId = window.setTimeout ->
+      me.loadCss(url)
+      window.clearTimeout(tmId)
+    , ms
+
   getElementById: (id) ->
     if id of @ids
       @ids[id]
