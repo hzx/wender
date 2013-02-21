@@ -38,11 +38,13 @@ for list:
 getOrmNames = (obj) ->
   names = []
   cursor = obj
-  while obj.ormName isnt null
-    names.push(obj.ormName)
+  # while obj.ormName isnt null
+  while cursor isnt null
+    # names.push(obj.ormName)
+    names.push(cursor.ormName)
     cursor = cursor.ormParent
   names.reverse()
-  names
+  return names
 
 # base class for struct
 class ns.OrmStruct

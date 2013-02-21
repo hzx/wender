@@ -1,5 +1,17 @@
 
 
+class EventHandler {
+
+  var observable = none;
+  var handler = none;
+
+  (var observable, var handler) {
+    this.observable = observable;
+    this.handler = handler;
+  }
+
+}
+
 /*
 View is DomElement wrapper, behavior like DomElement, but consists
 of tag structure and behavior.
@@ -16,8 +28,14 @@ class View {
   bool isInDocument = false;
   var obj = none;
 
+  var events = [];
+
   # DomElement wrap methods
-  
+
+  void addEvent(var observable, var handler) {
+    this.events.add(EventHandler(observable, handler));
+  }
+
   void getNode() {
     return this.element.getNode();
   }

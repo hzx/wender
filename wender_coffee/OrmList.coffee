@@ -4,7 +4,7 @@ class ns.OrmList extends ns.ObservableList
   ormKind: 'list'
 
   constructor: (type, name, parent) ->
-    super()
+    super([])
     @ormType = type
     @ormName = name
     @ormParent = parent

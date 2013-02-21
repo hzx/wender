@@ -3,6 +3,7 @@ source process.coffee
 source utils.coffee
 source List.coffee
 source Observable.coffee
+source ObservableEvent.coffee
 source ObservableValue.coffee
 source ObservableList.coffee
 source events.coffee
@@ -17,6 +18,8 @@ source Statistic.coffee
 source Browser.coffee
 source DomNode.coffee
 source DomElement.coffee
+source DomRawElement.coffee
 source DomText.coffee
+source View.coffee
 source World.coffee
 source main.coffee

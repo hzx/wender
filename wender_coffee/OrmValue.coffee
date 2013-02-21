@@ -11,5 +11,5 @@ class ns.OrmValue extends ns.ObservableValue
     @value = value
 
   setValue: (value) ->
-    @super(value)
+    super(value)
     ns.orm.setValue(this)

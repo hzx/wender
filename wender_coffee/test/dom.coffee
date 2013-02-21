@@ -70,7 +70,7 @@ describe "Dom tests", ->
   it "listen observable list", ->
     w = window.wender
 
-    list = new w.ObservableList()
+    list = new w.ObservableList([])
     u1 = new TestUser()
     u1.id = '1'
     u1.name.setValue('mercedes')

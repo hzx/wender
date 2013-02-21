@@ -3,7 +3,7 @@
 describe "ObservableList tests", ->
 
   beforeEach ->
-    @list = new wender.ObservableList()
+    @list = new wender.ObservableList([])
 
   afterEach ->
 

@@ -1,14 +1,34 @@
 
 
-class CheckedToolbar extends View {
+class CheckedToolbar extends wender.View {
+
+  robject[] items = [];
+  string id = '';
+  string[] class = ['ui_checked_toolbar'];
+  var extractId = this.extractIdDefault;
+  var extractClass = this.extractClassDefault;
+  var extractText = this.extractTextDefault;
+
+  event eventSelected;
+
   () {
     super();
   }
 
-  var element = this.render();
-
   tag render() {
-    return <div class=['checked_toolbar']></div>;
+    tag[] nodes = [];
+    for item in this.items {
+      nodes.append(this.renderButton(item));
+    }
+    return <div id=this.id class=this.class>
+        /*rmap(this.items, this.renderButton)*/
+      </div>;
+  }
+
+  tag renderButton(object obj) {
+    return <div id=this.extractId(obj) class=this.extractClass(obj)>
+        rraw(this.extractText(obj))
+      </div>;
   }
 
   void enterDocument() {
@@ -18,5 +38,11 @@ class CheckedToolbar extends View {
   void exitDocument() {
     super();
   }
+
+  # default extractors
+
+  string extractIdDefault(var obj) { return ''; }
+  string extractClassDefault(var obj) { return []; }
+  string extractTextDefault(var obj) { return ''; }
 
 }

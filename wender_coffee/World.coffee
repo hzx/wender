@@ -2,7 +2,8 @@
 
 class ns.World extends ns.OrmStruct
 
-  constructor: ->
+  constructor: (type, name, parent) ->
+    super(type, name, parent)
 
   load: (callback) ->
     ns.orm.load(callback)

@@ -2,7 +2,7 @@
 
 class ns.ObservableList extends ns.List
 
-  constructor: ->
+  constructor: (items) ->
     super()
     @changeObservable = new ns.Observable()
     @insertObservable = new ns.Observable()
