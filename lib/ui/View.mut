@@ -33,7 +33,7 @@ class View {
   # DomElement wrap methods
 
   void addEvent(object observable, object handler) {
-    this.events.add(EventHandler(observable, handler));
+    this.events.push(EventHandler(observable, handler));
   }
 
   void getNode() {

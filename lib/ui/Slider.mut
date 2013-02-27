@@ -1,6 +1,6 @@
 
 
-class Slider extends wender.View {
+class Slider extends View {
 
   string[] images = [];
 
@@ -15,9 +15,11 @@ class Slider extends wender.View {
 
   void enterDocument() {
     super();
+
   }
 
   void exitDocument() {
+
     super();
   }
 
