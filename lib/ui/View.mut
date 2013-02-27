@@ -2,10 +2,10 @@
 
 class EventHandler {
 
-  var observable = none;
-  var handler = none;
+  object observable = none;
+  object handler = none;
 
-  (var observable, var handler) {
+  (object observable, object handler) {
     this.observable = observable;
     this.handler = handler;
   }
@@ -26,13 +26,13 @@ class View {
   tag prev = none;
   string hash = none;
   bool isInDocument = false;
-  var obj = none;
+  object obj = none;
 
-  var events = [];
+  object[] events = [];
 
   # DomElement wrap methods
 
-  void addEvent(var observable, var handler) {
+  void addEvent(object observable, object handler) {
     this.events.add(EventHandler(observable, handler));
   }
 
@@ -61,7 +61,7 @@ class View {
   }
 
   void remove() {
-    this.element.remove();
+    this.parent.removeChild(this);
   }
 
   void enterDocument() {
@@ -88,16 +88,6 @@ class View {
     }
     this.isInDocument = false;
     return true;
-  }
-
-  void addToDocument(var parent) {
-    parent.append(this.element);
-    this.enterDocument();
-  }
-
-  void removeFromDocument() {
-    this.exitDocument();
-    this.element.remove();
   }
 
 }

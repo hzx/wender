@@ -20,6 +20,5 @@ source DomNode.coffee
 source DomElement.coffee
 source DomRawElement.coffee
 source DomText.coffee
-source View.coffee
 source World.coffee
 source main.coffee

@@ -1,6 +1,7 @@
 from tornado.web import RequestHandler
 from wender.utils.mongodb import toJson
 
+
 class BaseHandler(RequestHandler):
 
   # may stop processing if calls finish or send_error
@@ -45,14 +46,14 @@ class BaseHandler(RequestHandler):
 
 class AppHandler(BaseHandler):
 
-  def initialize(self, appName):
+  def initialize(self, appName, title):
     self.appName = appName
+    self.title = title
 
   def get(self):
     # load app template
     templateName = 'app-%s.html' % self.appName
-    msg = 'Loading application...'
-    self.render(templateName, lang='ru', title=msg, message=msg)
+    self.render(templateName, lang='ru', title=self.title, message=self.title)
 
 
 class OrmLoadHandler(BaseHandler):
