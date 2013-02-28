@@ -1,0 +1,21 @@
+
+
+/*
+Create image and load dynamically.
+Set placeholder image before loading.
+*/
+class Image extends View {
+
+  robject image;
+
+  () {
+    super();
+  }
+
+  tag render() {
+    return <div class=['ui_image']>
+        <img src=this.image/>
+      </div>;
+  }
+
+}

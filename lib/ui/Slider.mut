@@ -1,17 +1,30 @@
 
 
 class Slider extends View {
-
-  string[] images = [];
+  
+  tag currentSlide = none;
 
   () {
     super();
+
+    /*this.element = this.render();*/
   }
 
+  /*
+  implement this
   tag render() {
     return <div class=['ui_slider']>
+      <div class=['slides']>
+          <div class=['slide']></div>
+          <div class=['slide']></div>
+        </div>
+        <div class=['buttons']>
+          <div class=['next_button'] onclick=this.onNextClick></div>
+          <div class=['prev_button'] onclick=this.onPrevClick></div>
+        </div>
       </div>;
   }
+  */
 
   void enterDocument() {
     super();
@@ -21,6 +34,22 @@ class Slider extends View {
   void exitDocument() {
 
     super();
+  }
+
+  void startSlide() {
+  }
+  
+  void stopSlide() {
+  }
+
+  # events
+
+  void onNextClick(event e) {
+    console.log('slider onnextclick');
+  }
+
+  void onPrevClick(event e) {
+    console.log('slider onprevclick');
   }
 
 }

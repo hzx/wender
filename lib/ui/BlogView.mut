@@ -1,0 +1,30 @@
+
+
+class BlogContentView extends View {
+
+  robject[] items = [];
+
+  () {
+    super();
+
+    this.element = this.render();
+  }
+
+  tag render() {
+    return <div class=['ui_blogcontent']>
+      </div>;
+  }
+
+  void enterDocument() {
+    if not this.tryEnterDocument() { return none; }
+    super();
+
+  }
+
+  void exitDocument() {
+    if not this.tryExitDocument() { return none; }
+
+    super();
+  }
+
+}

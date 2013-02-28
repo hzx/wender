@@ -2,8 +2,8 @@
 
 class EventHandler {
 
-  object observable = none;
-  object handler = none;
+  object observable;
+  object handler;
 
   (object observable, object handler) {
     this.observable = observable;
@@ -20,6 +20,8 @@ class View {
   # View members
   tag element = none;
 
+  string id = null;
+
   # DomNode implementation members
   tag parent = none;
   tag next = none;
@@ -32,8 +34,21 @@ class View {
 
   # DomElement wrap methods
 
+  void registerId() {
+    if this.id isnot none {
+      browser.addIdElement(this.id, this)
+    }
+  }
+
+  void unregisterId() {
+    if this.id isnot none {
+      browser.removeIdElement(this.id)
+    }
+  }
+
   void addEvent(object observable, object handler) {
-    this.events.push(EventHandler(observable, handler));
+    var link = [observable, handler];
+    this.events.push(link);
   }
 
   void getNode() {
@@ -66,9 +81,25 @@ class View {
 
   void enterDocument() {
     this.element.enterDocument();
+
+    for ev in this.events {
+      var observable = ev[0];
+      var handler = ev[1];
+      observable.addListener(handler);
+    }
+
+    this.registerId();
   }
 
   void exitDocument() {
+    for ev in this.events {
+      var observable = ev[0];
+      var handler = ev[1];
+      observable.removeListener(handler);
+    }
+
+    this.unregisterId();
+
     this.element.exitDocument();
   }
 

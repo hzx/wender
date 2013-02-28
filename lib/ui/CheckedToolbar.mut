@@ -1,0 +1,45 @@
+
+
+class CheckedToolbar extends View {
+
+  string id = none;
+
+  event eventSelected;
+
+  tag lastNavButton = none;
+  tag lastView = none;
+
+  () {
+    super();
+  }
+
+  void enterDocument() {
+    super();
+  }
+
+  void exitDocument() {
+    super();
+  }
+
+  void selectToolbarButton(tag button) {
+    if button.hasClass('selected') { return none; }
+    if this.lastNavButton isnot none {
+      this.lastNavButton.removeClass('selected');
+    }
+    this.lastNavButton = button;
+    button.addClass('selected');
+  }
+
+  void selectToolbarButtonByName(string name) {
+    var button = browser.getElementById('nav_' + name);
+    this.selectToolbarButton(button);
+  }
+
+  # events
+
+  void onNavButtonClick(event e) {
+    this.selectToolbarButton(e.element);
+    this.eventSelected.notify(e.element.data);
+  }
+
+}

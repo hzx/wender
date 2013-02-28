@@ -1,0 +1,33 @@
+
+
+class CategorySearchEdit extends View {
+
+  event eventSearch;
+
+  () {
+    super();
+  }
+
+  /*
+  implement render
+  tag render() {
+    return <div>
+      </div>;
+  }
+  */
+
+  void enterDocument() {
+    super();
+  }
+
+  void exitDocument() {
+    super();
+  }
+
+  # events
+
+  void onSearchClick(event e) {
+    console.log('CategorySearchEdit.onSearchClick called');
+  }
+
+}
