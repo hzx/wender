@@ -86,6 +86,7 @@ class ns.Browser
   removeRender: (render) ->
     window.clearInterval(render.hash)
     delete render.hash
+    render.hash = null
 
   # events
 

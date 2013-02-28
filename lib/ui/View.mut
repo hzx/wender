@@ -1,17 +1,5 @@
 
 
-class EventHandler {
-
-  object observable;
-  object handler;
-
-  (object observable, object handler) {
-    this.observable = observable;
-    this.handler = handler;
-  }
-
-}
-
 /*
 View is DomElement wrapper, behavior like DomElement, but consists
 of tag structure and behavior.

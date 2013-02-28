@@ -2,19 +2,21 @@
 
 class Slider extends View {
   
+  bool isStarted = false;
+  bool isDisabled = false;
   tag currentSlide = none;
+  int slideTime = 2000;
 
   () {
     super();
 
-    /*this.element = this.render();*/
   }
 
   /*
   implement this
   tag render() {
     return <div class=['ui_slider']>
-      <div class=['slides']>
+        <div class=['slides']>
           <div class=['slide']></div>
           <div class=['slide']></div>
         </div>
@@ -29,6 +31,10 @@ class Slider extends View {
   void enterDocument() {
     super();
 
+    this.checkSlides();
+
+    # initialize first slide  .ui_slider > .slides > .slide
+    this.setSlideCurrent(this.element.first.first);
   }
 
   void exitDocument() {
@@ -36,20 +42,96 @@ class Slider extends View {
     super();
   }
 
-  void startSlide() {
+  void checkSlides() {
+    # .ui_slider > .slides
+    tag slides = this.element.first;
+    # if less then 2 slides disable slider
+    this.isDisabled = (slides.first is none) or (slides.first.next is none);
+    if this.isDisabled {
+      # .ui_slider > .slides .buttons
+      tag buttons = this.element.first.next;
+      # add disabled class to next_button and prev_button 
+      buttons.first.addClass('disabled');
+      buttons.last.addClass('disabled');
+    }
+  }
+
+  void setSlideCurrent(tag slide) {
+    if slide is none { return none; }
+    if this.currentSlide isnot none { this.currentSlide.removeClass('current'); }
+    this.currentSlide = slide;
+    this.currentSlide.addClass('current');
+  }
+
+  void moveNext() {
+    # move to next
+    tag next = this.currentSlide.next;
+    # if next is none then move to first
+    if next is none { next = this.currentSlide.parent.first; }
+
+    this.setSlideCurrent(next);
+  }
+
+  void movePrev() {
+    # move to prev
+    tag prev = this.currentSlide.prev;
+    # if prev is none then move to last
+    if prev is none { prev = this.currentSlide.parent.last; }
+
+    this.setSlideCurrent(prev);
+  }
+
+  void startSlides() {
+    if this.isDisabled { return none; }
+
+    this.isStarted = true;
+    this.unpauseSlides();
   }
   
-  void stopSlide() {
+  void stopSlides() {
+    if this.isDisabled { return none; }
+
+    this.pauseSlides();
+    this.isStarted = false;
+  }
+
+  void pauseSlides() {
+    if this.isStarted is false { return none; }
+
+    browser.removeRender(this.moveNext);
+  }
+
+  void unpauseSlides() {
+    if this.isStarted is false { return none; }
+  
+    browser.addRender(this.moveNext, this.slideTime);
   }
 
   # events
 
   void onNextClick(event e) {
-    console.log('slider onnextclick');
+    if this.isDisabled is false {
+      this.pauseSlides();
+      this.moveNext();
+      this.unpauseSlides();
+    }
   }
 
   void onPrevClick(event e) {
-    console.log('slider onprevclick');
+    if this.isDisabled is false {
+      # reset slide timeout and move slide
+      this.pauseSlides();
+      this.movePrev();
+      this.unpauseSlides();
+    }
+  }
+
+  void onSlideMouseover(event e) {
+    this.pauseSlides();
+  }
+
+  void onSlideMouseout(event e) {
+    this.unpauseSlides();
   }
 
 }
