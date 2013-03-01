@@ -272,11 +272,12 @@ class ns.DomElement extends ns.DomNode
   # private
 
   enterDocument: ->
-    if @isInDocument then return
+    if @isInDocument
+      return null
 
     # listen events
     for name, handler of @events
-      @addEvent(name, handler)
+      ns.addEvent(@node, name, @onEvent)
 
     @registerId()
 
@@ -299,11 +300,12 @@ class ns.DomElement extends ns.DomNode
     super()
 
   exitDocument: ->
-    if @isInDocument is false then return
+    if @isInDocument is false
+      return null
 
     # unlisten events
     for name, handler of @events
-      @removeEvent(name, handler)
+      ns.removeEvent(@node, name, @onEvent)
 
     @unregisterId()
 

@@ -69,14 +69,13 @@ class View {
 
   void enterDocument() {
     this.element.enterDocument();
+    this.registerId();
 
     for ev in this.events {
       var observable = ev[0];
       var handler = ev[1];
       observable.addListener(handler);
     }
-
-    this.registerId();
   }
 
   void exitDocument() {
@@ -87,7 +86,6 @@ class View {
     }
 
     this.unregisterId();
-
     this.element.exitDocument();
   }
 

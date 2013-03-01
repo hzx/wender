@@ -6,7 +6,10 @@ class ns.World extends ns.OrmStruct
     super(type, name, parent)
 
   load: (callback) ->
-    ns.orm.load(callback)
+    ns.orm.load(this, callback)
+
+  addStruct: (st) ->
+    ns.orm.addStruct(st)
 
   validate: (obj) ->
     ns.orm.validate(ob)

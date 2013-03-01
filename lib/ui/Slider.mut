@@ -1,11 +1,12 @@
 
 
 class Slider extends View {
+
+  int slideTime = 3000;
   
   bool isStarted = false;
   bool isDisabled = false;
   tag currentSlide = none;
-  int slideTime = 2000;
 
   () {
     super();
@@ -15,7 +16,7 @@ class Slider extends View {
   /*
   implement this
   tag render() {
-    return <div class=['ui_slider']>
+    return <div class=['ui_slider'] onmouseover=this.onSlideMouseover onmouseout=this.onSlideMouseout>
         <div class=['slides']>
           <div class=['slide']></div>
           <div class=['slide']></div>
@@ -34,10 +35,15 @@ class Slider extends View {
     this.checkSlides();
 
     # initialize first slide  .ui_slider > .slides > .slide
-    this.setSlideCurrent(this.element.first.first);
+    if this.currentSlide is none {
+      this.setSlideCurrent(this.element.first.first);
+    }
+
+    this.unpauseSlides();
   }
 
   void exitDocument() {
+    this.pauseSlides();
 
     super();
   }
@@ -81,28 +87,28 @@ class Slider extends View {
     this.setSlideCurrent(prev);
   }
 
-  void startSlides() {
-    if this.isDisabled { return none; }
+  /*void startSlides() {*/
+  /*  if this.isDisabled or this.isStarted { return none; }*/
 
-    this.isStarted = true;
-    this.unpauseSlides();
-  }
-  
-  void stopSlides() {
-    if this.isDisabled { return none; }
+  /*  this.isStarted = true;*/
+  /*  this.unpauseSlides();*/
+  /*}*/
+  /**/
+  /*void stopSlides() {*/
+  /*  if this.isDisabled or (not this.isStarted) { return none; }*/
 
-    this.pauseSlides();
-    this.isStarted = false;
-  }
+  /*  this.pauseSlides();*/
+  /*  this.isStarted = false;*/
+  /*}*/
 
   void pauseSlides() {
-    if this.isStarted is false { return none; }
+    if not this.isStarted { return none; }
 
     browser.removeRender(this.moveNext);
   }
 
   void unpauseSlides() {
-    if this.isStarted is false { return none; }
+    if not this.isStarted { return none; }
   
     browser.addRender(this.moveNext, this.slideTime);
   }
@@ -110,20 +116,15 @@ class Slider extends View {
   # events
 
   void onNextClick(event e) {
-    if this.isDisabled is false {
-      this.pauseSlides();
-      this.moveNext();
-      this.unpauseSlides();
-    }
+    if this.isDisabled { return none; }
+
+    this.moveNext();
   }
 
   void onPrevClick(event e) {
-    if this.isDisabled is false {
-      # reset slide timeout and move slide
-      this.pauseSlides();
-      this.movePrev();
-      this.unpauseSlides();
-    }
+    if this.isDisabled { return none; }
+
+    this.movePrev();
   }
 
   void onSlideMouseover(event e) {

@@ -98,11 +98,15 @@ class ns.Orm
 
     @validator = new ns.Validator()
 
-  load: (callback) ->
+    @world = null
+
+  load: (world, callback) ->
+    @world = world
     @loadCallback = callback
     ns.net.get('/load', @onLoadSuccess, @onLoadFail)
 
-  addStruct: (struct) ->
+  # st - array of struct name, fields
+  addStruct: (st) ->
     # add struct
 
   init: ->
