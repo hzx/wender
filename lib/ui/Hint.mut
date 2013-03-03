@@ -1,0 +1,12 @@
+
+
+class Hint extends View {
+
+  string content = '';
+
+  () {
+    super();
+
+  }
+
+}

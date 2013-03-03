@@ -87,20 +87,6 @@ class Slider extends View {
     this.setSlideCurrent(prev);
   }
 
-  /*void startSlides() {*/
-  /*  if this.isDisabled or this.isStarted { return none; }*/
-
-  /*  this.isStarted = true;*/
-  /*  this.unpauseSlides();*/
-  /*}*/
-  /**/
-  /*void stopSlides() {*/
-  /*  if this.isDisabled or (not this.isStarted) { return none; }*/
-
-  /*  this.pauseSlides();*/
-  /*  this.isStarted = false;*/
-  /*}*/
-
   void pauseSlides() {
     if not this.isStarted { return none; }
 

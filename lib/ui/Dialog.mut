@@ -1,0 +1,34 @@
+
+
+class Dialog extends View {
+
+  () {
+    super();
+
+  }
+
+  /*
+  implement this
+  tag render() {
+    return <div class=['ui_dialog']>
+      </div>;
+  }
+  */
+
+  void enterDocument() {
+    super();
+
+  }
+
+  void exitDocument() {
+
+    super();
+  }
+
+  # events
+
+  void onCloseClick() {
+    this.element.addClass('hidden_smooth');
+  }
+
+}

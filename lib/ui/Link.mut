@@ -1,0 +1,12 @@
+
+
+class Link extends View {
+  
+  string url = '';
+
+  () {
+    super();
+
+  }
+
+}

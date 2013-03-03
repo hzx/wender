@@ -1,4 +1,5 @@
 from tornado.web import RequestHandler
+from tornado.web import authenticated
 from wender.utils.mongodb import toJson
 
 
@@ -55,6 +56,18 @@ class AppHandler(BaseHandler):
     templateName = 'app-%s.html' % self.appName
     self.render(templateName, lang='ru', title=self.title, message=self.title)
 
+class AppAdminHandler(BaseHandler):
+
+  def initialize(self, appName, title):
+    self.appName = appName
+    self.title = title
+
+  @authenticated
+  def get(self):
+    # load app template
+    templateName = 'app-%s.html' % self.appName
+    self.render(templateName, lang='ru', title=self.title, message=self.title)
+
 
 class OrmLoadHandler(BaseHandler):
 
@@ -102,3 +115,4 @@ handlers = [
     ('/login', LoginHandler),
     # ('/logout', LogoutHandler),
     ]
+

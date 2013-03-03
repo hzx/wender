@@ -21,4 +21,5 @@ source DomElement.coffee
 source DomRawElement.coffee
 source DomText.coffee
 source World.coffee
+source AppLoader.coffee
 source main.coffee
