@@ -30,7 +30,7 @@ class ns.DomText extends ns.DomNode
         value.addListener(@onValueChange)
 
       # autorender values
-      if @values.length > 0
+      if @render isnt null
         @renderText()
 
     super()
