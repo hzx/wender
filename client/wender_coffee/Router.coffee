@@ -74,6 +74,9 @@ class ns.Router
       @routePattern(url, pattern, args)
       break
 
+  routeStaticUrl: (url) ->
+    window.location = url
+
   # Events
 
   onRoute: (url) =>

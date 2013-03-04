@@ -21,8 +21,10 @@ class Orm(object):
     self.structs = {}
 
   def addStruct(self, struct):
+    pass
 
-  def parseParams(self, struct, field)
+  def parseParams(self, struct, field):
+    pass
 
   # db operations
 

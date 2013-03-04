@@ -4,9 +4,10 @@ from tornado.options import options
 import tornado.web
 
 import pymongo
-from pymongo.objectid import ObjectId
+from pymongo.mongo_client import MongoClient
+from bson.objectid import ObjectId
 import pymongo.errors
-import pymongo.json_util
+import bson.json_util
 import json
 from datetime import datetime
 
@@ -19,13 +20,16 @@ db = None
 
 
 def connect():
-  connection = pymongo.Connection(options.db_host)
+  # connection = pymongo.Connection(options.db_host)
+  # db = connection[options.db_name]
+  # db.authenticate(options.db_user, options.db_password)
+  connection = pymongo.MongoClient()
   db = connection[options.db_name]
-  db.authenticate(options.db_user, options.db_password)
   return db
 
 def authorize(db):
-  db.authenticate(options.db_user, options.db_password)
+  # db.authenticate(options.db_user, options.db_password)
+  pass
 
 
 # database methods decorator

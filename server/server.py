@@ -3,7 +3,8 @@ import tornado.ioloop
 import tornado.options
 import tornado.web
 import os.path
-from wender.handlers import handlers as wenderHandlers
+from wender.handlers import urls as wender_urls
+from wender.auth.handlers import urls as auth_urls 
 
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -18,10 +19,16 @@ from {{ handler['module'] }} import urls as {{ handler['alias'] }}
 from tornado.options import define, options
 define('port', default=8000, help='web port', type=int)
 # COMPOSE DB CONNECTION
-define('mongodb', default='{{ mongodb }}')
+define('db_host', default='{{ db_host }}')
+define('db_port', default='{{ db_port }}')
+define('db_name', default='{{ db_name }}')
+define('db_user', default='{{ db_user }}')
+define('db_pass', default='{{ db_pass }}')
 
 # COMPOSE HANDLERS HERE
-handlers = wenderHandlers {% for handler in handlers %} + {{ handler['alias'] }}{% end %}
+handlers = wender_urls \
+    + auth_urls \
+    {% for handler in handlers %} + {{ handler['alias'] }}{% end %}
 
 # COMPOSE SETTINGS
 settings = {

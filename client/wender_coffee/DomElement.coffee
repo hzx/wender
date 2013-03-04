@@ -45,11 +45,17 @@ class ns.DomElement extends ns.DomNode
 
     @setAttributes(attributes)
 
+  setText: (text) ->
+    @node.innerText = text
+
   setAttribute: (name, value) ->
     @node.setAttribute(name, value)
 
   removeAttribute: (name) ->
     @node.removeAttribute(name)
+
+  getAttribute: (name) ->
+    @node.getAttribute(name)
 
   setAttributes: (attributes) ->
     for name, value of attributes
@@ -80,6 +86,7 @@ class ns.DomElement extends ns.DomNode
 
       # other values
       @setAttribute(name, value)
+
 
   # manipulate DOM
   

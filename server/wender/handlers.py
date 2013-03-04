@@ -10,8 +10,14 @@ class BaseHandler(RequestHandler):
     pass
 
   # render error pages
-  def write_error(self):
-    pass
+  def write_error(self, status_code, **kwargs):
+    print 'status_code "%d"' % status_code
+    if status_code == 404:
+      self.render('404.html')
+    elif status_code >= 500 and status_code < 600:
+      self.render('500.html')
+    else:
+      RequestHandler.write_error(status_code, kwargs)
 
   def get_current_user(self):
     userId = self.get_secure_cookie('user')
@@ -98,21 +104,27 @@ class OrmOpHandler(BaseHandler):
 
 
 class LoginHandler(BaseHandler):
+
   def post(self):
     self.set_secure_cookie('user', self.get_argument('name'))
 
 
 class NotFoundHandler(BaseHandler):
+
   def get(self):
     if self.isXhr():
       # return response for xhr request
       return
     self.render('404.html')
 
+class NoscriptHandler(BaseHandler):
 
-handlers = [
+  def get(self):
+    self.render('noscript.html')
+
+
+urls = [
     ('/load', OrmLoadHandler, {'appName': 'test'}),
-    ('/login', LoginHandler),
-    # ('/logout', LogoutHandler),
+    ('/noscript', NoscriptHandler),
     ]
 

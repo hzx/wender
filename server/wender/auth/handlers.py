@@ -1,7 +1,6 @@
 from tornado.web import HTTPError
-from arti.site.handlers import BaseHandler
-from arti.auth import models
-#from arti.auth
+from wender.handlers import BaseHandler
+from wender.auth import models
 
 
 class LoginHandler(BaseHandler):
@@ -19,7 +18,7 @@ class LoginHandler(BaseHandler):
 
     self.set_cookie('_xsrf', self.xsrf_token, httponly=True)
 
-    self.render('login_js.html', xsrf=self.xsrf_token)
+    self.render('login.html', title='LOGIN', xsrf=self.xsrf_token)
 
 
   def post(self):

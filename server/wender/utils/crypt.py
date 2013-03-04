@@ -1,5 +1,7 @@
 import hashlib
 import random
+import base64
+import uuid
 
 def encodeSaltPassword(salt, rawPassword):
   return hashlib.sha1(salt + rawPassword).hexdigest()
@@ -16,3 +18,7 @@ def checkPassword(rawPassword, encPassword):
   salt, password = encPassword.split('$')
   testPassword = encodeSaltPassword(salt, rawPassword)
   return password == testPassword
+
+def genPassword():
+  return base64.b64encode(uuid.uuid4().bytes + uuid.uuid4().bytes)
+
