@@ -10,8 +10,8 @@ class CaptchaHandler(BaseHandler):
     # TODO: by user_key generate captcha
     pass
 
-
 class RegHandler(BaseHandler):
+
   def get(self):
     self.render("reg.html", captcha=self.captcha.create())
     
@@ -36,8 +36,6 @@ class RegHandler(BaseHandler):
 
     self.auth.reg_user(login, password)
     self.write('user registration ok, login: %s' % login)
-
-
 
 class LoginHandler(BaseHandler):
 

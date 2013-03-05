@@ -4,7 +4,6 @@ from bson.objectid import ObjectId
 from wender.db import storable
 from wender.utils import crypt
 
-
 @storable
 def createUser(db, login, password):
   user = { 'login': login, 'password': crypt.encodePassword(password) }

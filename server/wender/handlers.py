@@ -1,4 +1,5 @@
 from tornado.web import RequestHandler
+from tornado.web import HTTPError
 from tornado.web import authenticated
 from wender.utils.mongodb import toJson
 
@@ -6,8 +7,8 @@ from wender.utils.mongodb import toJson
 class BaseHandler(RequestHandler):
 
   # may stop processing if calls finish or send_error
-  def prepare(self):
-    pass
+  # def prepare(self):
+  #   pass
 
   # render error pages
   def write_error(self, status_code, **kwargs):
@@ -37,8 +38,8 @@ class BaseHandler(RequestHandler):
     # Use the Accept-Language header
     return None
   
-  def on_connection_close(self):
-    pass
+  # def on_connection_close(self):
+  #   pass
 
   def set_default_headers(self):
     self.set_header('Server', 'wender')
@@ -81,20 +82,20 @@ class OrmLoadHandler(BaseHandler):
     self.appName = appName
 
   def get(self):
-    # load orm data
     if not self.isXhr():
-      self.finish('')
-    else:
-      self.writeJson({})
+      raise HTTPError(401)
+
+    # load orm data
+    self.writeJson({})
 
 
 class OrmOpHandler(BaseHandler):
 
   def get(self, appName):
     if not self.isXhr():
-      self.finish('')
-    else:
-      self.writeJson({})
+      raise HTTPError(401)
+
+    self.writeJson({})
 
   def get(self, appName):
     if not self.isXhr():
@@ -102,19 +103,9 @@ class OrmOpHandler(BaseHandler):
     else:
       self.writeJson({})
 
-
-class LoginHandler(BaseHandler):
-
-  def post(self):
-    self.set_secure_cookie('user', self.get_argument('name'))
-
-
 class NotFoundHandler(BaseHandler):
 
   def get(self):
-    if self.isXhr():
-      # return response for xhr request
-      return
     self.render('404.html')
 
 class NoscriptHandler(BaseHandler):
@@ -122,9 +113,9 @@ class NoscriptHandler(BaseHandler):
   def get(self):
     self.render('noscript.html')
 
-
 urls = [
     ('/load', OrmLoadHandler, {'appName': 'test'}),
+    ('/op', OrmOpHandler),
     ('/noscript', NoscriptHandler),
-    ]
+  ]
 

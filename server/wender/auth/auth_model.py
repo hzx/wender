@@ -1,6 +1,6 @@
-
 import pymongo
-from uilit.utils.crypt import encode_password, check_password
+from wender.utils.crypt import encodePassword, checkPassword
+
 
 class Auth(object):
   def __init__(self, application):
