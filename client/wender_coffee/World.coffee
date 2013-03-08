@@ -15,7 +15,7 @@ class ns.World extends ns.OrmStruct
     ns.orm.validate(ob)
 
   getImageUrl: (filename) ->
-    if filename.value.length > 0
-      '/static/img/' + filename.value
-    else
-      ''
+    return ns.orm.getImageUrl(filename)
+
+  getThumbUrl: (filename) ->
+    return ns.orm.getThumbUrl(filename)

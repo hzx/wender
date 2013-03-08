@@ -1,0 +1,16 @@
+
+
+class BlogEdit extends ui.View {
+
+  robject[] items = none;
+
+  () {
+    super();
+  }
+
+  tag render() {
+    return <div class=['blog_edit']>
+      </div>;
+  }
+
+}

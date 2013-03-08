@@ -75,11 +75,19 @@ class ns.OrmHashStruct extends ns.OrmStruct
   removeHashListener: (listener) ->
     @id.removeListener(listener)
 
+class OrmStructMeta
+  constructor: (name, fields) ->
+    @kind = name
+    @fields = @parseFields(fields)
+
+  parseFields: (fields) ->
+    return fields
+
 # class ns.OrmField
 # 
-#   constructor: (name, type, params) ->
-#     @name = name
+#   constructor: (type, name, params) ->
 #     @type = type
+#     @name = name
 #     @params = params
 # 
 # class ns.OrmStruct
@@ -89,21 +97,33 @@ class ns.OrmHashStruct extends ns.OrmStruct
 #     @fields = fields
 
 # Change, validate values of types OrmValue, OrmList
-# Send/receive datao by Net
+# Send/receive data by Net
 class ns.Orm
 
   constructor: ->
     # map struct name to params (fields, create structClass method)
-    @srtucts = {}
+    @rawSrtucts = {}
 
     @validator = new ns.Validator()
 
     @world = null
 
+    @paramToValidate = {
+      'maxLength': @validator.maxLength,
+      'lt': @validator.lt,
+      'lte': @validator.lte,
+      'gt': @validator.gt,
+      'gte': @validator.gte,
+      'regex': @validator.regex
+    }
+
   load: (world, callback) ->
     @world = world
     @loadCallback = callback
     ns.net.get('/load', @onLoadSuccess, @onLoadFail)
+
+  addStructs: (structs) ->
+    @rawStructs = structs
 
   # st - array of struct name, fields
   addStruct: (st) ->
@@ -115,7 +135,7 @@ class ns.Orm
   # Validate value
   
   validate: (obj) ->
-    names = getOrmNames(obj)
+    parent = obj.ormParent
 
     # obj maybe struct, list or value
     
@@ -125,48 +145,61 @@ class ns.Orm
 
   # work with structs
 
-  setValue: (obj) ->
-    names = getOrmNames(obj)
 
-    # validate
-    
-    # change referenced values
-    
-    # send changes by net
+  # CRUD OPERATIONS
 
-  insert: (obj) ->
-    names = getOrmNames(obj)
+  insert: (coll, val) ->
+    coll.insert(val)
 
-    # validate
-    # change referenced values
-    # send changes by net
+  insertAfter: (coll, val, whereFn) ->
 
-  append: (obj) ->
-    names = getOrmNames(obj)
+  insertBefore: (coll, val, whereFn) ->
 
-    # validate
-    # change referenced values
-    # send changes by net
+  selectCount: (coll) ->
+    return coll.count
 
-  insertAfter: (obj, after) ->
-    names = getOrmNames(obj)
+  selectOne: (coll, whereFn) ->
+    return coll.first.clone()
 
-    # validate
-    # change referenced values
-    # send changes by net
+  selectFrom: (dest, coll, whereFn, orderField, sortOrder) ->
+    dest.empty()
+    cursor = coll.first
+    while cursor isnt null
+      dest.append(cursor.obj.clone())
+      cursor = cursor.next
 
-  insertBefore: (obj, before) ->
-    names = getOrmNames(obj)
+  selectConcat: (dest, colls) ->
+    dest.empty()
+    for coll in colls
+      cursor = coll.first
+      while cursor isnt null
+        dest.append(cursor.obj.clone())
+        cursor = cursor.next
 
-    # validate
-    # change referenced values
-    # send changes by net
+  selectSum: (coll, byField) ->
+    sum = 0
+    console.log 'orm.selectSum'
+    console.log coll
 
-  remove: (obj) ->
-    names = getOrmNames(obj)
+  update: (coll, vals, whereFn) ->
+    console.log 'orm.update'
+    console.log coll
 
-    # change referenced values
-    # send changes by net
+  deleteFrom: (coll, whereFn) ->
+    console.log 'orm.deleteFrom'
+    console.log coll
+
+  getImageUrl: (filename) ->
+    if filename.value.length > 0
+      '/static/img/' + filename.value
+    else
+      ''
+
+  getThumbUrl: (filename) ->
+    if filename.value.length > 0
+      '/static/img/thumb_' + filename.value
+    else
+      ''
 
   # events
 
@@ -176,3 +209,41 @@ class ns.Orm
     @loadCallback()
 
   onLoadFail: (status) =>
+
+  # event OrmList, OrmValue operations
+  
+  onSetValue: (obj) ->
+    names = getOrmNames(obj)
+
+    # validate
+    
+    # change referenced values
+    
+    # send changes by net
+
+  
+  onInsert: (obj) =>
+    console.log 'Orm.onInsert'
+    # validate
+    # change referenced values
+    # send changes by net
+
+  onAppend: (obj) =>
+    console.log 'Orm.onAppend'
+
+  onInsertAfter: (obj, after) =>
+    console.log 'Orm.onInsertAfter'
+
+    # validate
+    # change referenced values
+    # send changes by net
+
+  onInsertBefore: (obj, before) =>
+    console.log 'Orm.onInsertBefore'
+    # validate
+    # change referenced values
+    # send changes by net
+
+  onRemove: (obj) =>
+    console.log 'Orm.onRemove'
+

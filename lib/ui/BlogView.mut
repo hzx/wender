@@ -1,6 +1,13 @@
 
 
-class BlogContentView extends View {
+enum BlogItemKind {
+  HEADER = 1;
+  PARAGRAPH = 2;
+  IMAGE = 3;
+  GALLERY = 4;
+}
+
+class BlogView extends View {
 
   robject[] items = [];
 
@@ -25,6 +32,39 @@ class BlogContentView extends View {
     if not this.tryExitDocument() { return none; }
 
     super();
+  }
+
+  tag renderItem(robject item) {
+    if item.kind is BlogItemKind.HEADER {
+      return this.renderHeader(item);
+    }
+    if item.kind is BlogItemKind.PARAGRAPH {
+      return this.renderParagraph(item);
+    }
+    if item.kind is BlogItemKind.IMAGE {
+      return this.renderImage(item);
+    }
+    if item.kind is BlogItemKind.GALLERY {
+      return this.renderGallery(item);
+    }
+    return <div class=['unknown_kind']>
+      </div>;
+  }
+
+  tag renderHeader(robject header) {
+    return <div class=['header']></div>;
+  }
+
+  tag renderParagraph(robject par) {
+    return <div class=['paragraph']></div>;
+  }
+
+  tag renderImage(robject im) {
+    return <div class=['image']></div>;
+  }
+
+  tag renderGallery(robject gal) {
+    return <div class=['gallery']></div>;
   }
 
 }

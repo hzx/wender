@@ -5,6 +5,8 @@ import tornado.web
 import os.path
 from wender.handlers import urls as wender_urls
 from wender.auth.handlers import urls as auth_urls 
+from wender.orm import Orm
+from wender.structs import structs
 
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -44,6 +46,8 @@ settings = {
 class Application(tornado.web.Application):
   def __init__(self):
     tornado.web.Application.__init__(self, handlers, **settings)
+
+    self.orm = Orm(structs)
 
 if __name__ == "__main__":
   tornado.options.parse_command_line()

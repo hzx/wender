@@ -7,23 +7,30 @@ class OrmField(object):
     self.kind = kind
     self.params = params
 
-class OrmStruct(object):
+class OrmStructMeta(object):
 
   def __init__(self, name, fields):
     self.name = name
-    self.fields = {}
-    for field in fields
-      self.fields[field.name] = field
+    self.fields = self.parseFields(fields)
+
+  def parseFields(fields):
+    fields = {}
+    for field in fields:
+      fields[field.name] = field
+    return fields
 
 class Orm(object):
 
-  def __init__(self):
+  def __init__(self, structs):
     self.structs = {}
 
-  def addStruct(self, struct):
+    for st in structs:
+      self.addStruct(st)
+
+  def addStruct(self, st):
     pass
 
-  def parseParams(self, struct, field):
+  def parseParams(self, st, field):
     pass
 
   # db operations

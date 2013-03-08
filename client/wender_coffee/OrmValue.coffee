@@ -6,10 +6,13 @@ class ns.OrmValue extends ns.ObservableValue
   constructor: (type, name, parent, value) ->
     super()
     @ormType = type
-    @ormName = name
-    @ormParent = parent
+    @ormName = if name then name else null
+    @ormParent = if parent then parent else null
     @value = value
 
   setValue: (value) ->
     super(value)
-    ns.orm.setValue(this)
+    ns.orm.onSetValue(this)
+
+  clone: ->
+    return new ns.OrmValue(@type, @name, null, @value)

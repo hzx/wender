@@ -1,0 +1,16 @@
+
+
+class PageEdit extends ui.View {
+
+  robject page = none;
+
+  () {
+    super();
+  }
+
+  tag render() {
+    return <div class=['page_edit']>
+      </div>;
+  }
+
+}
