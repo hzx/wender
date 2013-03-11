@@ -19,3 +19,6 @@ class ns.World extends ns.OrmStruct
 
   getThumbUrl: (filename) ->
     return ns.orm.getThumbUrl(filename)
+
+  uploadFiles: (url, fieldName, files, success, fail) ->
+    ns.net.uploadFiles(url, fieldName, files, success, fail)

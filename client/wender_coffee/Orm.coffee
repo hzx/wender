@@ -52,8 +52,8 @@ class ns.OrmStruct
 
   constructor: (type, name, parent) ->
     @ormType = type
-    @ormName = name
-    @ormParent = parent
+    @ormName = if !! name then name else null
+    @ormParent = if !! parent then parent else null
 
 
 # Base class for struct with id
@@ -205,6 +205,9 @@ class ns.Orm
 
   onLoadSuccess: (response) =>
     # parse all response
+    parsed = JSON.parse(response)
+    # set net xsrf
+    ns.net.setXsrf(parsed.xsrf)
     # call callback
     @loadCallback()
 

@@ -6,6 +6,10 @@ from wender.utils.mongodb import toJson
 
 class BaseHandler(RequestHandler):
 
+  @property
+  def orm(self):
+    return self.application.orm
+
   # may stop processing if calls finish or send_error
   # def prepare(self):
   #   pass
@@ -51,7 +55,6 @@ class BaseHandler(RequestHandler):
     self.set_header('Content-Type', 'application/json;charset=UTF-8')
     self.finish(toJson(obj))
 
-
 class AppHandler(BaseHandler):
 
   def initialize(self, appName, title):
@@ -86,8 +89,7 @@ class OrmLoadHandler(BaseHandler):
       raise HTTPError(401)
 
     # load orm data
-    self.writeJson({})
-
+    self.writeJson({'xsrf': self.xsrf_token })
 
 class OrmOpHandler(BaseHandler):
 
@@ -96,12 +98,6 @@ class OrmOpHandler(BaseHandler):
       raise HTTPError(401)
 
     self.writeJson({})
-
-  def get(self, appName):
-    if not self.isXhr():
-      self.finish('')
-    else:
-      self.writeJson({})
 
 class NotFoundHandler(BaseHandler):
 

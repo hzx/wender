@@ -6,8 +6,8 @@ class ns.OrmList extends ns.ObservableList
   constructor: (type, name, parent) ->
     super([])
     @ormType = type
-    @ormName = if name then name else null
-    @ormParent = if parent then parent else null
+    @ormName = if !! name then name else null
+    @ormParent = if !! parent then parent else null
     @hashGenerator = new ns.HashGenerator()
 
   setTemporaryId: (obj) ->

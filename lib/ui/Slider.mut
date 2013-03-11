@@ -51,8 +51,10 @@ class Slider extends View {
   void checkSlides() {
     # .ui_slider > .slides
     tag slides = this.element.first;
+
     # if less then 2 slides disable slider
     this.isDisabled = (slides.first is none) or (slides.first.next is none);
+
     if this.isDisabled {
       # .ui_slider > .slides .buttons
       tag buttons = this.element.first.next;
@@ -70,6 +72,8 @@ class Slider extends View {
   }
 
   void moveNext() {
+    if this.isDisabled { return none; }
+
     # move to next
     tag next = this.currentSlide.next;
     # if next is none then move to first
@@ -79,6 +83,8 @@ class Slider extends View {
   }
 
   void movePrev() {
+    if this.isDisabled { return none; }
+
     # move to prev
     tag prev = this.currentSlide.prev;
     # if prev is none then move to last
@@ -88,13 +94,13 @@ class Slider extends View {
   }
 
   void pauseSlides() {
-    if not this.isStarted { return none; }
+    if (not this.isStarted) or this.isDisabled { return none; }
 
     browser.removeRender(this.moveNext);
   }
 
   void unpauseSlides() {
-    if not this.isStarted { return none; }
+    if (not this.isStarted) or this.isDisabled { return none; }
   
     browser.addRender(this.moveNext, this.slideTime);
   }
@@ -102,14 +108,10 @@ class Slider extends View {
   # events
 
   void onNextClick(event e) {
-    if this.isDisabled { return none; }
-
     this.moveNext();
   }
 
   void onPrevClick(event e) {
-    if this.isDisabled { return none; }
-
     this.movePrev();
   }
 

@@ -1,3 +1,4 @@
+from wender import mongodb
 
 
 class OrmField(object):
@@ -33,6 +34,10 @@ class Orm(object):
   def parseParams(self, st, field):
     pass
 
+  # image operations
+  def getImageSizes(self, name):
+    pass
+
   # db operations
 
   def load(self, userKind):
@@ -44,8 +49,8 @@ class Orm(object):
   def append(self):
     pass
 
-  def insert(self):
-    pass
+  def insert(self, coll, values):
+    return mongodb.insert(coll, values)
 
   def insertBefore(self):
     pass
@@ -53,12 +58,15 @@ class Orm(object):
   def insertAfter(self):
     pass
 
-  def selectFrom(self):
-    pass
+  def selectOne(self, coll, where):
+    return mongodb.selectOne(coll, where)
 
-  def update(self):
-    pass
+  def selectFrom(self, coll, where):
+    return mongodb.selectFrom(coll, where)
 
-  def delete(self):
-    pass
+  def update(self, coll, values, where):
+    return mongodb.update(coll, values, where)
+
+  def delete(self, coll, where):
+    return mongodb.delete(coll, where)
 

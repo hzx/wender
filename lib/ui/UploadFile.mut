@@ -1,0 +1,51 @@
+
+
+class UploadFile extends View {
+
+  event eventSelected;
+
+  string uiclass = ['ui_upload'];
+  string text = 'ЗАГРУЗКА ФАЙЛА';
+  bool multiple = false;
+  bool isClicked = false;
+
+  () {
+    super();
+  }
+
+  tag render() {
+    if this.multiple {
+      return <div class=this.uiclass onclick=this.onUploadClick>
+          <div> this.renderText() </div>
+          <input type='file' multiple=true onchange=this.onFileInputChange/>
+        </div>;
+    }
+    return <div class=this.uiclass onclick=this.onUploadClick>
+        <div> this.renderText() </div>
+        <input type='file' onchange=this.onFileInputChange/>
+      </div>;
+  }
+
+  string renderText() {
+    return this.text;
+  }
+
+  void show() {
+    var input = this.element.first;
+  }
+
+  # events
+
+  void onUploadClick(event e) {
+    if this.isClicked { return none; }
+    this.isClicked = true;
+
+    var uploadElement = e.element;
+    uploadElement.last.fireClick();
+    this.isClicked = false;
+  }
+
+  void onFileInputChange(event e) {
+    this.eventSelected.notify(e.target.files);
+  }
+}

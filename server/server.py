@@ -32,12 +32,15 @@ handlers = wender_urls \
     + auth_urls \
     {% for handler in handlers %} + {{ handler['alias'] }}{% end %}
 
+STATIC_PATH = os.path.abspath(os.path.normpath(CURRENT_DIR + '/../static'))
+IMG_PATH = os.path.join(STATIC_PATH, 'img')
+
 # COMPOSE SETTINGS
 settings = {
     'debug': {{ debug }},
     'autoescape': None,
     'template_path': os.path.abspath(os.path.normpath(CURRENT_DIR + '/../templates')),
-    'static_path': os.path.abspath(os.path.normpath(CURRENT_DIR + '/../static')),
+    'static_path': STATIC_PATH,
     'xsrf_cookies': True,
     'cookie_secret': '{{ cookie_secret }}',
     'login_url': '/login',
@@ -48,6 +51,9 @@ class Application(tornado.web.Application):
     tornado.web.Application.__init__(self, handlers, **settings)
 
     self.orm = Orm(structs)
+
+  def getImagePath(self):
+    return IMG_PATH
 
 if __name__ == "__main__":
   tornado.options.parse_command_line()

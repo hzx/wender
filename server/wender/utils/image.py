@@ -45,37 +45,59 @@ def addFilenameSuffix(filename, suffix):
 
 
 # internal method
-def calcImageSize(boundSize, image):
+def calcImageSize(size, image):
   """
   Calculate size(width, height) relative bound size for image with
-  saved aspect ration.
+  saved aspect ratio.
 
   Return (width, height).
   """
-  imageWidth = image.size[0]
-  imageHeight = image.size[1]
+  iw = image.size[0]
+  ih = image.size[1]
 
   # width / height
-  aspect = float(imageWidth) / float(imageHeight)
+  ratio = float(iw) / float(ih)
 
-  widthDiv = float(imageWidth) / float(boundSize[0])
-  heightDiv = float(imageHeight) / float(boundSize[1])
+  wmul = float(iw) / float(size[0])
+  hmul = float(ih) / float(size[1])
 
   # base metrics is width
-  if widthDiv > heightDiv:
+  if wmul > hmul:
     # width = bound.width
-    width = boundSize[0]
+    width = size[0]
     # height = width / aspect
-    height = int(float(width) / float(aspect))
+    height = int(float(width) / float(ratio))
   # base metrics is height
   else:
     # height = bound.height
-    height = boundSize[1]
+    height = size[1]
     # width = height * aspect
-    width = int(float(height) * float(aspect))
+    width = int(float(height) * float(ratio))
 
   return (width, height)
 
+def calcImageCropSize(size, image):
+  """
+  Calculate size(width, height) outbound size
+  """
+  iw = image.size[0]
+  ih = image.size[1]
+
+  # width / height
+  ratio = float(iw) / float(ih)
+  # destratio = float(size[0]) / float(size[1])
+
+  wmul = float(iw) / float(size[0])
+  hmul = float(ih) / float(size[1])
+
+  if wmul > hmul:
+    height = size[1]
+    width = int(float(height) * float(ratio))
+  else:
+    width = size[0]
+    height = int(float(width) / float(ratio))
+
+  return (width, height)
 
 # public method
 def createResizedImage(srcFilename, destFilename, size):
@@ -93,6 +115,28 @@ def createResizedImage(srcFilename, destFilename, size):
 
   image.save(destFilename, image.format)
 
+def createResizedImageCrop(src, dest, size):
+  image = Image.open(src)
+  if image.mode not in ('L', 'RGB'):
+    image = image.convert('RGB')
+
+  preCropSize = calcImageCropSize(size, image)
+
+  image = image.resize(preCropSize, Image.ANTIALIAS)
+  # compute crop size
+  if preCropSize[0] > size[0]:
+    left = int(float(preCropSize[0] - size[0]) / 2.0)
+  else:
+    left = 0
+  if preCropSize[1] > size[1]:
+    top = int(float(preCropSize[1] - size[1]) / 2.0)
+  else:
+    top = 0
+  right = left + size[0]
+  bottom = top + size[1]
+  # crop image to size
+  image = image.crop((left, top, right, bottom))
+  image.save(dest, image.format)
 
 # public method
 def createResizedImages(filename, path, sizes):

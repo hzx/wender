@@ -34,3 +34,18 @@ class ns.DomNode
   exitDocument: ->
     @isInDocument = false
 
+  # TODO(dem) move to detect features, use function
+  fireClick: ->
+    # for firefox browsers
+    if !! @node.click
+      @node.click()
+      return
+
+    # for other browsers
+    if (document.createEvent)
+      event = document.createEvent("MouseEvents")
+      event.initMouseEvent("click", true, true, window,
+          0, 0, 0, 0, 0, false, false, false, false, 0, null)
+      @node.dispatchEvent(event)
+    else
+      @node.fireEvent('onclick', @node.ownerDocument.createEventObject())

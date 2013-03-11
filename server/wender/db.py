@@ -23,7 +23,7 @@ def connect():
   # connection = pymongo.Connection(options.db_host)
   # db = connection[options.db_name]
   # db.authenticate(options.db_user, options.db_password)
-  connection = pymongo.MongoClient()
+  connection = MongoClient()
   db = connection[options.db_name]
   return db
 

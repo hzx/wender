@@ -10,6 +10,7 @@ class PageEdit extends ui.View {
 
   tag render() {
     return <div class=['page_edit']>
+        <div class=['label']> 'СТРАНИЦА' </div>
       </div>;
   }
 
