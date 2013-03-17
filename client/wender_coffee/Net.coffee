@@ -78,9 +78,11 @@ class ns.Net
     xhr.setRequestHeader('Content-Length', signedData.length)
     xhr.send(signedData)
 
-  uploadFiles: (url, fieldName, files, success, fail) ->
+  # ops - orm operations
+  uploadFiles: (url, fieldName, files, ops, success, fail) ->
     formData = new FormData()
     formData.append('_xsrf', @xsrf)
+    formData.append('ops', ops)
     for file in files
       formData.append(fieldName, file)
 

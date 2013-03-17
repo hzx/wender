@@ -1,0 +1,99 @@
+
+
+class MultiSlider extends View {
+
+  int slideTime = 3000;
+  int slidesCount = 5;
+
+  bool isStarted = false;
+  bool isDisabled = false;
+  tag leftSlide = none;
+
+  () {
+    super();
+  }
+
+  /*
+  implement this
+  tag render() {
+    return <div class=['ui_multislider']>
+      <div class=['slides']>
+        rmap(this.slides, this.renderSlide)
+      </div>
+      <div class=['buttons']>
+        <div class=['next_button'] onclick=this.onNextClick></div>
+        <div class=['prev_button'] onclick=this.onPrevClick></div>
+      </div>
+    </div>;
+  }
+  tag renderSlide(robject slide) {
+    return <div class=['slide']>
+    </div>;
+  }
+  */
+
+  void enterDocument() {
+    super();
+
+    /*if leftSlide is none {*/
+    /*}*/
+
+    this.unpauseSlides();
+  }
+
+  void exitDocument() {
+    this.pauseSlides();
+
+    super();
+  }
+
+  void checkSlides() {
+    # .ui_multislider > .slides
+    tag slides = this.element.first;
+
+    # slides <= slidesCount then disable slider
+  }
+
+  void moveNext() {
+    if this.isDisabled { return none; }
+
+    # move to next
+  }
+
+  void movePrev() {
+    if this.isDisabled { return none; }
+
+    # move to prev
+  }
+
+  void pauseSlides() {
+    if (not this.isStarted) or this.isDisabled { return none; }
+
+    browser.removeRender(this.moveNext);
+  }
+
+  void unpauseSlides() {
+    if (not this.isStarted) or this.isDisabled { return none; }
+
+    browser.addRender(this.moveNext, this.slideTime);
+  }
+
+  # events
+
+  void onNextClick(event e) {
+    this.moveNext();
+  }
+
+  void onPrevClick(event e) {
+    this.movePrev();
+  }
+
+  void onSlideMouseover(event e) {
+    this.pauseSlides();
+  }
+
+  void onSlideMouseout(event e) {
+    this.unpauseSlides();
+  }
+
+}

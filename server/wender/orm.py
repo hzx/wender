@@ -1,4 +1,7 @@
 from wender import mongodb
+from wender import dbmeta
+from wender import db as dbutil
+import re
 
 
 class OrmField(object):
@@ -23,16 +26,18 @@ class OrmStructMeta(object):
 class Orm(object):
 
   def __init__(self, structs):
-    self.structs = {}
+    self.meta = dbmeta.DbMeta(structs)
 
-    for st in structs:
-      self.addStruct(st)
-
-  def addStruct(self, st):
-    pass
-
-  def parseParams(self, st, field):
-    pass
+    self.accessToRe = {
+      'user': {
+        'read': re.compile('.{2}([r])'),
+        'write': re.compile('.{3}([w])'),
+      },
+      'admin': {
+        'read': re.compile('.*'),
+        'write': re.compile('.*'),
+      },
+    }
 
   # image operations
   def getImageSizes(self, name):
@@ -40,11 +45,25 @@ class Orm(object):
 
   # db operations
 
-  def load(self, userKind):
+  def load(self, useraccess):
     """
     Load database for userKind
     """
-    pass
+    db = {}
+
+    accessre = self.accessToRe[useraccess]
+    accessReadRe = accessre['read']
+    accessWriteRe = accessre['write']
+
+    for docname, params in self.meta.docs.items():
+      access = params.get('access', '----')
+      if not accessReadRe.match(access): continue
+
+      if params['isArray']:
+        db[docname] = dbutil.cursorToList(mongodb.selectFrom(docname, {}))
+      else:
+        db[docname] = mongodb.selectOne(docname, {})
+    return db
 
   def append(self):
     pass

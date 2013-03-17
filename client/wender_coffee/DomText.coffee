@@ -16,7 +16,8 @@ class ns.DomText extends ns.DomNode
 
   setText: (text) ->
     @text = text
-    @node.textContent = text
+    # @node.textContent = text
+    ns.setText(@node, text)
 
   renderText: ->
     @setText(@render(@values))

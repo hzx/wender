@@ -17,15 +17,15 @@ class Slider extends View {
   implement this
   tag render() {
     return <div class=['ui_slider'] onmouseover=this.onSlideMouseover onmouseout=this.onSlideMouseout>
-        <div class=['slides']>
-          <div class=['slide']></div>
-          <div class=['slide']></div>
-        </div>
-        <div class=['buttons']>
-          <div class=['next_button'] onclick=this.onNextClick></div>
-          <div class=['prev_button'] onclick=this.onPrevClick></div>
-        </div>
-      </div>;
+      <div class=['slides']>
+        <div class=['slide']></div>
+        <div class=['slide']></div>
+      </div>
+      <div class=['buttons']>
+        <div class=['next_button'] onclick=this.onNextClick></div>
+        <div class=['prev_button'] onclick=this.onPrevClick></div>
+      </div>
+    </div>;
   }
   */
 
@@ -44,6 +44,8 @@ class Slider extends View {
 
   void exitDocument() {
     this.pauseSlides();
+
+    this.currentSlide = none;
 
     super();
   }

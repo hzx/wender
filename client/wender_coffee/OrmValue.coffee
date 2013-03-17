@@ -15,4 +15,4 @@ class ns.OrmValue extends ns.ObservableValue
     ns.orm.onSetValue(this)
 
   clone: ->
-    return new ns.OrmValue(@type, @name, null, @value)
+    return new ns.OrmValue(@ormType, @ormName, null, @value)

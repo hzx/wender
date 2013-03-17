@@ -91,6 +91,9 @@ def listToJson(cursor):
 
   return result
 
+def cursorToList(cursor):
+  return [item for item in cursor]
+
 
 def toJson(item):
   #return json.dumps(item, default=pymongo.json_util.default)

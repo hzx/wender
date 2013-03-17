@@ -1,9 +1,16 @@
 from wender.db import storable
+from bson.objectid import ObjectId
 
 
 @storable
 def insert(db, collName, values):
+  if not ('id' in values):
+    newid = ObjectId()
+    values['id'] = newid
+  else:
+    newid = values['id']
   db[collName].insert(values)
+  return str(newid)
 
 @storable
 def selectOne(db, collName, where=None):

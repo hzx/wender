@@ -23,3 +23,11 @@ initEvents = ->
   else
     (event) ->
       event.stopPropagation()
+
+  ns.setText = if ns.isIe
+    (node, text) ->
+      # node.innerText = text
+      node.nodeValue = text
+  else
+    (node, text) ->
+      node.textContent = text

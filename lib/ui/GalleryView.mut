@@ -1,0 +1,21 @@
+
+
+class GalleryView extends View {
+
+  () {
+    super();
+  }
+
+  tag render() {
+    return <div class=['gallery_view']>
+        <div class=['images']>
+        </div>
+        <div class=['buttons']>
+          <div class=['next_button']></div>
+          <div class=['prev_button']></div>
+          <div class=['close_button']></div>
+        </div>
+      </div>;
+  }
+
+}

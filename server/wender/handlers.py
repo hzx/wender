@@ -81,15 +81,21 @@ class AppAdminHandler(BaseHandler):
 
 class OrmLoadHandler(BaseHandler):
 
-  def initialize(self, appName):
+  def initialize(self, appName, useraccess):
     self.appName = appName
+    self.useraccess = useraccess
 
   def get(self):
     if not self.isXhr():
       raise HTTPError(401)
 
+    response = {
+        'xsrf': self.xsrf_token,
+        'data': self.orm.load(self.useraccess)
+        }
+
     # load orm data
-    self.writeJson({'xsrf': self.xsrf_token })
+    self.writeJson(response)
 
 class OrmOpHandler(BaseHandler):
 
@@ -97,6 +103,13 @@ class OrmOpHandler(BaseHandler):
     if not self.isXhr():
       raise HTTPError(401)
 
+    self.writeJson({})
+
+class OrmImageHandler(BaseHandler):
+
+  @authenticated
+  def post(self):
+    # if 'op' in self.request
     self.writeJson({})
 
 class NotFoundHandler(BaseHandler):
@@ -110,8 +123,8 @@ class NoscriptHandler(BaseHandler):
     self.render('noscript.html')
 
 urls = [
-    ('/load', OrmLoadHandler, {'appName': 'test'}),
     ('/op', OrmOpHandler),
+    ('/op-image', OrmImageHandler),
     ('/noscript', NoscriptHandler),
   ]
 

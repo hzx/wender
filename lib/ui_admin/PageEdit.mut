@@ -11,7 +11,36 @@ class PageEdit extends ui.View {
   tag render() {
     return <div class=['page_edit']>
         <div class=['label']> 'СТРАНИЦА' </div>
+        <div class=['buttons']>
+          <div class=['add_header_button'] onclick=this.onAddHeaderButtonClick> 'ЗАГОЛОВОК' </div>
+          <div class=['add_paragraph_button'] onclick=this.onAddParagraphButtonClick> 'ПАРАГРАФ' </div>
+          <div class=['add_image_button'] onclick=this.onAddImageButtonClick> 'КАРТИНКА' </div>
+          <div class=['add_gallery_button'] onclick=this.onAddGalleryButtonClick> 'ГАЛЕРЕЯ' </div>
+          <div class=['add_video_button'] onclick=this.onAddVideoButtonClick> 'ВИДЕО' </div>
+        </div>
       </div>;
+  }
+
+  # events
+
+  void onAddHeaderButtonClick(event e) {
+    console.log('onAddHeaderButtonClick');
+  }
+
+  void onAddParagraphButtonClick(event e) {
+    console.log('onAddParagraphButtonClick');
+  }
+
+  void onAddImageButtonClick(event e) {
+    console.log('onAddImageButtonClick');
+  }
+
+  void onAddGalleryButtonClick(event e) {
+    console.log('onAddGalleryButtonClick');
+  }
+
+  void onAddVideoButtonClick(event e) {
+    console.log('onAddVideoButtonClick');
   }
 
 }
