@@ -45,6 +45,12 @@ class ns.DomElement extends ns.DomNode
 
     @setAttributes(attributes)
 
+  getChildsCount: ->
+    count = 0
+    for hash of @childs
+      count = count + 1
+    return count
+
   setText: (text) ->
     @node.innerText = text
 
@@ -333,6 +339,40 @@ class ns.DomElement extends ns.DomNode
       child.exitDocument()
 
     super()
+
+  # style
+
+  getWidth: ->
+
+  getHeight: ->
+
+  # Get a style property (name) of a specific element (elem)
+  getStyle: (name) ->
+    # if the property exists in style[], then it's been set
+    # recently (and is current)
+    if @node.style[name]
+      return @node.style[name]
+
+    # Otherwise, try to use IE's method
+    else if @node.currentStyle
+      return @node.currentStyle[name]
+
+    # Or the W3C's method, if it exists
+    else if document.defaultView and document.defaultView.getComputedStyle
+      # It uses the traditional 'text-align' style of rule writing,
+      # instead of textAlign
+      name = name.replace(/[A-Z]/g, "-$1")
+      name = name.toLowerCase()
+
+      # Get the style object and get the value of the property (if it exists)
+      s = document.defaultView.getComputedStyle(@node, "")
+      return s and s.getPropertyValue(name)
+    # Otherwise, we're using some other browser
+    else
+      return null
+
+  setStyle: (name, value) ->
+    @node.style[name] = value
 
   # events
 
