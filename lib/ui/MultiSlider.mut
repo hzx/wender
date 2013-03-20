@@ -4,10 +4,14 @@ class MultiSlider extends View {
 
   int slideTime = 3000;
   int slidesCount = 5;
+  int slidesDelta = 3;
+
+  int slidesWidth = 0;
+  int slideWidth = 0;
 
   bool isStarted = false;
   bool isDisabled = false;
-  tag leftSlide = none;
+  tag currentSlide = none;
 
   () {
     super();
@@ -35,8 +39,17 @@ class MultiSlider extends View {
   void enterDocument() {
     super();
 
-    /*if leftSlide is none {*/
+    this.initSizes();
+
+    /*if currentSlide is none {*/
     /*}*/
+    this.checkSlides();
+
+    # initialize first slide .ui_multislider > .slides > .slide
+    if this.currentSlide is none {
+      this.initSizes();
+    }
+    this.setSlideCurrent(this.element.first.first);
 
     this.unpauseSlides();
   }
@@ -47,6 +60,29 @@ class MultiSlider extends View {
     super();
   }
 
+  void initSizes() {
+    # get slides
+    tag slides = this.element.first;
+    # get first slide
+    if slides is none {
+      return none;
+    }
+    int childsCount = slides.getChildsCount();
+    if childsCount is 0 {
+      return none;
+    }
+    tag firstSlide = slides.first;
+    # get slides width
+    int slidesWidth = parseInt(slides.getStyle('width'), 10) - this.slidesDelta;
+    # get child width
+    int slideWidth = parseInt(firstSlide.getStyle('width'), 10);
+    # calculate slide space value
+    float slideSpace = (slidesWidth - slideWidth * this.slidesCount) / (this.slidesCount - 1);
+    this.slidesWidth = slidesWidth;
+    this.slideWidth = slideWidth;
+    this.slideSpace = parseInt(slideSpace, 10);
+  }
+
   void checkSlides() {
     # .ui_multislider > .slides
     tag slides = this.element.first;
@@ -54,16 +90,57 @@ class MultiSlider extends View {
     # slides <= slidesCount then disable slider
   }
 
+  void setSlideCurrent(tag slide) {
+    if slide is none { return none; }
+    int counter = 0;
+    int leftPos = 0;
+    var cursor = slide;
+    this.currentSlide = slide;
+    while (cursor isnot none) {
+      # set current slide position
+      cursor.setStyle('left', leftPos + 'px');
+
+      counter = counter + 1;
+      # move position to next slide
+      leftPos = leftPos + this.slideSpace + this.slideWidth;
+      cursor = cursor.next;
+    }
+  }
+
   void moveNext() {
     if this.isDisabled { return none; }
 
-    # move to next
+    # move to next slidesCount-1
+    int counter = 0;
+    int maxCounter = this.slidesCount - 1;
+    var cursor = this.currentSlide;
+    tag currentSlide = none;
+    while (cursor isnot none) and (counter < maxCounter) {
+      counter = counter + 1;
+      cursor = cursor.next;
+      if cursor isnot none {
+        currentSlide = cursor;
+      }
+    }
+    this.setSlideCurrent(currentSlide);
   }
 
   void movePrev() {
     if this.isDisabled { return none; }
 
-    # move to prev
+    # move to prev slidesCount-1
+    int counter = 0;
+    int maxCounter = this.slidesCount - 1;
+    var cursor = this.currentSlide;
+    tag currentSlide = none;
+    while (cursor isnot none) and (counter < maxCounter) {
+      counter = counter + 1;
+      cursor = cursor.prev;
+      if cursor isnot none {
+        currentSlide = cursor;
+      }
+    }
+    this.setSlideCurrent(cursor);
   }
 
   void pauseSlides() {
