@@ -2,16 +2,23 @@
 
 class MultiSlider extends View {
 
-  int slideTime = 3000;
-  int slidesCount = 5;
-  int slidesDelta = 3;
-
-  int slidesWidth = 0;
-  int slideWidth = 0;
-
+  int time = 3000;
+  int bunch = 5;
+  int padding = 3;
   bool isStarted = false;
-  bool isDisabled = false;
-  tag currentSlide = none;
+
+  # calculated values
+  # one slide width + space
+  int delta = 0;
+  # max slide num
+  int maxNum = 0;
+  # slides shift num count
+  int numShift = 1;
+  # current slide num
+  int curr = 0;
+
+  bool isNextButtonEnabled = false;
+  bool isPrevButtonEnabled = false;
 
   () {
     super();
@@ -21,8 +28,8 @@ class MultiSlider extends View {
   implement this
   tag render() {
     return <div class=['ui_multislider']>
-      <div class=['slides']>
-        rmap(this.slides, this.renderSlide)
+      <div class=['slides_wrap']>
+        <div class=['slides']> rmap(this.slides, this.renderSlide) </div>
       </div>
       <div class=['buttons']>
         <div class=['next_button'] onclick=this.onNextClick></div>
@@ -39,17 +46,12 @@ class MultiSlider extends View {
   void enterDocument() {
     super();
 
-    this.initSizes();
-
-    /*if currentSlide is none {*/
-    /*}*/
-    this.checkSlides();
-
-    # initialize first slide .ui_multislider > .slides > .slide
-    if this.currentSlide is none {
-      this.initSizes();
+    if this.curr is 0 {
+      this.initSizes(); 
+      this.curr = 1;
     }
-    this.setSlideCurrent(this.element.first.first);
+    this.setButtonsStates();
+    this.setInitialPositions();
 
     this.unpauseSlides();
   }
@@ -60,87 +62,113 @@ class MultiSlider extends View {
     super();
   }
 
+  tag getFirstSlide() {
+    # initialize first slide .ui_multislider > .slides_wrap > .slides > .slide
+    return this.element.first.first.first;
+  }
+
+  tag getSlidesWrap() {
+    return this.element.first;
+  }
+
+  tag getSlides() {
+    return this.element.first.first;
+  }
+
+  tag getNextButton() {
+    return this.element.last.first;
+  }
+
+  tag getPrevButton() {
+    return this.element.last.last;
+  }
+
   void initSizes() {
     # get slides
-    tag slides = this.element.first;
+    tag slides = this.getSlidesWrap();
+    int childsCount = slides.first.getChildsCount();
     # get first slide
-    if slides is none {
+    if (slides is none) or (childsCount is 0) {
+      this.isNextButtonEnabled = false;
+      this.isPrevButtonEnabled = false;
       return none;
     }
-    int childsCount = slides.getChildsCount();
-    if childsCount is 0 {
-      return none;
-    }
-    tag firstSlide = slides.first;
+    tag firstSlide = this.getFirstSlide();
     # get slides width
-    int slidesWidth = parseInt(slides.getStyle('width'), 10) - this.slidesDelta;
+    int width = parseInt(slides.getStyle('width'), 10) - this.padding;
     # get child width
     int slideWidth = parseInt(firstSlide.getStyle('width'), 10);
     # calculate slide space value
-    float slideSpace = (slidesWidth - slideWidth * this.slidesCount) / (this.slidesCount - 1);
-    this.slidesWidth = slidesWidth;
-    this.slideWidth = slideWidth;
-    this.slideSpace = parseInt(slideSpace, 10);
+    int slideSpace = parseInt((width - slideWidth * this.bunch) / (this.bunch - 1), 10);
+    
+    # set calcualtes values
+    this.delta = slideWidth + slideSpace;
+    this.maxNum = childsCount;
+    this.numShift = this.bunch - 1;
   }
 
-  void checkSlides() {
-    # .ui_multislider > .slides
-    tag slides = this.element.first;
-
-    # slides <= slidesCount then disable slider
+  void setEnabledNextButton(bool isEnabled) {
+    tag nextButton = this.getNextButton();
+    if isEnabled {
+      nextButton.removeClass('disabled');
+    } else {
+      nextButton.addClass('disabled');
+    }
+    this.isNextButtonEnabled = isEnabled;
   }
 
-  void setSlideCurrent(tag slide) {
-    if slide is none { return none; }
-    int counter = 0;
-    int leftPos = 0;
-    var cursor = slide;
-    this.currentSlide = slide;
-    while (cursor isnot none) {
-      # set current slide position
-      cursor.setStyle('left', leftPos + 'px');
+  void setEnabledPrevButton(bool isEnabled) {
+    tag prevButton = this.getPrevButton();
+    if isEnabled {
+      prevButton.removeClass('disabled');
+    } else {
+      prevButton.addClass('disabled');
+    }
+    this.isPrevButtonEnabled = isEnabled;
+  }
 
-      counter = counter + 1;
-      # move position to next slide
-      leftPos = leftPos + this.slideSpace + this.slideWidth;
+  void setInitialPositions() {
+    int left = 0;
+    tag cursor = this.getFirstSlide();
+    while cursor isnot none {
+      cursor.setStyle('left', left + 'px');
+      left = left + this.delta;
       cursor = cursor.next;
     }
   }
+
+  void setButtonsStates() {
+    this.setEnabledNextButton((this.curr + this.numShift) < this.maxNum);
+    this.setEnabledPrevButton(this.curr > 1);
+  }
+
 
   void moveNext() {
-    if this.isDisabled { return none; }
+    if not this.isNextButtonEnabled { return none; }
 
-    # move to next slidesCount-1
-    int counter = 0;
-    int maxCounter = this.slidesCount - 1;
-    var cursor = this.currentSlide;
-    tag currentSlide = none;
-    while (cursor isnot none) and (counter < maxCounter) {
-      counter = counter + 1;
-      cursor = cursor.next;
-      if cursor isnot none {
-        currentSlide = cursor;
-      }
+    tag slides = this.getSlides();
+    int next = this.curr + this.numShift;
+    if next > (this.maxNum - this.numShift) {
+      next = this.maxNum - this.numShift;
     }
-    this.setSlideCurrent(currentSlide);
+    this.curr = next;
+    int left = 0 - (this.curr - 1) * this.delta;
+    slides.setStyle('left', left + 'px');
+
+    this.setButtonsStates();
   }
 
   void movePrev() {
-    if this.isDisabled { return none; }
+    if not this.isPrevButtonEnabled { return none; }
 
-    # move to prev slidesCount-1
-    int counter = 0;
-    int maxCounter = this.slidesCount - 1;
-    var cursor = this.currentSlide;
-    tag currentSlide = none;
-    while (cursor isnot none) and (counter < maxCounter) {
-      counter = counter + 1;
-      cursor = cursor.prev;
-      if cursor isnot none {
-        currentSlide = cursor;
-      }
-    }
-    this.setSlideCurrent(cursor);
+    tag slides = this.getSlides();
+    int prev = this.curr - this.numShift;
+    if prev < 1 { prev = 1; }
+    this.curr = prev;
+    int left = 0 - (this.curr - 1) * this.delta;
+    slides.setStyle('left', left + 'px');
+
+    this.setButtonsStates();
   }
 
   void pauseSlides() {
