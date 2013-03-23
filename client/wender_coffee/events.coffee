@@ -19,10 +19,18 @@ initEvents = ->
 
   ns.stopPropagation = if ns.isIe
     (event) ->
-      event.preventDefault()
+      event.cancelBubble = true
   else
     (event) ->
       event.stopPropagation()
+
+  ns.preventDefault = if ns.isIe
+    (event) ->
+      event.returnValue = false
+      return false
+  else
+    (event) ->
+      event.preventDefault()
 
   ns.setText = if ns.isIe
     (node, text) ->
@@ -31,3 +39,4 @@ initEvents = ->
   else
     (node, text) ->
       node.textContent = text
+

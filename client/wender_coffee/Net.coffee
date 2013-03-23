@@ -58,6 +58,20 @@ class ns.Net
     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest')
     xhr.send(null)
 
+  getCached: (url, success, fail) ->
+    xhr = @getFreeXhr()
+
+    xhr.onreadystatechange = ->
+      if xhr.readyState is 4
+        if xhr.status is 200
+          success(xhr.responseText)
+        else
+          fail(xhr.status)
+
+    xhr.open('GET', url, true)
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest')
+    xhr.send(null)
+
   # TODO(dem) add stream
   # post: (url, data, success, fail, stream) ->
   post: (url, data, success, fail) ->

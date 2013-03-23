@@ -402,7 +402,7 @@ class ns.DomElement extends ns.DomNode
 
     handler = @events[event.type]
     # TODO(dem) make more specific params depending on event type
-    isPropagation = handler({
+    isPreventDefault = handler({
       'type': event.type,
       'event': event,
       'element': this,
@@ -410,6 +410,6 @@ class ns.DomElement extends ns.DomNode
     })
 
     # stop event propagation (bubbling)
-    if isPropagation is false
-      ns.stopPropagation(event)
+    if isPreventDefault is false
+      ns.preventDefault(event)
 
