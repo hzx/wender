@@ -7,7 +7,7 @@ class CheckedToolbar extends View {
   event eventSelected;
 
   tag lastNavButton = none;
-  tag lastView = none;
+  /*tag lastView = none;*/
 
   () {
     super();
@@ -19,6 +19,12 @@ class CheckedToolbar extends View {
 
   void exitDocument() {
     super();
+  }
+
+  void unselect() {
+    if this.lastNavButton is none { return none; }
+    this.lastNavButton.removeClass('selected');
+    this.lastNavButton = none;
   }
 
   void selectToolbarButton(tag button) {

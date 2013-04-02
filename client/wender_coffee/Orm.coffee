@@ -136,7 +136,7 @@ class ns.Orm
     # sort data, arrays fill first
     for name, value of data
       params = meta[name]
-      if params.isArray and not (!!('ref' of params) or !!('link' of params))
+      if params.isArray# and not (!!('ref' of params) or !!('link' of params))
         bufarr[name] = value
       else
         buf[name] = value
@@ -156,12 +156,16 @@ class ns.Orm
 
   fillRefLinkArrayNow: ->
     for item in @reflink
-      @fillRefLinkArray(item[0], item[1], item[2], item[3])
+      @fillRefLinkArray(item)
 
   fillRefLinkArrayLater: (dest, data, typename, rlarr) ->
     @reflink.push([dest, data, typename, rlarr])
 
-  fillRefLinkArray: (dest, data, typename, rlarr) ->
+  fillRefLinkArray: (item) ->
+    dest = item[0]
+    data = item[1]
+    typename = item[2]
+    rlarr = item[3]
     for item in data
       # clone data from rlarr
       rlobj = rlarr.get(item)

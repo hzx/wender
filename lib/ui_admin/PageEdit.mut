@@ -3,6 +3,22 @@
 class PageEdit extends ui.View {
 
   robject page = none;
+  var renderItemMap = {
+    /*PageItemType.HEADER: this.renderHeader,*/
+    /*PageItemType.PARAGRAPH: this.renderParagraph,*/
+    /*PageItemType.IMAGE: this.renderImage,*/
+    /*PageItemType.GALLERY: this.renderGallery,*/
+    /*PageItemType.VIDEO: this.renderVideo,*/
+    /*PageItemType.LINK: this.renderLink,*/
+    /*PageItemType.FILE: this.renderFile,*/
+    1: this.renderHeader,
+    2: this.renderParagraph,
+    3: this.renderImage,
+    4: this.renderGallery,
+    5: this.renderVideo,
+    6: this.renderLink,
+    7: this.renderFile,
+  };
 
   () {
     super();
@@ -17,8 +33,85 @@ class PageEdit extends ui.View {
           <div class=['add_image_button'] onclick=this.onAddImageButtonClick> 'КАРТИНКА' </div>
           <div class=['add_gallery_button'] onclick=this.onAddGalleryButtonClick> 'ГАЛЕРЕЯ' </div>
           <div class=['add_video_button'] onclick=this.onAddVideoButtonClick> 'ВИДЕО' </div>
+          <div class=['add_link_button'] onclick=this.onAddLinkButtonClick> 'ССЫЛКА' </div>
+          <div class=['add_file_button'] onclick=this.onAddFileButtonClick> 'ФАИЛ' </div>
         </div>
       </div>;
+  }
+
+  tag renderHeader(robject item) {
+    return <div class=['header']>
+      'header'
+    </div>;
+  }
+
+  tag renderParagraph(robject item) {
+    return <div class=['paragraph']>
+      'paragraph'
+    </div>;
+  }
+
+  tag renderImage(robject item) {
+    return <div class=['image']>
+      'image'
+    </div>;
+  }
+
+  tag renderGallery(robject item) {
+    return <div class=['gallery']>
+      'gallery'
+    </div>;
+  }
+
+  tag renderVideo(robject item) {
+    return <div class=['video']>
+      'video'
+    </div>;
+  }
+
+  tag renderLink(robject item) {
+    return <div class=['link']> 
+      'link'
+    </div>;
+  }
+
+  tag renderFile(robject item) {
+    return <div class=['file']>
+      'file'
+    </div>;
+  }
+
+  tag renderItem(robject item) {
+    var renderMethod = this.renderItemMap[item.kind];
+    return renderMethod(item);
+  }
+
+  void addHeader() {
+    console.log('not implemented');
+  }
+
+  void addParagraph() {
+    console.log('not implemented');
+  }
+
+  void addImage() {
+    console.log('not implemented');
+  }
+
+  void addGallery() {
+    console.log('not implemented');
+  }
+
+  void addVideo() {
+    console.log('not implemented');
+  }
+
+  void addLink() {
+    console.log('not implemented');
+  }
+
+  void addFile() {
+    console.log('not implemented');
   }
 
   # events
@@ -41,6 +134,14 @@ class PageEdit extends ui.View {
 
   void onAddVideoButtonClick(event e) {
     console.log('onAddVideoButtonClick');
+  }
+
+  void onAddLinkButtonClick(event e) {
+    console.log('onAddLinkButtonClick');
+  }
+
+  void onAddFileButtonClick(event e) {
+    console.log('onAddFileButtonClick');
   }
 
 }

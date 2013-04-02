@@ -79,8 +79,10 @@ class ns.DomElement extends ns.DomNode
         @data = value
         continue
 
-      # TODO(dem) need style attribute
-      # if name is 'style'
+      if name is 'style'
+        for sname, svalue of value
+          @setStyle(sname, svalue)
+        continue
       
       # events
       eventMatch = @eventNamePattern.exec(name)
