@@ -3,22 +3,23 @@
 class PageEdit extends ui.View {
 
   robject page = none;
-  var renderItemMap = {
-    /*PageItemType.HEADER: this.renderHeader,*/
-    /*PageItemType.PARAGRAPH: this.renderParagraph,*/
-    /*PageItemType.IMAGE: this.renderImage,*/
-    /*PageItemType.GALLERY: this.renderGallery,*/
-    /*PageItemType.VIDEO: this.renderVideo,*/
-    /*PageItemType.LINK: this.renderLink,*/
-    /*PageItemType.FILE: this.renderFile,*/
-    1: this.renderHeader,
-    2: this.renderParagraph,
-    3: this.renderImage,
-    4: this.renderGallery,
-    5: this.renderVideo,
-    6: this.renderLink,
-    7: this.renderFile,
-  };
+  /*var renderItemMap = {*/
+  /*  common.PageItemType.HEADER: this.renderHeader,*/
+  /*  common.PageItemType.PARAGRAPH: this.renderParagraph,*/
+  /*  common.PageItemType.IMAGE: this.renderImage,*/
+  /*  common.PageItemType.GALLERY: this.renderGallery,*/
+  /*  common.PageItemType.VIDEO: this.renderVideo,*/
+  /*  common.PageItemType.LINK: this.renderLink,*/
+  /*  common.PageItemType.FILE: this.renderFile,*/
+  /*};*/
+
+  event eventAddHeader;
+  event eventAddParagraph;
+  event eventAddImage;
+  event eventAddGallery;
+  event eventAddVideo;
+  event eventAddLink;
+  event eventAddFile;
 
   () {
     super();
@@ -27,6 +28,8 @@ class PageEdit extends ui.View {
   tag render() {
     return <div class=['page_edit']>
         <div class=['label']> 'СТРАНИЦА' </div>
+        <div class=['title']> this.page.title </div>
+        <div class=['items']> rmap(this.page.items, this.renderItem) </div>
         <div class=['buttons']>
           <div class=['add_header_button'] onclick=this.onAddHeaderButtonClick> 'ЗАГОЛОВОК' </div>
           <div class=['add_paragraph_button'] onclick=this.onAddParagraphButtonClick> 'ПАРАГРАФ' </div>
@@ -41,13 +44,13 @@ class PageEdit extends ui.View {
 
   tag renderHeader(robject item) {
     return <div class=['header']>
-      'header'
+      item.content
     </div>;
   }
 
   tag renderParagraph(robject item) {
     return <div class=['paragraph']>
-      'paragraph'
+      item.content
     </div>;
   }
 
@@ -82,66 +85,92 @@ class PageEdit extends ui.View {
   }
 
   tag renderItem(robject item) {
-    var renderMethod = this.renderItemMap[item.kind];
-    return renderMethod(item);
+    /*var renderMethod = this.renderItemMap[item.kind];*/
+    /*return renderMethod(item);*/
+    if item.kind is common.PageItemType.HEADER { return this.renderHeader(item); }
+    if item.kind is common.PageItemType.PARAGRAPH { return this.renderParagraph(item); }
+    if item.kind is common.PageItemType.IMAGE { return this.renderImage(item); }
+    if item.kind is common.PageItemType.GALLERY { return this.renderGallery(item); }
+    if item.kind is common.PageItemType.VIDEO { return this.renderVideo(item); }
+    if item.kind is common.PageItemType.LINK { return this.renderLink(item); }
+    if item.kind is common.PageItemType.FILE { return this.renderFile(item); }
+    console.log('renderItem kind unknown');
   }
 
-  void addHeader() {
-    console.log('not implemented');
+  void addHeader(object bef) {
+    var header = common.PageItem() {
+      kind: common.PageItemType.HEADER,
+      content: 'HEADER'
+    };
+    if bef isnot none {
+      console.log('addHeader bef isnot none');
+      insert this.page.items value header before bef;
+    } else {
+      console.log('addHeader bef is none');
+      insert this.page.items value header;
+    }
   }
 
-  void addParagraph() {
-    console.log('not implemented');
-  }
+  /*void addParagraph(object bef) {*/
+  /*  console.log('not implemented');*/
+  /*}*/
 
-  void addImage() {
-    console.log('not implemented');
-  }
+  /*void addImage(object bef) {*/
+  /*  console.log('not implemented');*/
+  /*}*/
 
-  void addGallery() {
-    console.log('not implemented');
-  }
+  /*void addGallery(object bef) {*/
+  /*  console.log('not implemented');*/
+  /*}*/
 
-  void addVideo() {
-    console.log('not implemented');
-  }
+  /*void addVideo(object bef) {*/
+  /*  console.log('not implemented');*/
+  /*}*/
 
-  void addLink() {
-    console.log('not implemented');
-  }
+  /*void addLink(object bef) {*/
+  /*  console.log('not implemented');*/
+  /*}*/
 
-  void addFile() {
-    console.log('not implemented');
-  }
+  /*void addFile(object bef) {*/
+  /*  console.log('not implemented');*/
+  /*}*/
 
   # events
 
   void onAddHeaderButtonClick(event e) {
-    console.log('onAddHeaderButtonClick');
+    /*this.addHeader(none);*/
+    this.eventAddHeader.notify(none);
   }
 
   void onAddParagraphButtonClick(event e) {
-    console.log('onAddParagraphButtonClick');
+    /*this.addParagraph(none);*/
+    this.eventAddParagraph.notify(none);
   }
 
   void onAddImageButtonClick(event e) {
-    console.log('onAddImageButtonClick');
+    /*this.addImage(none);*/
+    this.eventAddImage.notify(none);
   }
 
   void onAddGalleryButtonClick(event e) {
-    console.log('onAddGalleryButtonClick');
+    /*this.addGallery(none);*/
+    this.eventAddGallery.notify(none);
   }
 
   void onAddVideoButtonClick(event e) {
-    console.log('onAddVideoButtonClick');
+    /*this.addVideo(none);*/
+    this.eventAddVideo.notify(none);
   }
 
   void onAddLinkButtonClick(event e) {
-    console.log('onAddLinkButtonClick');
+    /*this.addLink(none);*/
+    this.eventAddLink.notify(none);
   }
 
   void onAddFileButtonClick(event e) {
-    console.log('onAddFileButtonClick');
+    /*this.addFile(none);*/
+    this.eventAddFile.notify(none);
   }
 
 }
+

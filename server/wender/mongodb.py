@@ -3,40 +3,48 @@ from bson.objectid import ObjectId
 
 
 @storable
-def insert(db, collName, values):
-  if not ('id' in values):
-    newid = ObjectId()
-    values['id'] = newid
-  else:
-    newid = values['id']
-  db[collName].insert(values)
-  return str(newid)
+def createIndex(db, coll, indexName):
+  db[coll].create_index(indexName)
 
 @storable
-def selectOne(db, collName, where=None):
+def insert(db, coll, obj):
+  # set new id
+  newid = str(ObjectId())
+  obj['id'] = newid
+
+  # debug
+  print 'mongodb.insert newid "%s"' % newid
+  print 'mongodb.insert coll "%s"' % coll
+
+  db[coll].insert(obj)
+
+  return newid
+
+@storable
+def selectOne(db, coll, where=None):
   if where:
-    return db[collName].find_one(where)
+    return db[coll].find_one(where)
   
-  return db[collName].find_one()
+  return db[coll].find_one()
 
 @storable
-def selectFrom(db, collName, where=None):
+def selectFrom(db, coll, where=None):
   if where:
-    return db[collName].find(where)
+    return db[coll].find(where)
 
-  return db[collName].find()
+  return db[coll].find()
 
 @storable
-def update(db, collName, values, where=None):
+def update(db, coll, values, where=None):
   if where:
-    return db[collName].update(where, { '$set': values })
+    return db[coll].update(where, { '$set': values })
 
-  return db[collName].update({}, { '$set': values }, upsert=True, multi=True)
+  return db[coll].update({}, { '$set': values }, upsert=False, multi=True)
 
 @storable
-def delete(db, collName, where=None):
+def delete(db, coll, where=None):
   if where:
-    return db[collName].remove(where)
+    return db[coll].remove(where)
 
-  return db[collName].remove()
+  return db[coll].remove()
 

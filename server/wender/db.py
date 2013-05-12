@@ -50,8 +50,9 @@ def storable(method):
         print 'Warning', error
         db = None
         #time.sleep(5)
-      except pymongo.errors.DuplicateKeyError:
+      except pymongo.errors.DuplicateKeyError, error:
         # It worked first time
+        print 'DuplicateKeyError', error
         pass
       except pymongo.errors.PyMongoError, error:
         print 'Error', error

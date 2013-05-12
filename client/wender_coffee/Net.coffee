@@ -85,11 +85,20 @@ class ns.Net
         else
           fail(xhr.status)
 
-    signedData = data + '&_xsrf=' + @xsrf
+    # formData = new FormData()
+    # formData.append('_xsrf', @xsrf)
+    buf = []
+    for na, va of data
+      # formData.append(na, va)
+      buf.push(na + '=' + va)
+    buf.push('_xsrf=' + @xsrf)
+    # signedData = data + '&_xsrf=' + @xsrf
+    signedData = buf.join('&')
 
     xhr.open("POST", url, true)
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest')
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
-    xhr.setRequestHeader('Content-Length', signedData.length)
+    # xhr.setRequestHeader('Content-Length', signedData.length)
     xhr.send(signedData)
 
   # ops - orm operations

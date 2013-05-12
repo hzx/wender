@@ -2,6 +2,7 @@ from tornado.web import RequestHandler
 from tornado.web import HTTPError
 from tornado.web import authenticated
 from wender.utils.mongodb import toJson
+import json
 
 
 class BaseHandler(RequestHandler):
@@ -91,7 +92,10 @@ class OrmLoadHandler(BaseHandler):
 
     response = {
         'xsrf': self.xsrf_token,
-        'data': self.orm.load(self.useraccess)
+        'data': self.orm.load(self.useraccess),
+        'coll_to_refs': self.orm.meta.collToRefs,
+        'coll_to_links': self.orm.meta.collToLinks,
+        'link_to_coll': self.orm.meta.linkToColl,
         }
 
     # load orm data
@@ -99,16 +103,193 @@ class OrmLoadHandler(BaseHandler):
 
 class OrmOpHandler(BaseHandler):
 
+  def opValue(self):
+    rawseq = self.get_argument('seq', None)
+    if not rawseq: raise HTTPError(500, 'send seq parameter')
+
+    seq = json.loads(rawseq)
+
+    self.orm.setValue(seq)
+
+    return {}
+
+
+  def opInsert(self):
+    coll = self.get_argument('coll', None)
+    obj = self.get_argument('obj', None)
+    parent = self.get_argument('parent', None)
+    if (not coll) or (not obj): raise HTTPError(500)
+
+    obj = json.loads(obj)
+
+    # debug
+    print 'opInsert:'
+    print coll
+    print obj
+
+    oldid = obj['id']
+    newid = self.orm.insert(coll, obj)
+
+    return { 'coll': coll, 'oldid': oldid, 'newid': newid }
+
+  def opInsertBefore(self):
+    hsh = self.get_argument('hash', None)
+    coll = self.get_argument('coll', None)
+    obj = self.get_argument('obj', None)
+    before = self.get_argument('before', None)
+    parent = self.get_argument('parent', None)
+    if (not coll) or (not obj) or (not before) or (not parent): raise HTTPError(500)
+
+    obj = json.loads(obj)
+
+    # debug
+    print 'opInsertBefore:'
+    print coll
+    print obj
+    print before
+
+    oldid = obj['id']
+    newid = self.orm.insertBefore(coll, obj, parent, before)
+
+    return { 'hash': hsh, 'coll': coll, 'oldid': oldid, 'newid': newid, 'before': before }
+
+  def opInsertAfter(self):
+    hsh = self.get_argument('hash', None)
+    coll = self.get_argument('coll', None)
+    obj = self.get_argument('obj', None)
+    after = self.get_argument('after', None)
+    parent = self.get_argument('parent', None)
+    if (not coll) or (not obj) or (not after) or (not parent): raise HTTPError(500)
+
+    obj = json.loads(obj)
+
+    # debug
+    print 'opInsertAfter:'
+    print coll
+    print obj
+    print after
+
+    oldid = obj['id']
+    newid = self.orm.insertAfter(coll, obj, parent, after)
+
+    return { 'hash': hsh, 'coll': coll, 'oldid': oldid, 'newid': newid, 'after': after }
+
+  def opAppend(self):
+    # get coll
+    coll = self.get_argument('coll', None)
+    hsh = self.get_argument('hash', None)
+    obj = self.get_argument('obj', None)
+    parent = self.get_argument('parent', None)
+    if (not coll) or (not hsh) or (not obj): raise HTTPError(500, 'coll, hash, obj not provided')
+
+    obj = json.loads(obj)
+
+    # debug
+    print 'opAppend:'
+    print coll
+    print obj
+    print parent
+
+    # obj = json.loads(obj)
+    # names = coll.split('.')
+
+    # oldid = obj['id']
+    # print oldid
+
+    # newid = 8 
+    # return { 'append': coll, 'oldid': oldid, 'id': newid }
+
+    oldid = obj['id']
+    newid = self.orm.append(coll, obj, parent)
+
+    print 'newid:'
+    print newid
+
+    return { 'hash': hsh, 'coll': coll, 'oldid': oldid, 'newid': newid }
+
+  # TODO(dem) search relations
+  def opDelete(self):
+    coll = self.get_argument('coll', None)
+    objid = self.get_argument('id', None)
+    parent = self.get_argument('parent', None)
+    if (not coll) or (not objid): raise HTTPError(500, 'coll, id not found')
+
+    # debug
+    print 'opDelete:'
+    print coll
+    print objid
+
+    self.orm.delete(coll, objid, parent)
+
+    return { 'coll': coll, 'id': objid }
+
+  # TODO(dem) implement this
+  def opUpdate(self):
+    coll = self.get_argument('coll', None)
+    objid = self.get_argument('id', None)
+    values = self.get_argument('values', None)
+    parent = self.get_argument('parent', None)
+
+    if (not coll) or (not objid) or (not values): raise HTTPError(500)
+
+    obj = json.loads(obj)
+
+    # debug
+    print 'opUpdate:'
+
+    return {}
+
+  def opSelectFrom(self):
+    coll = self.get_argument('coll', None)
+    hsh = self.get_argument('hash', None)
+    parent = self.get_argument('parent', None)
+    if (not coll) or (not hsh):
+      raise HTTPError(500)
+
+    items = self.orm.selectFrom(coll, {}, parent)
+
+    return {'hash': hsh, 'coll': items}
+
   def get(self, appName):
-    if not self.isXhr():
-      raise HTTPError(401)
+    print 'OrmOpHandler get'
+    if not self.isXhr(): raise HTTPError(401)
 
     self.writeJson({})
+
+  @authenticated
+  def post(self):
+    print 'OrmOpHandler post'
+    if not self.isXhr():
+      raise HTTPError(403)
+
+    # get operation
+    op = self.get_argument('op', None)
+    if not op: raise HTTPError(500)
+
+    ops = {
+      'value': self.opValue,
+      'insert': self.opInsert,
+      'insert_before': self.opInsertBefore,
+      'insert_after': self.opInsertAfter,
+      'append': self.opAppend,
+      'delete': self.opDelete,
+      'update': self.opUpdate,
+      'select_from': self.opSelectFrom,
+    }
+
+    fn = ops.get(op, None)
+    if not fn:
+      raise HTTPError(500, 'unknown op: ' + str(op))
+
+    response = fn();
+
+    self.writeJson(response)
 
 class OrmImageHandler(BaseHandler):
 
   @authenticated
   def post(self):
+    print 'OrmImageHandler'
     # if 'op' in self.request
     self.writeJson({})
 

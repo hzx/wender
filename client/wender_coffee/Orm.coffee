@@ -41,10 +41,66 @@ getOrmNames = (obj) ->
   # while obj.ormName isnt null
   while cursor isnt null
     # names.push(obj.ormName)
-    names.push(cursor.ormName)
+    if cursor.ormName isnt null
+      names.push(cursor.ormName)
     cursor = cursor.ormParent
   names.reverse()
   return names
+
+# TODO(dem) implement it
+getOrmSequence = (obj, child = null) ->
+  ###
+  Create node sequences of objects from parent to obj
+  ###
+  # for world return child sequence
+  if obj.ormName is 'world'
+    return child
+
+  if obj.ormKind is 'value'
+    # value must have parent, grandpa and parent is struct
+    if (obj.ormParent is null) or (obj.ormParent.ormParent is null) or (obj.ormParent.ormKind isnt 'struct')
+      return null
+
+    grandpa = obj.ormParent.ormParent
+
+    node = {
+      'kind': 'value',
+      'name': obj.ormName,
+      'value': obj.value,
+      'parentid': obj.ormParent.id.value
+    }
+
+    # for grandpa struct
+    if grandpa.ormKind is 'struct'
+      node['parentname'] = obj.ormParent.ormName
+
+    # for grandpa list - do nothing
+    if grandpa.ormKind is 'list'
+      console.log 'for grandpa list parent name must be null:'
+      console.log obj.ormParent.ormName
+    
+    return getOrmSequence(grandpa, node)
+
+  if obj.ormKind is 'struct'
+    # console.log 'inner structures not implemented'
+    # console.log 'child:'
+    # console.log child
+    node = {
+      'kind': 'struct',
+      'name': obj.ormName,
+      'child': child
+    }
+    return getOrmSequence(obj.ormParent, node)
+
+  if obj.ormKind is 'list'
+    node = {
+      'kind': 'list',
+      'name': obj.ormName,
+      'child': child
+    }
+    return getOrmSequence(obj.ormParent, node)
+
+  return null
 
 # base class for struct
 class ns.OrmStruct
@@ -96,7 +152,7 @@ class OrmStructMeta
 #     @name = name
 #     @fields = fields
 
-# Change, validate values of types OrmValue, OrmList
+# TODO(dem) Change, validate values of types OrmValue, OrmList
 # Send/receive data by Net
 class ns.Orm
 
@@ -122,6 +178,22 @@ class ns.Orm
 
     # orm operations url
     @urlOp = '/op'
+
+    # hash for operations
+    @opHashGenerator = new ns.HashGenerator()
+    # save op hash to dest coll
+    @selectFromOps = {}
+    @insertOps = {}
+
+  init: ->
+    # parse all structs
+
+  setStructs: (structs) ->
+    @structs = structs
+    # store coll dotnames to array of refs dotnames
+    @collToRefs = {}
+    # store coll dotnames to array of links dotnames
+    @collToLinks = {}
 
   load: (url, modelNs, world, callback) ->
     @model = modelNs
@@ -152,7 +224,7 @@ class ns.Orm
     for item in data
       field = new @model[typename]
       @fillStruct(field, item, typename)
-      dest.append(field)
+      dest.append(field, false)
 
   fillRefLinkArrayNow: ->
     for item in @reflink
@@ -170,12 +242,22 @@ class ns.Orm
       # clone data from rlarr
       rlobj = rlarr.get(item)
       field = rlobj.clone()
-      dest.append(field)
+      dest.append(field, false)
 
   fillValue: (dest, data, valuetype) ->
+    # debug
+    # console.log('dest:')
+    # console.log(dest)
+
     if (!! data) is false
       return null
-    dest.setValue(data)
+    if valuetype is 'int'
+      # console.log('valuetype int')
+      data = parseInt(data)
+    if valuetype is 'float'
+      # console.log('valuetype float')
+      data = parseFloat(data)
+    dest.setValue(data, false)
 
   fillStruct: (dest, data, typename) ->
     if (!! data) is false
@@ -190,6 +272,9 @@ class ns.Orm
         continue
       # fill field depend on type
       if params.isArray
+        # skip loading lazy
+        if @isArrayLazy(params)
+          continue
         if 'ref' of params
           refarr = @world[params.ref]
           @fillRefLinkArrayLater(dest[name], value, params.type, refarr)
@@ -201,12 +286,24 @@ class ns.Orm
         @fillArray(dest[name], value, params.type)
       else
         if params.isValueType
+          # debug
+          # console.log('before fillValue name=' + name)
+          # console.log(dest)
           @fillValue(dest[name], value, params.type)
         else
           @fillStruct(dest[name], value, params.type)
 
-  setStructs: (structs) ->
-    @structs = structs
+  isArrayLazy: (params) ->
+    # detect lazy by source array
+    if 'ref' of params
+      # get source array params
+      world = @structs['World']
+      params = world[params.ref]
+    if 'link' of params
+      world = @structs['World']
+      params = world[params.link]
+    # by default lazy is true
+    return if 'lazy' of params then params['lazy'] else true
 
   getFieldParams: (field) ->
     # take parent ormType
@@ -219,9 +316,6 @@ class ns.Orm
     if !!params is false then return null
 
     return params
-
-  init: ->
-    # parse all structs
 
   # Validate value
   
@@ -253,27 +347,101 @@ class ns.Orm
     strOps = JSON.stringify(ops)
     ns.net.uploadFiles(@urlOp, 'imgs', files, strOps, success, fail)
 
+  structToJson: (obj) ->
+    # get obj struct
+    st = @structs[obj.ormType]
+    # json buffer
+    buf = {}
+    # for every field serialize it
+    for field, params of st
+      objfield = obj[field]
+      if params.isArray
+        if 'ref' of params
+          buf[field] = @refToJson(objfield, params)
+        else
+          if 'link' of params
+            buf[field] = @linkToJson(objfield, params)
+          else
+            buf[field] = @arrayToJson(objfield, params)
+      else
+        if params.isValueType
+          # fill value
+          buf[field] = @valueToJson(objfield, params)
+        else
+          # fill struct
+          buf[field] = @structToJson(objfield)
+    return buf
+
+  arrayToJson: (arr, params) ->
+    buf = []
+    for item in arr
+      buf.push(@structToJson(item))
+    return buf
+
+  refToJson: (arr, params) ->
+    buf = []
+    for item in arr
+      buf.push(item.getHash())
+    return buf
+
+  linkToJson: (arr, params) ->
+    buf = []
+    for item in arr
+      buf.push(item.getHash())
+    return buf
+
+  valueToJson: (val, params) ->
+    return val.value
+
   # CRUD OPERATIONS
 
   insert: (coll, val) ->
     coll.insert(val)
 
   insertAfter: (coll, val, whereFn) ->
+    obj = @selectOne(coll, whereFn)
+    if obj isnt null
+      coll.insertAfter(val, obj)
 
   insertBefore: (coll, val, whereFn) ->
+    obj = @selectOne(coll, whereFn)
+    if obj isnt null
+      coll.insertBefore(val, obj)
 
   selectCount: (coll) ->
     return coll.count
 
   selectOne: (coll, whereFn) ->
-    return coll.first.clone()
+    # return coll.first.clone()
+    return coll.get(whereFn.id.value)
 
   selectFrom: (dest, coll, whereFn, orderField, sortOrder) ->
-    dest.empty()
-    cursor = coll.first
-    while cursor isnt null
-      dest.append(cursor.obj.clone())
-      cursor = cursor.next
+    # if coll is lazy, select from server
+    if @isCollectionLazy(coll)
+      # load collection from server
+      names = getOrmNames(coll)
+      hash = @opHashGenerator.generate().toString()
+      data = {
+        'op': 'select_from',
+        'hash': hash,
+        'coll': names.join('.')
+      }
+      # add parent id if exists
+      if coll.ormParent isnt null
+        data['parent'] = coll.ormParent.id.value
+      # save dest to operations map
+      @selectFromOps[hash] = {'dest': dest, 'coll': coll, 'ormType': coll.ormType}
+      ns.net.post(@urlOp, data, @onNetSelectFrom, @onNetSelectFromFail)
+    else
+      # load collection from cache
+      dest.empty()
+      # set src collection
+      dest.setSrc(coll)
+      # add nodes
+      cursor = coll.first
+      while cursor isnt null
+        dest.append(cursor.obj.clone())
+        cursor = cursor.next
 
   selectConcat: (dest, colls) ->
     dest.empty()
@@ -284,17 +452,47 @@ class ns.Orm
         cursor = cursor.next
 
   selectSum: (coll, byField) ->
-    sum = 0
     # console.log 'orm.selectSum'
     # console.log coll
+    sum = 0
 
-  update: (coll, vals, whereFn) ->
+  update: (coll, vals, id) ->
+    # debug
     # console.log 'orm.update'
     # console.log coll
+    # console.log vals
+    # console.log whereFn
+    
+    names = getOrmNames(coll)
+    data = {
+      'op': 'update',
+      'coll': names.join('.'),
+      'values': JSON.stringify(@structToJson(vals)),
+      'id': id.value
+    }
+    ns.net.post(@urlOp, data, @onNetUpdate, @onNetUpdateFail)
 
-  deleteFrom: (coll, whereFn) ->
-    # console.log 'orm.deleteFrom'
+  # this duplicate onRemove
+  deleteFrom: (coll, id) ->
+    coll.remove(id.value)
+    return false
+
+    names = getOrmNames(coll)
+
+    # debug
+    # console.log('Orm.deleteFrom')
     # console.log coll
+    # console.log id
+
+    # delete from local collection
+    coll.remove
+
+    data = {
+      'op': 'delete',
+      'coll': names.join('.'),
+      'id': id.value
+    }
+    ns.net.post(@urlOp, data, @onNetRemove, @onNetRemoveFail)
 
   getImageUrl: (filename) ->
     if filename.value.length is 0
@@ -324,6 +522,9 @@ class ns.Orm
 
   findImageStruct: (image) ->
 
+  isWorldNames: (names) ->
+    return (names.length > 0) and (names[0] is 'world')
+
   # events
 
   onLoadSuccess: (response) =>
@@ -337,41 +538,244 @@ class ns.Orm
     @loadCallback()
 
   onLoadFail: (status) =>
+    console.log('onLoadFail')
+    console.log(status)
 
   # event OrmList, OrmValue operations
   
   onSetValue: (obj) ->
     names = getOrmNames(obj)
+    if not @isWorldNames(names)
+      return
+    ormobj = getOrmSequence(obj)
+    console.log 'Orm.onSetvalue'
+    console.log(names)
+    console.log(obj)
+    console.log(ormobj)
 
     # validate
     
     # change referenced values
+
+    data = {
+      'op': 'value',
+      'seq': JSON.stringify(ormobj)
+    }
     
     # send changes by net
+    ns.net.post(@urlOp, data, @onNetSetValue, @onNetSetValueFail)
 
   
-  onInsert: (obj) =>
-    # console.log 'Orm.onInsert'
+  onInsert: (coll, obj) =>
+    # validate
+    # change referenced values
+    # send changes by net
+    names = getOrmNames(coll)
+    data = {
+      'op': 'insert',
+      'coll': names.join('.'),
+      'obj': JSON.stringify(@structToJson(obj))
+    }
+    # add parent id if exists
+    if (coll.ormParent isnt null) and (coll.ormParent.ormName isnt 'world')
+      data['parent'] = coll.ormParent.id.value
+    ns.net.post(@urlOp, data, @onNetInsert, @onNetInsertFail)
+
+  onAppend: (coll, obj) =>
+    names = getOrmNames(coll)
+    hash = @opHashGenerator.generate().toString()
+    data = {
+      'op': 'append',
+      'hash': hash,
+      'coll': names.join('.'),
+      'obj': JSON.stringify(@structToJson(obj))
+    }
+    # add parent id if exists
+    if (coll.ormParent isnt null) and (coll.ormParent.ormName isnt 'world')
+      data['parent'] = coll.ormParent.id.value
+    # save operation to buffer
+    @insertOps[hash] = {'coll': coll}
+    ns.net.post(@urlOp, data, @onNetAppend, @onNetAppendFail)
+
+  onInsertAfter: (coll, obj, after) =>
+    # validate
+    # change referenced values
+    # send changes by net
+    names = getOrmNames(coll)
+    hash = @opHashGenerator.generate().toString()
+    data = {
+      'op': 'insert_after',
+      'hash': hash,
+      'coll': names.join('.'),
+      'obj': JSON.stringify(@structToJson(obj)),
+      'after': after.value
+    }
+    # add parent id if exists
+    if (coll.ormParent isnt null) and (coll.ormParent.ormName isnt 'world')
+      data['parent'] = coll.ormParent.id.value
+    @insertOps[hash] = {'coll': coll}
+    ns.net.post(@urlOp, data, @onNetInsertAfter, @onNetInsertAfterFail)
+
+  onInsertBefore: (coll, obj, before) =>
     # validate
     # change referenced values
     # send changes by net
 
-  onAppend: (obj) =>
-    # console.log 'Orm.onAppend'
+    # debug
+    # console.log('before:')
+    # console.log(before)
+    
+    names = getOrmNames(obj)
+    hash = @opHashGenerator.generate().toString()
+    data = {
+      'op': 'insert_before',
+      'hash': hash,
+      'coll': names.join('.'),
+      'obj': JSON.stringify(@structToJson(obj)),
+      'before': before.id.value
+    }
+    # add parent id if exists
+    if (coll.ormParent isnt null) and (coll.ormParent.ormName isnt 'world')
+      data['parent'] = coll.ormParent.id.value
+    @insertOps[hash] = {'coll': coll}
+    ns.net.post(@urlOp, data, @onNetInsertBefore, @onNetInsertBeforeFail)
 
-  onInsertAfter: (obj, after) =>
-    # console.log 'Orm.onInsertAfter'
+  onRemove: (coll, obj) =>
+    names = getOrmNames(coll)
+    data = {
+      'op': 'delete',
+      'coll': names.join('.'),
+      'id': obj.id.value
+    }
+    # add parent id if exists
+    if (coll.ormParent isnt null) and (coll.ormParent.ormName isnt 'world')
+      data['parent'] = coll.ormParent.id.value
+    ns.net.post(@urlOp, data, @onNetRemove, @onNetRemoveFail)
 
-    # validate
-    # change referenced values
-    # send changes by net
+  onNetSetValue: (response) =>
+    console.log 'onNetSetValue, response:'
+    console.log response
 
-  onInsertBefore: (obj, before) =>
-    # console.log 'Orm.onInsertBefore'
-    # validate
-    # change referenced values
-    # send changes by net
+  onNetSetValueFail: (status) =>
+    console.log 'onNetSetValueFail, status:'
+    console.log status
 
-  onRemove: (obj) =>
-    # console.log 'Orm.onRemove'
+  onNetInsert: (response) =>
+    # update old id if exists
+    console.log('onNetInsert')
+    console.log(response)
+    parsed = JSON.parse(response)
+    if not (parsed.hash of @insertOps)
+      return
+
+    params = @insertOps[parsed.hash]
+    delete @insertOps[parsed.hash]
+
+    # TODO(dem) do post insert
+
+  onNetInsertFail: (status) =>
+    console.log('onNetInsertFail')
+    console.log(status)
+
+  onNetAppend: (response) =>
+    # update old id if exists
+    parsed = JSON.parse(response)
+    if not (parsed.hash of @insertOps)
+      return
+
+    params = @insertOps[parsed.hash]
+    delete @insertOps[parsed.hash]
+
+    params.coll.updateId(parsed.oldid, parsed.newid)
+
+
+  onNetAppendFail: (status) =>
+    console.log('onNetAppendFail')
+    console.log(status)
+
+  onNetInsertAfter: (response) =>
+    # update old id if exists
+    console.log('onNetInsertAfter')
+    console.log(response)
+
+  onNetInsertAfterFail: (status) =>
+    console.log('onNetInsertAfterFail')
+    console.log(status)
+
+  onNetInsertBefore: (response) =>
+    # update old id if exists
+    parsed = JSON.parse(response)
+    if not (parsed.hash of @insertOps)
+      return
+
+    params = @insertOps[parsed.hash]
+    delete @insertOps[parsed.hash]
+
+    params.coll.updateId(parsed.oldid, parsed.newid)
+
+  onNetInsertBeforeFail: (status) =>
+    console.log('onNetInsertBeforeFail')
+    console.log(status)
+
+  onNetUpdate: (response) =>
+    console.log('onNetUpdate')
+    console.log(response)
+
+  onNetUpdateFail: (status) =>
+    console.log('onNetUpdateFail')
+    console.log(status)
+
+  onNetRemove: (response) =>
+    console.log('onNetRemove')
+    console.log(response)
+
+  onNetRemoveFail: (status) =>
+    console.log('onNetRemoveFail')
+    console.log(status)
+
+  onNetSelectFrom: (response) =>
+    parsed = JSON.parse(response)
+    # get dest from cache
+    if not (parsed.hash of @selectFromOps)
+      return
+
+    params = @selectFromOps[parsed.hash]
+    delete @selectFromOps[parsed.hash]
+    coll = parsed.coll
+
+    params.dest.emptySilent()
+
+    # set dest coll as coll cache, copy orm properties
+    params.dest.ormType = params.coll.ormType
+    params.dest.ormName = params.coll.ormName
+    params.dest.ormParent = params.coll.ormParent
+
+    @fillArray(params.dest, coll, params.ormType)
+
+  onNetSelectFromFail: (status) =>
+    console.log('onNetSelectFromFail')
+    console.log(status)
+
+  # Helpers
+
+  isCollectionLazy: (coll) ->
+    names = getOrmNames(coll)
+
+    if names[0] isnt 'world'
+      return false
+
+    params = @getParams(names)
+    return @isArrayLazy(params)
+
+  getParams: (names) ->
+    fields = @structs['World']
+    params = null
+    for name in names
+      if name is 'world'
+        continue
+      params = fields[name]
+      if params.isValueType or params.isArray
+        continue
+      fields = @structs[params.type]
+    return params
 

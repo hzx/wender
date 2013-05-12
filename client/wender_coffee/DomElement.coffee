@@ -61,7 +61,9 @@ class ns.DomElement extends ns.DomNode
     @node.removeAttribute(name)
 
   getAttribute: (name) ->
-    @node.getAttribute(name)
+    if name is 'value'
+      return @node.value
+    return @node.getAttribute(name)
 
   setAttributes: (attributes) ->
     for name, value of attributes
@@ -376,19 +378,27 @@ class ns.DomElement extends ns.DomNode
   setStyle: (name, value) ->
     @node.style[name] = value
 
+  updateChildHash: (oldhash, newhash) ->
+    if not (oldhash of @objChilds)
+      return
+
+    # move node of objChilds from old to new
+    child = @objChilds[oldhash]
+    delete @objChilds[oldhash]
+    @objChilds[newhash] = child
+
   # events
 
   onObjHashChange: (oldValue, newValue) =>
-    # move node of objChilds from old to new
-    node = @objChilds[oldValue]
-    delete @objChilds[oldValue]
-    @objChilds[newValue] = node
+    if @parent isnt null
+      @parent.updateChildHash(oldValue, newValue)
   
   onListInsert: (obj, before) =>
     node = @render(obj)
     node.obj = obj
     if before isnt null
-      @insertBefore(node, before)
+      beforeNode = @objChilds[before.getHash()]
+      @insertBefore(node, beforeNode)
     else
       @append(node)
 
@@ -403,6 +413,11 @@ class ns.DomElement extends ns.DomNode
     target = event.target || event.srcElement
 
     handler = @events[event.type]
+
+    if !!handler is false
+      return false
+      # console.log('undefined handler for event.type "' + event.type + '"')
+
     # TODO(dem) make more specific params depending on event type
     isPreventDefault = handler({
       'type': event.type,

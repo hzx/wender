@@ -20,9 +20,8 @@ class ns.World extends ns.OrmStruct
   uploadFiles: (url, fieldName, files, success, fail) ->
     ns.net.uploadFiles(url, fieldName, files, "[]", success, fail)
 
-  updateImage: (field, file, success, fail) ->
+  updateImage: (field, file) ->
     ns.orm.updateImage(field, file, success, fail)
 
   insertImages: (field, files, success, fail) ->
     ns.orm.insertImages(field, files, success, fail)
-

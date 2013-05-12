@@ -1,5 +1,6 @@
 
 
+# TODO(dem) implement sync
 class ns.OrmList extends ns.ObservableList
   ormKind: 'list'
 
@@ -14,43 +15,64 @@ class ns.OrmList extends ns.ObservableList
     if obj.id.value is null or obj.id.value.length is 0
       obj.id.value = @hashGenerator.generate().toString()
 
-  insert: (obj) ->
+  updateId: (oldid, newid) ->
+    if not (oldid of @nodes)
+      return
+    # get obj
+    node = @nodes[oldid]
+    # delete old from nodes
+    delete @nodes[oldid]
+    # add new to nodes
+    @nodes[newid] = node
+    # update id
+    node.obj.id.setValue(newid, false)
+
+  insert: (obj, sync = true) ->
+    # @setTemporaryId(obj)
+    # obj.ormParent = this
+    # super(obj)
+    # ns.orm.onInsert(obj)
+    @append(obj, sync)
+
+  append: (obj, sync = true) ->
     @setTemporaryId(obj)
     obj.ormParent = this
     super(obj)
-    getOrmNames(obj)
-    ns.orm.onInsert(obj)
+    if sync
+      ns.orm.onAppend(this, obj)
 
-  append: (obj) ->
-    @setTemporaryId(obj)
-    obj.ormParent = this
-    super(obj)
-    ns.orm.onAppend(obj)
-
-  insertAfter: (obj, after) ->
+  insertAfter: (obj, after, sync = true) ->
     @setTemporaryId(obj)
     obj.ormParent = this
     super(obj, after)
-    ns.orm.onInsertAfter(obj, after)
+    if sync
+      ns.orm.onInsertAfter(this, obj, after)
 
-  insertBefore: (obj, before) ->
+  insertBefore: (obj, before, sync = true) ->
     @setTemporaryId(obj)
     obj.ormParent = this
     super(obj, before)
-    ns.orm.onInsertBefore(obj, before)
+    if sync
+      ns.orm.onInsertBefore(this, obj, before)
 
-  remove: (hash) ->
+  remove: (hash, sync = true) ->
     orphan = super(hash)
     if orphan isnt null
-      ns.orm.onRemove(orphan)
       orphan.ormParent = null
-      orphan
-    else
-      null
+      if sync
+        ns.orm.onRemove(this, orphan)
+    return orphan
 
-  empty: ->
+  removeSilent: (hash) ->
+    super(hash)
+
+  empty: (sync = true) ->
     for hash, node of @nodes
-      this.remove(hash)
+      this.remove(hash, sync)
+
+  emptySilent: ->
+    for hash, node of @nodes
+      this.removeSilent(hash)
 
   clone: ->
     list = new ns.OrmList(@type, @name, null)
@@ -60,5 +82,5 @@ class ns.OrmList extends ns.ObservableList
       child = cursor.obj
       clone = child.clone()
       cursor = cursor.next
-      list.append(clone)
+      list.append(clone, false)
 

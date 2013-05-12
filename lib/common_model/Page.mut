@@ -1,0 +1,23 @@
+
+
+enum PageItemType {
+  HEADER = 1;
+  PARAGRAPH = 2;
+  IMAGE = 3;
+  GALLERY = 4;
+  VIDEO = 5;
+  LINK = 6;
+  FILE = 7;
+}
+
+/*struct Page {*/
+/*  string id {};*/
+/*  string title {};*/
+/*  PageItem[] items {};*/
+/*}*/
+/**/
+/*struct PageItem {*/
+/*  string id {};*/
+/*  int kind {};*/
+/*  string content {};*/
+/*}*/

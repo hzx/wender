@@ -10,9 +10,12 @@ class ns.OrmValue extends ns.ObservableValue
     @ormParent = if !! parent then parent else null
     @value = value
 
-  setValue: (value) ->
+  setValue: (value, sync = true) ->
+    isChanged = @value isnt value
     super(value)
-    ns.orm.onSetValue(this)
+    if isChanged
+      if sync
+        ns.orm.onSetValue(this)
 
   clone: ->
     return new ns.OrmValue(@ormType, @ormName, null, @value)

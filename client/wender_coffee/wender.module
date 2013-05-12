@@ -12,6 +12,7 @@ source Router.coffee
 source Validator.coffee
 source OrmValue.coffee
 source OrmList.coffee
+source OrmCacheList.coffee
 source Orm.coffee
 source Statistic.coffee
 source Browser.coffee

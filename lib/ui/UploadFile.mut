@@ -40,12 +40,13 @@ class UploadFile extends View {
     if this.isClicked { return none; }
     this.isClicked = true;
 
-    var uploadElement = e.element;
+    var uploadElement = this.element;
     uploadElement.last.fireClick();
     this.isClicked = false;
   }
 
   void onFileInputChange(event e) {
-    this.eventSelected.notify(e.target.files);
+    /*this.eventSelected.notify(e.target.files);*/
+    this.eventSelected.notify(e);
   }
 }
