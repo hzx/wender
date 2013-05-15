@@ -231,6 +231,15 @@ class DbMeta(object):
       links[link] = coll
     return links
 
+  def getCollType(self, names):
+    fields = self.getStruct('World')
+    if len(names) == 0: return None
+    for name in names:
+      params = fields.get(name, None)
+      if not params: return None
+      fields = self.getStruct(params['type'])
+    return fields
+
   # def searchLinkRefs(self):
   #   """
   #   For every world array field search refs, links.

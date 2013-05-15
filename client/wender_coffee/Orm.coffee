@@ -75,9 +75,8 @@ getOrmSequence = (obj, child = null) ->
       node['parentname'] = obj.ormParent.ormName
 
     # for grandpa list - do nothing
-    if grandpa.ormKind is 'list'
-      console.log 'for grandpa list parent name must be null:'
-      console.log obj.ormParent.ormName
+    # if grandpa.ormKind is 'list'
+    #   throw new Error('for grandpa list parent name must be null:' + obj.ormParent.ormName)
     
     return getOrmSequence(grandpa, node)
 
@@ -427,7 +426,7 @@ class ns.Orm
         'coll': names.join('.')
       }
       # add parent id if exists
-      if coll.ormParent isnt null
+      if (coll.ormParent isnt null) and (coll.ormParent.ormName isnt 'world')
         data['parent'] = coll.ormParent.id.value
       # save dest to operations map
       @selectFromOps[hash] = {'dest': dest, 'coll': coll, 'ormType': coll.ormType}
@@ -548,10 +547,6 @@ class ns.Orm
     if not @isWorldNames(names)
       return
     ormobj = getOrmSequence(obj)
-    console.log 'Orm.onSetvalue'
-    console.log(names)
-    console.log(obj)
-    console.log(ormobj)
 
     # validate
     
@@ -662,8 +657,6 @@ class ns.Orm
 
   onNetInsert: (response) =>
     # update old id if exists
-    console.log('onNetInsert')
-    console.log(response)
     parsed = JSON.parse(response)
     if not (parsed.hash of @insertOps)
       return
@@ -741,7 +734,6 @@ class ns.Orm
 
     params = @selectFromOps[parsed.hash]
     delete @selectFromOps[parsed.hash]
-    coll = parsed.coll
 
     params.dest.emptySilent()
 
@@ -750,7 +742,7 @@ class ns.Orm
     params.dest.ormName = params.coll.ormName
     params.dest.ormParent = params.coll.ormParent
 
-    @fillArray(params.dest, coll, params.ormType)
+    @fillArray(params.dest, parsed.coll, params.ormType)
 
   onNetSelectFromFail: (status) =>
     console.log('onNetSelectFromFail')

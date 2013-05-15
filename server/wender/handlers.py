@@ -17,7 +17,6 @@ class BaseHandler(RequestHandler):
 
   # render error pages
   def write_error(self, status_code, **kwargs):
-    print 'status_code "%d"' % status_code
     if status_code == 404:
       self.render('404.html')
     elif status_code >= 500 and status_code < 600:
@@ -122,11 +121,6 @@ class OrmOpHandler(BaseHandler):
 
     obj = json.loads(obj)
 
-    # debug
-    print 'opInsert:'
-    print coll
-    print obj
-
     oldid = obj['id']
     newid = self.orm.insert(coll, obj)
 
@@ -141,12 +135,6 @@ class OrmOpHandler(BaseHandler):
     if (not coll) or (not obj) or (not before) or (not parent): raise HTTPError(500)
 
     obj = json.loads(obj)
-
-    # debug
-    print 'opInsertBefore:'
-    print coll
-    print obj
-    print before
 
     oldid = obj['id']
     newid = self.orm.insertBefore(coll, obj, parent, before)
@@ -163,12 +151,6 @@ class OrmOpHandler(BaseHandler):
 
     obj = json.loads(obj)
 
-    # debug
-    print 'opInsertAfter:'
-    print coll
-    print obj
-    print after
-
     oldid = obj['id']
     newid = self.orm.insertAfter(coll, obj, parent, after)
 
@@ -184,26 +166,8 @@ class OrmOpHandler(BaseHandler):
 
     obj = json.loads(obj)
 
-    # debug
-    print 'opAppend:'
-    print coll
-    print obj
-    print parent
-
-    # obj = json.loads(obj)
-    # names = coll.split('.')
-
-    # oldid = obj['id']
-    # print oldid
-
-    # newid = 8 
-    # return { 'append': coll, 'oldid': oldid, 'id': newid }
-
     oldid = obj['id']
     newid = self.orm.append(coll, obj, parent)
-
-    print 'newid:'
-    print newid
 
     return { 'hash': hsh, 'coll': coll, 'oldid': oldid, 'newid': newid }
 
@@ -213,11 +177,6 @@ class OrmOpHandler(BaseHandler):
     objid = self.get_argument('id', None)
     parent = self.get_argument('parent', None)
     if (not coll) or (not objid): raise HTTPError(500, 'coll, id not found')
-
-    # debug
-    print 'opDelete:'
-    print coll
-    print objid
 
     self.orm.delete(coll, objid, parent)
 
@@ -234,9 +193,6 @@ class OrmOpHandler(BaseHandler):
 
     obj = json.loads(obj)
 
-    # debug
-    print 'opUpdate:'
-
     return {}
 
   def opSelectFrom(self):
@@ -251,14 +207,13 @@ class OrmOpHandler(BaseHandler):
     return {'hash': hsh, 'coll': items}
 
   def get(self, appName):
-    print 'OrmOpHandler get'
     if not self.isXhr(): raise HTTPError(401)
 
     self.writeJson({})
 
-  @authenticated
+  # @authenticated
+  # TODO(dem) check operation right
   def post(self):
-    print 'OrmOpHandler post'
     if not self.isXhr():
       raise HTTPError(403)
 

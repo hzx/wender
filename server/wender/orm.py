@@ -2,6 +2,7 @@ from wender import mongodb
 from wender import dbmeta
 from wender import db as dbutil
 import re
+from pytils.translit import slugify
 
 
 class OrmField(object):
@@ -201,32 +202,24 @@ class Orm(object):
 
     # just add id
     if dotcoll in self.meta.refToColl:
-      # print 'append to ref "%s"' % dotcoll
-      # print parent
       self.appendIdToRefLink(names, obj['id'], parent)
       return obj['id']
         
     # add obj to coll and id to link
     elif dotcoll in self.meta.linkToColl:
-      # print 'append to link "%s"' % dotcoll
-      # print parent
-
       # append obj to src coll
       src = self.meta.linkToColl[dotcoll]
-      # print 'src "%s"' % src
+      slug = self.setSlug(names, obj)
+      print 'slug: ' + str(slug)
       newid = mongodb.insert(src, obj)
-
-      # debug
-      print 'orm.append newid "%s"' % newid
 
       # append to link id
       self.appendIdToRefLink(names, newid, parent)
       return newid
     # add obj to coll
     elif dotcoll in self.meta.colls:
-      # print 'append to coll "%s"' % dotcoll
-      # print parent
-
+      slug = self.setSlug(names, obj)
+      print 'slug: ' + str(slug)
       newid = mongodb.insert(dotcoll, obj)
       return newid
 
@@ -235,26 +228,30 @@ class Orm(object):
 
   def setValue(self, seq):
     # parse sequences
-    print 'orm.setValue, seq:'
-    print repr(seq)
+    # print 'orm.setValue, seq:'
+    # print repr(seq)
 
     # get last list
     lastList = self.getLastList(seq)
 
     # global update
     if not lastList:
-      print 'global update'
+      # print 'global update'
 
       names = self.seqToNames(seq)
       value = self.getSeqValue(seq)
       coll = names[0]
       field = names[1]
+
+      slugs = self.updateSlug([coll], field, value['value'])
+      values = {field: value['value']}
+      if slugs: values[slugs[0]] = slugs[1]
     
-      mongodb.update(coll, {field: value['value']}, {'id': value['parentid']})
+      mongodb.update(coll, values, {'id': value['parentid']})
 
     # list update
     else:
-      print 'list update'
+      # print 'list update'
 
       listNames = self.getLastListNames(seq, lastList)
       coll = '.'.join(listNames)
@@ -262,29 +259,31 @@ class Orm(object):
       # search src list and update
       # search src in refs
       if coll in self.meta.refToColl:
-        print 'update ref value:'
-        print coll
+        # print 'update ref value:'
+        # print coll
         src = self.meta.refToColl[coll]
-        print src
+        # print src
         self.updateListValue(src, seq, lastList)
       # search src in links
       elif coll in self.meta.linkToColl:
-        print 'update link value:'
-        print coll
+        # print 'update link value:'
+        # print coll
         src = self.meta.linkToColl[coll]
-        print src
+        # print src
         self.updateListValue(src, seq, lastList)
       # search src in colls
-      elif coll in self.meta.coll:
-        print 'update list value:'
-        print coll
-        self.updateListValue(src, seq, lastList)
+      elif coll in self.meta.colls:
+        # print 'update list value:'
+        # print coll
+        self.updateListValue(coll, seq, lastList)
       else:
         raise Exception('unknown list type "%s"' % str(coll))
 
   def insert(self, coll, obj):
     names = self.collToNames(coll)
     if not names: return None
+    slug = self.setSlug(names, obj)
+    print 'slug: ' + str(slug)
     return self.append(names[0], obj)
 
   def insertBefore(self, coll, obj, parent, before):
@@ -305,6 +304,8 @@ class Orm(object):
     elif dotcoll in self.meta.linkToColl:
       # append obj to src coll
       src = self.meta.linkToColl[dotcoll]
+      slug = self.setSlug(names, obj)
+      print 'slug: ' + str(slug)
       newid = mongodb.insert(src, obj)
 
       # insert to link id
@@ -313,6 +314,8 @@ class Orm(object):
 
     # add obj to coll
     elif dotcoll in self.meta.colls:
+      slug = self.setSlug(names, obj)
+      print 'slug: ' + str(slug)
       newid = mongodb.insert(dotcoll, obj)
       return newid
 
@@ -348,7 +351,7 @@ class Orm(object):
       return self.selectFromRefLink(src, names, where, parent)
     # load array
     elif dotcoll in self.meta.colls:
-      return mongodb.selectFrom(coll, where)
+      return dbutil.cursorToList(mongodb.selectFrom(dotcoll, where))
 
     raise Exception('unknown collection type "%s"' % dotcoll)
 
@@ -486,5 +489,65 @@ class Orm(object):
 
   def updateListValue(self, coll, seq, lastList):
     val = lastList['child']
-    mongodb.update(coll, {val['name']: val['value']}, {'id': val['parentid']})
+    values = {val['name']: val['value']}
 
+    slugs = self.updateSlug(coll.split('.'), val['name'], val['value'])
+    if slugs: values[slugs[0]] = slugs[1]
+
+    mongodb.update(coll, values, {'id': val['parentid']})
+
+  def setSlug(self, names, obj):
+    """
+    Find slug field and set it
+    Return generated slug or None is slug not exists
+    """
+    print 'setSlug:'
+    print repr(names)
+    # get obj type
+    fields = self.meta.getCollType(names)
+    if not fields: return None
+
+    # search slug field name
+    slugName = None
+    for name, params in fields.items():
+      if 'slug' in params:
+        slugName = name
+        break
+    if not slugName: return None
+
+    # get slug src
+    slugSrc = fields[slugName]['slug']
+
+    # gen slug from src
+    src = obj.get(slugSrc, None)
+    if not src: return None
+    slug = slugify(src)
+
+    # set slug
+    obj[slugName] = slug
+
+    return slug
+
+  def updateSlug(self, names, field, value):
+    # get coll type
+    fields = self.meta.getCollType(names)
+    if not fields: return None
+
+    # search slug field name
+    slugName = None
+    for name, params in fields.items():
+      if 'slug' in params:
+        slugName = name
+        break
+    if not slugName: return None
+
+    # get slug src
+    slugSrc = fields[slugName]['slug']
+
+    # slug src must be equal to field
+    if slugSrc != field: return None
+
+    # gen slug
+    slug = slugify(value)
+
+    return [slugName, slug]
