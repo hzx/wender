@@ -64,7 +64,7 @@ class ns.OrmList extends ns.ObservableList
     return orphan
 
   removeSilent: (hash) ->
-    super(hash)
+    @remove(hash, false)
 
   empty: (sync = true) ->
     for hash, node of @nodes

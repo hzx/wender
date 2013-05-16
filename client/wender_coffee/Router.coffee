@@ -68,7 +68,6 @@ class ns.Router
 
     for pattern in @urlpatterns
       params = pattern[0].exec(url)
-
       if params is null then continue
       args = (params[1...params.length] if params.length >= 2) or []
       @routePattern(url, pattern, args)

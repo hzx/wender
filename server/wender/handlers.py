@@ -195,6 +195,17 @@ class OrmOpHandler(BaseHandler):
 
     return {}
 
+  def opSelectOne(self):
+    coll = self.get_argument('coll', None)
+    hsh = self.get_argument('hash', None)
+    slug = self.get_argument('slug', None)
+    if (not coll) or (not hsh) or (not slug):
+      raise HTTPError(500, 'provide coll, hash, slug')
+
+    obj = self.orm.selectOne(coll, {'slug': slug})
+
+    return {'hash': hsh, 'obj': obj}
+
   def opSelectFrom(self):
     coll = self.get_argument('coll', None)
     hsh = self.get_argument('hash', None)
@@ -229,6 +240,7 @@ class OrmOpHandler(BaseHandler):
       'append': self.opAppend,
       'delete': self.opDelete,
       'update': self.opUpdate,
+      'select_one': self.opSelectOne,
       'select_from': self.opSelectFrom,
     }
 

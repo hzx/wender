@@ -28,6 +28,7 @@ class CheckedToolbar extends View {
   }
 
   void selectToolbarButton(tag button) {
+    if button is none { return none; }
     if button.hasClass('selected') { return none; }
     if this.lastNavButton isnot none {
       this.lastNavButton.removeClass('selected');

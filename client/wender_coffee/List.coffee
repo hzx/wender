@@ -44,12 +44,12 @@ class ns.List
 
   appendNode: (node) ->
 
-  insertAfter: (obj, afterObj) ->
+  insertAfter: (obj, afterId) ->
     node = new ns.ListNode(obj)
-    if afterObj.getHash() of @nodes
+    if afterId of @nodes
       @nodes[obj.getHash()] = node
       @count = @count + 1
-      after = @nodes[afterObj.getHash()]
+      after = @nodes[afterId]
       if after.next isnt null
         after.next.prev = node
         node.next = after.next
@@ -59,12 +59,12 @@ class ns.List
       node.prev = after
     node
 
-  insertBefore: (obj, beforeObj) ->
+  insertBefore: (obj, beforeId) ->
     node = new ns.ListNode(obj)
-    if beforeObj.getHash() of @nodes
+    if beforeId of @nodes
       @nodes[obj.getHash()] = node
       @count = @count + 1
-      before = @nodes[beforeObj.getHash()]
+      before = @nodes[beforeId]
       if before.prev isnt null
         before.prev.next = node
         node.prev = before.prev

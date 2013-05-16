@@ -397,7 +397,7 @@ class ns.DomElement extends ns.DomNode
     node = @render(obj)
     node.obj = obj
     if before isnt null
-      beforeNode = @objChilds[before.getHash()]
+      beforeNode = @objChilds[before]
       @insertBefore(node, beforeNode)
     else
       @append(node)

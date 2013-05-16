@@ -187,7 +187,7 @@ class Orm(object):
 
     cursor = seq
     while cursor:
-      names.append(cursor['name'])
+      if cursor['name']: names.append(cursor['name'])
       if cursor is lastList: break
       cursor = cursor.get('child', None)
 
@@ -249,8 +249,6 @@ class Orm(object):
 
     # list update
     else:
-      # print 'list update'
-
       listNames = self.getLastListNames(seq, lastList)
       coll = '.'.join(listNames)
 
@@ -281,7 +279,6 @@ class Orm(object):
     names = self.collToNames(coll)
     if not names: return None
     slug = self.setSlug(names, obj)
-    print 'slug: ' + str(slug)
     return self.append(names[0], obj)
 
   def insertBefore(self, coll, obj, parent, before):
@@ -303,7 +300,6 @@ class Orm(object):
       # append obj to src coll
       src = self.meta.linkToColl[dotcoll]
       slug = self.setSlug(names, obj)
-      print 'slug: ' + str(slug)
       newid = mongodb.insert(src, obj)
 
       # insert to link id
@@ -313,7 +309,6 @@ class Orm(object):
     # add obj to coll
     elif dotcoll in self.meta.colls:
       slug = self.setSlug(names, obj)
-      print 'slug: ' + str(slug)
       newid = mongodb.insert(dotcoll, obj)
       return newid
 
@@ -328,12 +323,6 @@ class Orm(object):
     if not names: return None
     pass
 
-  def selectOne(self, coll, where):
-    names = self.collToNames(coll)
-    if not names: return None
-
-    return mongodb.selectOne(coll, where)
-
   def getSrcColl(self, names):
     dotcoll = '.'.join(names)
     if dotcoll in self.meta.refToColl:
@@ -342,6 +331,21 @@ class Orm(object):
       return self.meta.linkToColl[dotcoll]
     if dotcoll in self.meta.colls:
       return dotcoll
+    return None
+
+  def selectOne(self, coll, where):
+    names = self.collToNames(coll)
+    if not names: return None
+    dotcoll = '.'.join(names)
+
+    if dotcoll in self.meta.refToColl:
+      src = self.meta.refToColl[dotcoll]
+      return mongodb.selectOne(dotcoll, where)
+    elif dotcoll in self.meta.linkToColl:
+      src = self.meta.linkToColl[dotcoll]
+      return mongodb.selectOne(dotcoll, where)
+    elif dotcoll in self.meta.colls:
+      return mongodb.selectOne(dotcoll, where)
     return None
 
   def selectFrom(self, coll, where, parent):
@@ -361,12 +365,6 @@ class Orm(object):
     elif dotcoll in self.meta.colls:
       return dbutil.cursorToList(mongodb.selectFrom(dotcoll, where))
 
-    print 'refs:'
-    print repr(self.meta.refToColl)
-    print 'links:'
-    print repr(self.meta.linkToColl)
-    print 'colls:'
-    print repr(self.meta.colls)
     raise Exception('unknown collection type "%s"' % dotcoll)
 
   def update(self, coll, values, where):

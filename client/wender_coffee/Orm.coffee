@@ -181,6 +181,7 @@ class ns.Orm
     # hash for operations
     @opHashGenerator = new ns.HashGenerator()
     # save op hash to dest coll
+    @selectOneOps = {}
     @selectFromOps = {}
     @insertOps = {}
 
@@ -397,22 +398,38 @@ class ns.Orm
   insert: (coll, val) ->
     coll.insert(val)
 
-  insertAfter: (coll, val, whereFn) ->
-    obj = @selectOne(coll, whereFn)
-    if obj isnt null
-      coll.insertAfter(val, obj)
+  insertAfter: (coll, val, objid) ->
+    # obj = @selectOne(coll, whereFn)
+    # if obj isnt null
+    coll.insertAfter(val, objid)
 
-  insertBefore: (coll, val, whereFn) ->
-    obj = @selectOne(coll, whereFn)
-    if obj isnt null
-      coll.insertBefore(val, obj)
+  insertBefore: (coll, val, objid) ->
+    # obj = @selectOne(coll, objid)
+    # if obj isnt null
+    coll.insertBefore(val, objid.value)
 
   selectCount: (coll) ->
     return coll.count
 
-  selectOne: (coll, whereFn) ->
-    # return coll.first.clone()
-    return coll.get(whereFn.id.value)
+  selectOne: (coll, whereFn, slug, callback) ->
+    if @isCollectionLazy(coll)
+      # load collection from server
+      names = getOrmNames(coll)
+      hash = @opHashGenerator.generate().toString()
+      data = {
+        'op': 'select_one',
+        'hash': hash,
+        'coll': names.join('.'),
+        'slug': slug
+      }
+      # add parent id if exists
+      if (coll.ormParent isnt null) and (coll.ormParent.ormName isnt 'world')
+        data['parent'] = coll.ormParent.id.value
+      # save dest to operations map
+      @selectOneOps[hash] = {'coll': coll, 'slug': slug, 'callback': callback}
+      ns.net.post(@urlOp, data, @onNetSelectOne, @onNetSelectOneFail)
+    else
+      return coll.get(whereFn.id.value)
 
   selectFrom: (dest, coll, whereFn, orderField, sortOrder) ->
     # if coll is lazy, select from server
@@ -627,7 +644,7 @@ class ns.Orm
       'hash': hash,
       'coll': names.join('.'),
       'obj': JSON.stringify(@structToJson(obj)),
-      'before': before.id.value
+      'before': before
     }
     # add parent id if exists
     if (coll.ormParent isnt null) and (coll.ormParent.ormName isnt 'world')
@@ -725,6 +742,24 @@ class ns.Orm
   onNetRemoveFail: (status) =>
     console.log('onNetRemoveFail')
     console.log(status)
+
+  onNetSelectOne: (response) =>
+    parsed = JSON.parse(response)
+    if not (parsed.hash of @selectOneOps)
+      return
+
+    params = @selectOneOps[parsed.hash]
+    delete @selectOneOps[parsed.hash]
+
+
+    instance = new @model[params.coll.ormType]
+    @fillStruct(instance, parsed.obj, params.coll.ormType)
+    instance.ormParent = params.coll
+
+    params.callback(instance)
+
+  onNetSelectOneFail: (status) =>
+    abc = ''
 
   onNetSelectFrom: (response) =>
     parsed = JSON.parse(response)
