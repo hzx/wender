@@ -12,10 +12,6 @@ def insert(db, coll, obj):
   newid = str(ObjectId())
   obj['id'] = newid
 
-  # debug
-  print 'mongodb.insert newid "%s"' % newid
-  print 'mongodb.insert coll "%s"' % coll
-
   db[coll].insert(obj)
 
   return newid

@@ -718,8 +718,9 @@ class ns.Orm
     console.log(status)
 
   onNetRemove: (response) =>
-    console.log('onNetRemove')
-    console.log(response)
+    # console.log('onNetRemove')
+    # console.log(response)
+    dummy = ''
 
   onNetRemoveFail: (status) =>
     console.log('onNetRemoveFail')

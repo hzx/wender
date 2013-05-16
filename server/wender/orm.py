@@ -210,7 +210,6 @@ class Orm(object):
       # append obj to src coll
       src = self.meta.linkToColl[dotcoll]
       slug = self.setSlug(names, obj)
-      print 'slug: ' + str(slug)
       newid = mongodb.insert(src, obj)
 
       # append to link id
@@ -219,7 +218,6 @@ class Orm(object):
     # add obj to coll
     elif dotcoll in self.meta.colls:
       slug = self.setSlug(names, obj)
-      print 'slug: ' + str(slug)
       newid = mongodb.insert(dotcoll, obj)
       return newid
 
@@ -336,6 +334,16 @@ class Orm(object):
 
     return mongodb.selectOne(coll, where)
 
+  def getSrcColl(self, names):
+    dotcoll = '.'.join(names)
+    if dotcoll in self.meta.refToColl:
+      return self.meta.refToColl[dotcoll]
+    if dotcoll in self.meta.linkToColl:
+      return self.meta.linkToColl[dotcoll]
+    if dotcoll in self.meta.colls:
+      return dotcoll
+    return None
+
   def selectFrom(self, coll, where, parent):
     names = self.collToNames(coll)
     if not names: return None
@@ -353,6 +361,12 @@ class Orm(object):
     elif dotcoll in self.meta.colls:
       return dbutil.cursorToList(mongodb.selectFrom(dotcoll, where))
 
+    print 'refs:'
+    print repr(self.meta.refToColl)
+    print 'links:'
+    print repr(self.meta.linkToColl)
+    print 'colls:'
+    print repr(self.meta.colls)
     raise Exception('unknown collection type "%s"' % dotcoll)
 
   def update(self, coll, values, where):
@@ -400,9 +414,10 @@ class Orm(object):
     if not parentid: raise Exception('append to ref, link must provide parent id')
 
     parentNames = collNames[:-1]
-    if len(parentNames) != 1: raise Exception('append to ref, link must be in parent object')
-
-    parentColl = parentNames[0]
+    if len(parentNames) == 1:
+      parentColl = parentNames[0]
+    else:
+      parentColl = self.getSrcColl(parentNames)
     fieldName = collNames[len(collNames)-1]
 
     # get parent object
@@ -421,9 +436,10 @@ class Orm(object):
     if not parentid: raise Exception('insert to ref, link must provide parent id')
 
     parentNames = names[:-1]
-    if len(parentNames) != 1: raise Exception('insert to ref, link must be in parent object')
-
-    parentColl = parentNames[0]
+    if len(parentNames) == 1:
+      parentColl = parentNames[0]
+    else:
+      parentColl = self.getSrcColl(parentNames)
     fieldName = names[len(names)-1]
 
     # get parent object
@@ -442,12 +458,13 @@ class Orm(object):
 
   # TODO(dem) implement
   def selectFromRefLink(self, src, collNames, where, parentid):
-    if not parentid: raise Exception('append to ref, link must provide parent id')
+    if not parentid: raise Exception('select from ref, link must provide parent id')
 
     parentNames = collNames[:-1]
-    if len(parentNames) != 1: raise Exception('append to ref, link must be in parent object')
-
-    parentColl = parentNames[0]
+    if len(parentNames) == 1:
+      parentColl = parentNames[0]
+    else:
+      parentColl = self.getSrcColl(parentNames)
     fieldName = collNames[len(collNames)-1]
 
     # get parent object
@@ -470,9 +487,10 @@ class Orm(object):
     if not parentid: raise Exception('delete from ref, link must provide parent id')
 
     parentNames = names[:-1]
-    if len(parentNames) != 1: raise Exception('delete ref, link must be in parent object')
-
-    parentColl = parentNames[0]
+    if len(parentNames) == 1:
+      parentColl = parentNames[0]
+    else:
+      parentColl = self.getSrcColl(parentNames)
     fieldName = names[len(names)-1]
 
     # get parent object
@@ -501,8 +519,6 @@ class Orm(object):
     Find slug field and set it
     Return generated slug or None is slug not exists
     """
-    print 'setSlug:'
-    print repr(names)
     # get obj type
     fields = self.meta.getCollType(names)
     if not fields: return None
