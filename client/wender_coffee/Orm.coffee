@@ -648,8 +648,7 @@ class ns.Orm
     ns.net.post(@urlOp, data, @onNetRemove, @onNetRemoveFail)
 
   onNetSetValue: (response) =>
-    console.log 'onNetSetValue, response:'
-    console.log response
+    abc = ''
 
   onNetSetValueFail: (status) =>
     console.log 'onNetSetValueFail, status:'
@@ -766,8 +765,6 @@ class ns.Orm
       if name is 'world'
         continue
       params = fields[name]
-      if params.isValueType or params.isArray
-        continue
       fields = @structs[params.type]
     return params
 
