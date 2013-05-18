@@ -26,6 +26,16 @@ class UploadFile extends View {
       </div>;
   }
 
+  void enterDocument() {
+    super();
+    this.element.parent = this;
+  }
+
+  void exitDocument() {
+    this.element.parent = none;
+    super();
+  }
+
   string renderText() {
     return this.text;
   }
