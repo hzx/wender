@@ -5,7 +5,36 @@ Create image and load dynamically.
 Set placeholder image before loading.
 */
 class Image extends View {
+  object image = none;
 
+  () {
+    super();
+  }
+
+  tag render() {
+    return <img class=['ui_image'] src=wender.orm.getImageUrl(this.image)/>;
+  }
+
+  void enterDocument() {
+    super();
+    # listen image
+    this.image.addListener(this.onChange);
+  }
+
+  void exitDocument() {
+    this.image.removeListener(this.onChange);
+    # unlisten image
+    super();
+  }
+
+  void onChange(string oldValue, string newValue) {
+    var imgurl = wender.orm.getImageUrl(this.image);
+    this.element.setAttribute('src', imgurl);
+  }
+}
+
+
+class Thumb extends View {
   robject image;
 
   () {
@@ -13,9 +42,21 @@ class Image extends View {
   }
 
   tag render() {
-    return <div class=['ui_image']>
-        <img src=this.image/>
-      </div>;
+    return <img class=['ui_image'] src=wender.orm.getThumbUrl(this.image)/>;
   }
 
+  void enterDocument() {
+    super();
+    this.image.addListener(this.onChange);
+  }
+
+  void exitDocument() {
+    this.image.removeListener(this.onChange);
+    super();
+  }
+
+  void onChange(string oldValue, string newValue) {
+    var imgurl = wender.orm.getThumbUrl(this.image);
+    this.element.setAttribute('src', imgurl);
+  }
 }
