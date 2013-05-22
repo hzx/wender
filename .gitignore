@@ -9,3 +9,5 @@
 *.log
 
 .sass-cache
+
+.ropeproject

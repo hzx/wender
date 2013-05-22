@@ -24,7 +24,9 @@ for value:
 - gte:value - >=
 - regex:litstring
 - thumbSizes:['160x120', 320x240']
+- thumbCrop:true
 - imageSizes:['1200x400', '2400x800']
+- imageCrop:true
 for list:
 - lazy:true|false, by default lazy:true, list download at once or by query request
 - ref:'collName' contains only id's, may be ordered,
@@ -46,6 +48,7 @@ getOrmNames = (obj) ->
     cursor = cursor.ormParent
   names.reverse()
   return names
+
 
 # TODO(dem) implement it
 getOrmSequence = (obj, child = null) ->
@@ -81,9 +84,6 @@ getOrmSequence = (obj, child = null) ->
     return getOrmSequence(grandpa, node)
 
   if obj.ormKind is 'struct'
-    # console.log 'inner structures not implemented'
-    # console.log 'child:'
-    # console.log child
     node = {
       'kind': 'struct',
       'name': obj.ormName,
@@ -101,6 +101,7 @@ getOrmSequence = (obj, child = null) ->
 
   return null
 
+
 # base class for struct
 class ns.OrmStruct
   ormKind: 'struct'
@@ -113,7 +114,6 @@ class ns.OrmStruct
 
 # Base class for struct with id
 class ns.OrmHashStruct extends ns.OrmStruct
-
   constructor: (type, name, parent) ->
     super(type, name, parent)
 
@@ -130,6 +130,7 @@ class ns.OrmHashStruct extends ns.OrmStruct
   removeHashListener: (listener) ->
     @id.removeListener(listener)
 
+
 class OrmStructMeta
   constructor: (name, fields) ->
     @kind = name
@@ -137,6 +138,7 @@ class OrmStructMeta
 
   parseFields: (fields) ->
     return fields
+
 
 # class ns.OrmField
 # 
@@ -154,7 +156,6 @@ class OrmStructMeta
 # TODO(dem) Change, validate values of types OrmValue, OrmList
 # Send/receive data by Net
 class ns.Orm
-
   constructor: ->
     # map struct name to params (fields, create structClass method)
     @structs = {}
@@ -200,6 +201,13 @@ class ns.Orm
     @world = world
     @loadCallback = callback
     ns.net.get(url, @onLoadSuccess, @onLoadFail)
+
+  addToCache: (hash, val) ->
+    @insertOps[hash] = val
+  getFromCache: (hash) ->
+    return @insertOps[hash]
+  deleteFromCache: (hash) ->
+    delete @insertOps[hash]
 
   fillWorld: (data) ->
     meta = @structs['World']
@@ -320,20 +328,39 @@ class ns.Orm
   # Validate value
   
   validate: (obj) ->
-    parent = obj.ormParent
-
     # obj maybe struct, list or value
     
     # need struct or struct, field name to get validate params
     
     # validate obj
+    parent = obj.ormParent
 
   # work with structs
 
   # work with server orm
 
+  uploadImages: (field, files, success, fail) ->
+    ###
+    # Params:
+    # field - struct.field string, need to detect image sizes
+    # files - files to send
+    # success - hash, contain filenames
+    ###
+    hash = @opHashGenerator.generate().toString()
+    data = {
+      'op': 'upload_images',
+      'field': field,
+      'hash': hash
+    }
+
+    ns.net.uploadFiles(@urlOp, 'imgs', files, data, success, fail)
+    return hash
+
   # field must be dot_names
   updateImage: (field, file, success, fail) ->
+    data = {
+      'op': 'update_image',
+    }
     ops = [
       {'update_image': field}
     ]
@@ -374,8 +401,10 @@ class ns.Orm
 
   arrayToJson: (arr, params) ->
     buf = []
-    for item in arr
-      buf.push(@structToJson(item))
+    cursor = arr.first
+    while cursor isnt null
+      buf.push(@structToJson(cursor.obj))
+      cursor = cursor.next
     return buf
 
   refToJson: (arr, params) ->
@@ -540,6 +569,24 @@ class ns.Orm
 
   isWorldNames: (names) ->
     return (names.length > 0) and (names[0] is 'world')
+
+  bunchAppend: (coll, objs) ->
+    names = getOrmNames(coll)
+    data = {
+      'op': 'bunch_append',
+      'coll': names.join('.'),
+      # 'objs': JSON.stringify(
+    }
+    ns.net.post(@urlOp, data, @onNetBunchAppend, @onNetBunchAppendFail)
+    
+  bunchInsertBefore: (coll, objs, before) ->
+    names = getOrmNames(coll)
+    data = {
+      'op': 'bunch_insert_before',
+      'coll': names.join('.'),
+    }
+    ns.net.post(@urlOp, data,
+      @onNetBunchInsertBefore, @onNetBunchInsertBeforeFail)
 
   # events
 
@@ -762,13 +809,13 @@ class ns.Orm
     abc = ''
 
   onNetSelectFrom: (response) =>
-    parsed = JSON.parse(response)
+    res = JSON.parse(response)
     # get dest from cache
-    if not (parsed.hash of @selectFromOps)
+    if not (res.hash of @selectFromOps)
       return
 
-    params = @selectFromOps[parsed.hash]
-    delete @selectFromOps[parsed.hash]
+    params = @selectFromOps[res.hash]
+    delete @selectFromOps[res.hash]
 
     params.dest.emptySilent()
 
@@ -777,7 +824,7 @@ class ns.Orm
     params.dest.ormName = params.coll.ormName
     params.dest.ormParent = params.coll.ormParent
 
-    @fillArray(params.dest, parsed.coll, params.ormType)
+    @fillArray(params.dest, res.coll, params.ormType)
 
   onNetSelectFromFail: (status) =>
     console.log('onNetSelectFromFail')

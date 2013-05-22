@@ -3,26 +3,23 @@
 indexOrderMap = {
     'asc': 1,
     'desc': -1,
-  }
+}
 
 
 class DbIndex(object):
-
-  def __init__(self, names, order):
-    self.names = names
-    self.order = indexOrderMap[order]
-    self.value_types = ['bool', 'int', 'float', 'string', 'datetime']
+    def __init__(self, names, order):
+        self.names = names
+        self.order = indexOrderMap[order]
+        self.value_types = ['bool', 'int', 'float', 'string', 'datetime']
 
 
 class DbCollection(object):
-
   def __init__(self, name):
     self.name = name
     self.indexes = []
 
 
 class DbMeta(object):
-
   def __init__(self, structs):
     self.structs = structs
     self.colls = []
@@ -233,10 +230,12 @@ class DbMeta(object):
 
   def getCollType(self, names):
     fields = self.getStruct('World')
-    if len(names) == 0: return None
+    if len(names) == 0:
+      return None
     for name in names:
       params = fields.get(name, None)
-      if not params: return None
+      if not params:
+        return None
       fields = self.getStruct(params['type'])
     return fields
 
@@ -265,3 +264,20 @@ class DbMeta(object):
   #     structFields = getStruct(params.type)
   #     self.searchCollLinkRefs(coll, structFields)
 
+  def getFieldParams(self, field):
+    # split field by field names
+    names = field.split('.')
+    if len(names) < 2:
+      return None
+    # get struct
+    fields = self.getStruct(names[0])
+    tail = names[1:]
+    # for every name in names search field params
+    params = None
+    for name in tail:
+      params = fields.get(name, None)
+      if not params:
+        return None
+      if not params['isValueType']:
+        fields = self.getStruct(params['type'])
+    return params

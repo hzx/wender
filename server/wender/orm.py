@@ -3,17 +3,20 @@ from wender import dbmeta
 from wender import db as dbutil
 import re
 from pytils.translit import slugify
+from wender.utils import image as uimage
+import os.path
+import os
+import uuid
 
 
 class OrmField(object):
-
   def __init__(self, name, kind, params):
     self.name = name
     self.kind = kind
     self.params = params
 
-class OrmStructMeta(object):
 
+class OrmStructMeta(object):
   def __init__(self, name, fields):
     self.name = name
     self.fields = self.parseFields(fields)
@@ -24,9 +27,9 @@ class OrmStructMeta(object):
       fields[field.name] = field
     return fields
 
+
 # TODO(dem) check structs meta before operations
 class Orm(object):
-
   def __init__(self, structs):
     self.meta = dbmeta.DbMeta(structs)
 
@@ -63,10 +66,12 @@ class Orm(object):
     """
     fields = self.meta.getStruct('World')
     for name, params in fields.items():
-      if params['isValueType'] or params['isArray']: continue
+      if params['isValueType'] or params['isArray']:
+        continue
 
       collobj = mongodb.selectOne(name, {})
-      if collobj: continue
+      if collobj:
+        continue
 
       # if default object not found, create it
       default = self.composeDefaultObject(params['type'])
@@ -91,7 +96,9 @@ class Orm(object):
         return 0.0
       if paramtype == 'string':
         return ''
-      raise Exception('getDefaultFieldValue: dont know default value to type "%s"' % paramtype)
+      raise Exception(
+        'getDefaultFieldValue: dont know default value to type "%s"'
+        % paramtype)
     # array type
     if params['isArray']:
       return []
@@ -113,14 +120,16 @@ class Orm(object):
 
     accessre = self.accessToRe[useraccess]
     accessReadRe = accessre['read']
-    accessWriteRe = accessre['write']
+    # accessWriteRe = accessre['write']
 
     for docname, params in self.meta.docs.items():
       access = params.get('access', '----')
-      if not accessReadRe.match(access): continue
+      if not accessReadRe.match(access):
+        continue
 
       if params['isArray']:
-        if self.isArrayLazy(params): continue
+        if self.isArrayLazy(params):
+          continue
         db[docname] = dbutil.cursorToList(mongodb.selectFrom(docname, {}))
       else:
         db[docname] = mongodb.selectOne(docname, {})
@@ -154,9 +163,11 @@ class Orm(object):
     cursor = seq
     names = []
     while cursor:
-      if 'parentname' in cursor: names.append(cursor['parentname'])
+      if 'parentname' in cursor:
+        names.append(cursor['parentname'])
       names.append(cursor['name'])
-      if cursor['kind'] == 'value': break
+      if cursor['kind'] == 'value':
+        break
       cursor = cursor.get('child', None)
     return names
 
@@ -164,7 +175,8 @@ class Orm(object):
     value = None
     cursor = seq
     while cursor:
-      if cursor['kind'] == 'value': value = cursor
+      if cursor['kind'] == 'value':
+        value = cursor
       cursor = cursor.get('child', None)
     return value
 
@@ -187,16 +199,18 @@ class Orm(object):
 
     cursor = seq
     while cursor:
-      if cursor['name']: names.append(cursor['name'])
-      if cursor is lastList: break
+      if cursor['name']:
+        names.append(cursor['name'])
+      if cursor is lastList:
+        break
       cursor = cursor.get('child', None)
 
     return names
 
-
   def append(self, coll, obj, parent):
     names = self.collToNames(coll)
-    if not names: return None
+    if not names:
+      return None
 
     dotcoll = '.'.join(names)
 
@@ -204,12 +218,12 @@ class Orm(object):
     if dotcoll in self.meta.refToColl:
       self.appendIdToRefLink(names, obj['id'], parent)
       return obj['id']
-        
+
     # add obj to coll and id to link
     elif dotcoll in self.meta.linkToColl:
       # append obj to src coll
       src = self.meta.linkToColl[dotcoll]
-      slug = self.setSlug(names, obj)
+      self.setSlug(names, obj)
       newid = mongodb.insert(src, obj)
 
       # append to link id
@@ -217,7 +231,7 @@ class Orm(object):
       return newid
     # add obj to coll
     elif dotcoll in self.meta.colls:
-      slug = self.setSlug(names, obj)
+      self.setSlug(names, obj)
       newid = mongodb.insert(dotcoll, obj)
       return newid
 
@@ -243,8 +257,9 @@ class Orm(object):
 
       slugs = self.updateSlug([coll], field, value['value'])
       values = {field: value['value']}
-      if slugs: values[slugs[0]] = slugs[1]
-    
+      if slugs:
+        values[slugs[0]] = slugs[1]
+
       mongodb.update(coll, values, {'id': value['parentid']})
 
     # list update
@@ -277,8 +292,9 @@ class Orm(object):
 
   def insert(self, coll, obj):
     names = self.collToNames(coll)
-    if not names: return None
-    slug = self.setSlug(names, obj)
+    if not names:
+      return None
+    self.setSlug(names, obj)
     return self.append(names[0], obj)
 
   def insertBefore(self, coll, obj, parent, before):
@@ -286,7 +302,8 @@ class Orm(object):
     For ref and link.
     """
     names = self.collToNames(coll)
-    if not names: return None
+    if not names:
+      return None
 
     dotcoll = '.'.join(names)
 
@@ -299,7 +316,7 @@ class Orm(object):
     elif dotcoll in self.meta.linkToColl:
       # append obj to src coll
       src = self.meta.linkToColl[dotcoll]
-      slug = self.setSlug(names, obj)
+      self.setSlug(names, obj)
       newid = mongodb.insert(src, obj)
 
       # insert to link id
@@ -308,7 +325,7 @@ class Orm(object):
 
     # add obj to coll
     elif dotcoll in self.meta.colls:
-      slug = self.setSlug(names, obj)
+      self.setSlug(names, obj)
       newid = mongodb.insert(dotcoll, obj)
       return newid
 
@@ -320,7 +337,8 @@ class Orm(object):
     For ref and link.
     """
     names = self.collToNames(coll)
-    if not names: return None
+    if not names:
+      return None
     pass
 
   def getSrcColl(self, names):
@@ -335,22 +353,24 @@ class Orm(object):
 
   def selectOne(self, coll, where):
     names = self.collToNames(coll)
-    if not names: return None
+    if not names:
+      return None
     dotcoll = '.'.join(names)
 
     if dotcoll in self.meta.refToColl:
       src = self.meta.refToColl[dotcoll]
-      return mongodb.selectOne(dotcoll, where)
+      return mongodb.selectOne(src, where)
     elif dotcoll in self.meta.linkToColl:
       src = self.meta.linkToColl[dotcoll]
-      return mongodb.selectOne(dotcoll, where)
+      return mongodb.selectOne(src, where)
     elif dotcoll in self.meta.colls:
       return mongodb.selectOne(dotcoll, where)
     return None
 
   def selectFrom(self, coll, where, parent):
     names = self.collToNames(coll)
-    if not names: return None
+    if not names:
+      return None
 
     dotcoll = '.'.join(names)
 
@@ -369,13 +389,15 @@ class Orm(object):
 
   def update(self, coll, values, where):
     names = self.collToNames(coll)
-    if not names: return None
+    if not names:
+      return None
 
     return mongodb.update(coll, values, where)
 
   def delete(self, coll, objid, parentid):
     names = self.collToNames(coll)
-    if not names: return None
+    if not names:
+      return None
 
     dotcoll = '.'.join(names)
 
@@ -397,26 +419,78 @@ class Orm(object):
     else:
       raise Exception('unknown collection type "%s"' % dotcoll)
 
-  def updateImage(self, field, img, id):
-    # get field
-    # delete old field if exists
-    # update field
-    # return image filename
-
-    # debug
-    print 'updateImage not implemented'
+  def saveImages(self, field, imgs, imagePath):
+      """
+      Return saved images
+      """
+      saved = []
+      # get field params
+      params = self.meta.getFieldParams(field)
+      if not params:
+          return None
+      imageSizes = params.get('imageSizes', None)
+      imageCrop = params.get('imageCrop', False)
+      thumbSizes = params.get('thumbSizes', None)
+      thumbCrop = params.get('thumbCrop', None)
+      # save files
+      for img in imgs:
+          # get from src filename extension
+          srcname, srcext = os.path.splitext(img['filename'])
+          # generate filename
+          filename = str(uuid.uuid4()) + srcext
+          # compose filepath
+          filepath = os.path.join(imagePath, filename)
+          # save original image
+          with open(filepath, 'w') as f:
+            f.write(img['body'])
+          # add filename to saved
+          saved.append(filename)
+          # generate for imageSizes
+          if imageSizes:
+              for sz in imageSizes:
+                  # generate sized image filename
+                  imagepath = os.path.join(
+                      imagePath,
+                      "%s_%s" % (sz, filename))
+                  nums = sz.split('x')
+                  if imageCrop:
+                      uimage.createResizedImageCrop(
+                          filepath, imagepath,
+                          (int(nums[0]), int(nums[1])))
+                  else:
+                      uimage.createResizedImage(
+                          filepath, imagepath,
+                          (int(nums[0]), int(nums[1])))
+          # generate for thumbSizes
+          if thumbSizes:
+              for sz in thumbSizes:
+                  # generate sized thumb filename
+                  thumbpath = os.path.join(
+                      imagePath,
+                      "%s_%s" % (sz, filename))
+                  nums = sz.split('x')
+                  if thumbCrop:
+                      uimage.createResizedImageCrop(
+                          filepath, thumbpath,
+                          (int(nums[0]), int(nums[1])))
+                  else:
+                      uimage.createResizedImage(
+                          filepath, thumbpath,
+                          (int(nums[0]), int(nums[1])))
+      return saved
 
   # HELPERS
 
   def appendIdToRefLink(self, collNames, objid, parentid):
-    if not parentid: raise Exception('append to ref, link must provide parent id')
+    if not parentid:
+      raise Exception('append to ref, link must provide parent id')
 
     parentNames = collNames[:-1]
     if len(parentNames) == 1:
       parentColl = parentNames[0]
     else:
       parentColl = self.getSrcColl(parentNames)
-    fieldName = collNames[len(collNames)-1]
+    fieldName = collNames[len(collNames) - 1]
 
     # get parent object
     parentObj = mongodb.selectOne(parentColl, {'id': parentid})
@@ -431,14 +505,15 @@ class Orm(object):
       mongodb.update(parentColl, {fieldName: idsField}, {'id': parentid})
 
   def insertBeforeToRefLink(self, names, objid, parentid, beforeid):
-    if not parentid: raise Exception('insert to ref, link must provide parent id')
+    if not parentid:
+      raise Exception('insert to ref, link must provide parent id')
 
     parentNames = names[:-1]
     if len(parentNames) == 1:
       parentColl = parentNames[0]
     else:
       parentColl = self.getSrcColl(parentNames)
-    fieldName = names[len(names)-1]
+    fieldName = names[len(names) - 1]
 
     # get parent object
     parent = mongodb.selectOne(parentColl, {'id': parentid})
@@ -456,14 +531,15 @@ class Orm(object):
 
   # TODO(dem) implement
   def selectFromRefLink(self, src, collNames, where, parentid):
-    if not parentid: raise Exception('select from ref, link must provide parent id')
+    if not parentid:
+      raise Exception('select from ref, link must provide parent id')
 
     parentNames = collNames[:-1]
     if len(parentNames) == 1:
       parentColl = parentNames[0]
     else:
       parentColl = self.getSrcColl(parentNames)
-    fieldName = collNames[len(collNames)-1]
+    fieldName = collNames[len(collNames) - 1]
 
     # get parent object
     parentObj = mongodb.selectOne(parentColl, {'id': parentid})
@@ -482,14 +558,15 @@ class Orm(object):
     # return dbutil.cursorToList(items)
 
   def deleteRefLink(self, names, objid, parentid):
-    if not parentid: raise Exception('delete from ref, link must provide parent id')
+    if not parentid:
+      raise Exception('delete from ref, link must provide parent id')
 
     parentNames = names[:-1]
     if len(parentNames) == 1:
       parentColl = parentNames[0]
     else:
       parentColl = self.getSrcColl(parentNames)
-    fieldName = names[len(names)-1]
+    fieldName = names[len(names) - 1]
 
     # get parent object
     parentObj = mongodb.selectOne(parentColl, {'id': parentid})
@@ -508,7 +585,8 @@ class Orm(object):
     values = {val['name']: val['value']}
 
     slugs = self.updateSlug(coll.split('.'), val['name'], val['value'])
-    if slugs: values[slugs[0]] = slugs[1]
+    if slugs:
+      values[slugs[0]] = slugs[1]
 
     mongodb.update(coll, values, {'id': val['parentid']})
 
@@ -519,7 +597,8 @@ class Orm(object):
     """
     # get obj type
     fields = self.meta.getCollType(names)
-    if not fields: return None
+    if not fields:
+      return None
 
     # search slug field name
     slugName = None
@@ -527,14 +606,16 @@ class Orm(object):
       if 'slug' in params:
         slugName = name
         break
-    if not slugName: return None
+    if not slugName:
+      return None
 
     # get slug src
     slugSrc = fields[slugName]['slug']
 
     # gen slug from src
     src = obj.get(slugSrc, None)
-    if not src: return None
+    if not src:
+      return None
     slug = slugify(src)
 
     # set slug
@@ -545,7 +626,8 @@ class Orm(object):
   def updateSlug(self, names, field, value):
     # get coll type
     fields = self.meta.getCollType(names)
-    if not fields: return None
+    if not fields:
+      return None
 
     # search slug field name
     slugName = None
@@ -553,15 +635,25 @@ class Orm(object):
       if 'slug' in params:
         slugName = name
         break
-    if not slugName: return None
+    if not slugName:
+      return None
 
     # get slug src
     slugSrc = fields[slugName]['slug']
 
     # slug src must be equal to field
-    if slugSrc != field: return None
+    if slugSrc != field:
+      return None
 
     # gen slug
     slug = slugify(value)
 
     return [slugName, slug]
+
+  def updateObjIds(self, coll, obj):
+    """
+    Search inner fields and update id
+    """
+    # from coll get obj struct fields
+    # for each field search id name
+    pass

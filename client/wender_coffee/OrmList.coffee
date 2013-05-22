@@ -79,8 +79,6 @@ class ns.OrmList extends ns.ObservableList
     # copy all values from current list
     cursor = @first
     while cursor isnt null
-      child = cursor.obj
-      clone = child.clone()
+      list.append(cursor.obj.clone(), false)
       cursor = cursor.next
-      list.append(clone, false)
 

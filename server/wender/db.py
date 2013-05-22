@@ -7,12 +7,11 @@ import pymongo
 from pymongo.mongo_client import MongoClient
 from bson.objectid import ObjectId
 import pymongo.errors
-import bson.json_util
+# import bson.json_util
 import json
 from datetime import datetime
 
 import functools
-
 
 
 RECONNECT_COUNT = 3
@@ -26,6 +25,7 @@ def connect():
   connection = MongoClient()
   db = connection[options.db_name]
   return db
+
 
 def authorize(db):
   # db.authenticate(options.db_user, options.db_password)
@@ -41,8 +41,10 @@ def storable(method):
     result = None
     for i in range(RECONNECT_COUNT):
       try:
-        if db == None: db = connect()
-        else: authorize(db)
+        if not db:
+          db = connect()
+        else:
+          authorize(db)
         result = method(db, *args, **kwargs)
         # if method called ok then break cicle
         break
@@ -92,6 +94,7 @@ def listToJson(cursor):
 
   return result
 
+
 def cursorToList(cursor):
   return [item for item in cursor]
 
@@ -100,4 +103,6 @@ def toJson(item):
   #return json.dumps(item, default=pymongo.json_util.default)
   return json.dumps(item, default=jsonDefault)
 
-  
+
+def getId():
+  return str(ObjectId())

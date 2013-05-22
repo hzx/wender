@@ -98,14 +98,18 @@ class ns.Net
     xhr.open("POST", url, true)
     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest')
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
-    # xhr.setRequestHeader('Content-Length', signedData.length)
     xhr.send(signedData)
 
   # ops - orm operations
-  uploadFiles: (url, fieldName, files, ops, success, fail) ->
+  uploadFiles: (url, fieldName, files, fields, success, fail) ->
+    # compose formData
     formData = new FormData()
+    # add xsrf
     formData.append('_xsrf', @xsrf)
-    formData.append('ops', ops)
+    # add fields
+    for k, v of fields
+      formData.append(k, v)
+    # add files
     for file in files
       formData.append(fieldName, file)
 
@@ -119,5 +123,8 @@ class ns.Net
           fail(xhr.status)
 
     xhr.open("POST", url, true)
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest')
+    # xhr.setRequestHeader('Content-Type', 'multipart/form-data')
+    # xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
     xhr.send(formData)
 
