@@ -81,4 +81,5 @@ class ns.OrmList extends ns.ObservableList
     while cursor isnt null
       list.append(cursor.obj.clone(), false)
       cursor = cursor.next
+    return list
 
