@@ -75,7 +75,7 @@ class ns.OrmList extends ns.ObservableList
       this.removeSilent(hash)
 
   clone: ->
-    list = new ns.OrmList(@type, @name, null)
+    list = new ns.OrmList(@ormType, @ormName, null)
     # copy all values from current list
     cursor = @first
     while cursor isnt null
