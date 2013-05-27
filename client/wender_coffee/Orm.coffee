@@ -458,6 +458,8 @@ class ns.Orm
       @selectOneOps[hash] = {'coll': coll, 'slug': slug, 'callback': callback}
       ns.net.post(@urlOp, data, @onNetSelectOne, @onNetSelectOneFail)
     else
+      if !!slug
+        return coll.getBy('slug', slug)
       return coll.get(whereFn.id.value)
 
   selectFrom: (dest, coll, whereFn, orderField, sortOrder) ->

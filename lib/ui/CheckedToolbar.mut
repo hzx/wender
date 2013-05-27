@@ -7,7 +7,6 @@ class CheckedToolbar extends View {
   event eventSelected;
 
   tag lastNavButton = none;
-  /*tag lastView = none;*/
 
   () {
     super();

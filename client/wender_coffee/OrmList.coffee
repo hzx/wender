@@ -83,3 +83,10 @@ class ns.OrmList extends ns.ObservableList
       cursor = cursor.next
     return list
 
+  getBy: (name, value) ->
+    cursor = @first
+    while cursor isnt null
+      if cursor.obj[name].value is value
+        return cursor.obj
+      cursor = cursor.next
+    return null
