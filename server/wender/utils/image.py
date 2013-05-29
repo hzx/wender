@@ -1,5 +1,3 @@
-import tornado
-from tornado.options import options
 import os.path
 import hashlib
 import random
@@ -32,7 +30,8 @@ def saveMultiRequestFile(requestFiles, path):
 # internal method
 def generateFilename(original):
   name, ext = os.path.splitext(original)
-  return  hashlib.md5(str(random.random()) + str(random.random())).hexdigest() + ext
+  return hashlib.md5(str(random.random())
+                     + str(random.random())).hexdigest() + ext
 
 
 # internal method
@@ -55,6 +54,10 @@ def calcImageSize(size, image):
   iw = image.size[0]
   ih = image.size[1]
 
+  # don't resize small images to bigger
+  if (iw < size[0]) or (ih < size[1]):
+    return (iw, ih)
+
   # width / height
   ratio = float(iw) / float(ih)
 
@@ -75,6 +78,7 @@ def calcImageSize(size, image):
     width = int(float(height) * float(ratio))
 
   return (width, height)
+
 
 def calcImageCropSize(size, image):
   """
@@ -99,6 +103,7 @@ def calcImageCropSize(size, image):
 
   return (width, height)
 
+
 # public method
 def createResizedImage(srcFilename, destFilename, size):
   """
@@ -114,6 +119,7 @@ def createResizedImage(srcFilename, destFilename, size):
   image = image.resize(calcImageSize(size, image), Image.ANTIALIAS)
 
   image.save(destFilename, image.format)
+
 
 def createResizedImageCrop(src, dest, size):
   image = Image.open(src)
@@ -137,6 +143,7 @@ def createResizedImageCrop(src, dest, size):
   # crop image to size
   image = image.crop((left, top, right, bottom))
   image.save(dest, image.format)
+
 
 # public method
 def createResizedImages(filename, path, sizes):

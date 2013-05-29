@@ -618,6 +618,10 @@ class ns.Orm
     
     # change referenced values
 
+    # seq = JSON.stringify(ormobj)
+    # console.log('onSetValue:')
+    # console.log(seq)
+
     data = {
       'op': 'value',
       'seq': JSON.stringify(ormobj)

@@ -3,6 +3,7 @@ from tornado.web import HTTPError
 from tornado.web import authenticated
 from wender.utils.mongodb import toJson
 import json
+from tornado.escape import url_unescape
 
 
 class BaseHandler(RequestHandler):
@@ -114,7 +115,13 @@ class OrmOpHandler(BaseHandler):
         if not rawseq:
             raise HTTPError(500, 'send seq parameter')
 
-        seq = json.loads(rawseq)
+        unesc = url_unescape(rawseq)
+
+        print 'opValue:'
+        print repr(rawseq)
+        print repr(unesc)
+
+        seq = json.loads(unesc)
 
         self.orm.setValue(seq)
 

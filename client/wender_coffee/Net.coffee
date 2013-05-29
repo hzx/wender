@@ -90,7 +90,7 @@ class ns.Net
     buf = []
     for na, va of data
       # formData.append(na, va)
-      buf.push(na + '=' + va)
+      buf.push(na + '=' + encodeURIComponent(va))
     buf.push('_xsrf=' + @xsrf)
     # signedData = data + '&_xsrf=' + @xsrf
     signedData = buf.join('&')
@@ -108,7 +108,7 @@ class ns.Net
     formData.append('_xsrf', @xsrf)
     # add fields
     for k, v of fields
-      formData.append(k, v)
+      formData.append(k, encodeURIComponent(v))
     # add files
     for file in files
       formData.append(fieldName, file)
@@ -124,6 +124,7 @@ class ns.Net
 
     xhr.open("POST", url, true)
     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest')
+    # multipart/form-data not send fields
     # xhr.setRequestHeader('Content-Type', 'multipart/form-data')
     # xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
     xhr.send(formData)
