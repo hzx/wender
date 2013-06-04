@@ -19,6 +19,9 @@ class ns.OrmCacheList extends ns.OrmList
     # listen events
     @ormSrc = src
     @listenSrcEvents()
+    # copy orm params
+    @ormParent = src.ormParent
+    @ormName = src.ormName
     
   listenSrcEvents: ->
     @ormSrc.addListener(@onSrcChange)
@@ -34,16 +37,13 @@ class ns.OrmCacheList extends ns.OrmList
   
   onSrcChange: (oldvalue, newvalue) =>
     # change value without sync
-    console.log 'onSrcChange'
 
   onSrcInsert: (obj, before) =>
     # append without sync
     if before is null
-      console.log 'onSrcInsert'
       @append(obj, false)
     # insert before without sync
     else
-      console.log 'onSrcInsert before'
       @insertBefore(obj, before, false)
 
   onSrcDelete: (obj) =>

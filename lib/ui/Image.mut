@@ -6,13 +6,14 @@ Set placeholder image before loading.
 */
 class Image extends View {
   object image = none;
+  string uiclass = '';
 
   () {
     super();
   }
 
   tag render() {
-    return <img class=['ui_image'] src=wender.orm.getImageUrl(this.image)/>;
+    return <img class=[this.uiclass, 'ui_image'] src=wender.orm.getImageUrl(this.image)/>;
   }
 
   void enterDocument() {
@@ -35,14 +36,15 @@ class Image extends View {
 
 
 class Thumb extends View {
-  robject image;
+  object image;
+  string uiclass = '';
 
   () {
     super();
   }
 
   tag render() {
-    return <img class=['ui_image'] src=wender.orm.getThumbUrl(this.image)/>;
+    return <img class=[this.uiclass, 'ui_image'] src=wender.orm.getThumbUrl(this.image)/>;
   }
 
   void enterDocument() {

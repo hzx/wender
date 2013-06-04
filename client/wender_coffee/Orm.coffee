@@ -481,21 +481,21 @@ class ns.Orm
       ns.net.post(@urlOp, data, @onNetSelectFrom, @onNetSelectFromFail)
     else
       # load collection from cache
-      dest.empty()
+      dest.emptySilent()
       # set src collection
       dest.setSrc(coll)
       # add nodes
       cursor = coll.first
       while cursor isnt null
-        dest.append(cursor.obj.clone())
+        dest.append(cursor.obj.clone(), false)
         cursor = cursor.next
 
   selectConcat: (dest, colls) ->
-    dest.empty()
+    dest.emptySilent()
     for coll in colls
       cursor = coll.first
       while cursor isnt null
-        dest.append(cursor.obj.clone())
+        dest.append(cursor.obj.clone(), false)
         cursor = cursor.next
 
   selectSum: (coll, byField) ->

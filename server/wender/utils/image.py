@@ -113,9 +113,10 @@ def createResizedImage(srcFilename, destFilename, size):
   srcFilename, destFilename must be absolute path.
   """
   image = Image.open(srcFilename)
-  if image.mode not in ('L', 'RGB'):
+  if image.mode not in ('L', 'RGB', 'RGBA'):
     image = image.convert('RGB')
 
+  # if image.size != size:
   image = image.resize(calcImageSize(size, image), Image.ANTIALIAS)
 
   image.save(destFilename, image.format)
@@ -123,11 +124,12 @@ def createResizedImage(srcFilename, destFilename, size):
 
 def createResizedImageCrop(src, dest, size):
   image = Image.open(src)
-  if image.mode not in ('L', 'RGB'):
+  if image.mode not in ('L', 'RGB', 'RGBA'):
     image = image.convert('RGB')
 
   preCropSize = calcImageCropSize(size, image)
 
+  # if image.size != size:
   image = image.resize(preCropSize, Image.ANTIALIAS)
   # compute crop size
   if preCropSize[0] > size[0]:

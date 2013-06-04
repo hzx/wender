@@ -4,7 +4,7 @@ class UploadFile extends View {
 
   event eventSelected;
 
-  string uiclass = ['ui_upload'];
+  string uiclass = '';
   string text = 'ЗАГРУЗКА ФАЙЛА';
   bool multiple = false;
   bool isClicked = false;
@@ -15,12 +15,12 @@ class UploadFile extends View {
 
   tag render() {
     if this.multiple {
-      return <div class=this.uiclass onclick=this.onUploadClick>
+      return <div class=[this.uiclass, 'ui_upload'] onclick=this.onUploadClick>
           <div> this.renderText() </div>
           <input type='file' multiple=true onchange=this.onFileInputChange/>
         </div>;
     }
-    return <div class=this.uiclass onclick=this.onUploadClick>
+    return <div class=[this.uiclass, 'ui_upload'] onclick=this.onUploadClick>
         <div> this.renderText() </div>
         <input type='file' onchange=this.onFileInputChange/>
       </div>;
