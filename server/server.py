@@ -4,7 +4,7 @@ import tornado.options
 import tornado.web
 import os.path
 from wender.handlers import urls as wender_urls
-from wender.auth.handlers import urls as auth_urls 
+from wender.auth.handlers import urls as auth_urls
 from wender.orm import Orm
 from wender.structs import structs
 
@@ -34,6 +34,8 @@ handlers = wender_urls \
 
 STATIC_PATH = os.path.abspath(os.path.normpath(CURRENT_DIR + '/../static'))
 IMG_PATH = os.path.join(STATIC_PATH, 'img')
+
+define('imgpath', default=IMG_PATH)
 
 # COMPOSE SETTINGS
 settings = {

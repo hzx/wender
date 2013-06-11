@@ -6,7 +6,7 @@ class ns.HashGenerator
 
   generate: ->
     @hashCounter = @hashCounter + 1
-    @hashCounter
+    return (new Date()).getTime().toString() + '-' + @hashCounter
 
 
 encodeDict = (dict) ->

@@ -7,6 +7,7 @@ from wender.utils import image as uimage
 import os.path
 import os
 import uuid
+from tornado.options import options
 
 
 class OrmField(object):
@@ -236,7 +237,20 @@ class Orm(object):
       return newid
 
     else:
-      raise Exception('unknown collection type "%s"' % dotcoll)
+      # try resolve inner coll
+      # search parent coll without last names item
+      parentColl = '.'.join(names[:-1])
+      subColl = names[-1]
+      if parentColl in self.meta.refToColl:
+        src = self.meta.refToColl[parentColl]
+        self.appendInnerColl(src, parent, subColl, obj)
+      elif parentColl in self.meta.linkToColl:
+        src = self.meta.linkToColl[parentColl]
+        self.appendInnerColl(src, parent, subColl, obj)
+      elif parentColl in self.meta.links:
+        self.appendInnerColl(parentColl, parent, subColl, obj)
+      else:
+        raise Exception('unknown collection type "%s"' % dotcoll)
 
   def setValue(self, seq):
     # parse sequences
@@ -411,13 +425,29 @@ class Orm(object):
       self.deleteRefLink(names, objid, parentid)
       # delete from coll
       src = self.meta.linkToColl[dotcoll]
-      mongodb.delete(src, {'id': objid})
+      # mongodb.delete(src, {'id': objid})
+      self.deleteCollItem(src, objid)
     # just coll
     elif dotcoll in self.meta.colls:
       # delete from coll
-      mongodb.delete(dotcoll, {'id': objid})
+      # mongodb.delete(dotcoll, {'id': objid})
+      self.deleteCollItem(dotcoll, objid)
     else:
-      raise Exception('unknown collection type "%s"' % dotcoll)
+      # try resolve inner coll
+      # search parent coll without last names item
+      parentColl = '.'.join(names[:-1])
+      subColl = names[-1]
+      if parentColl in self.meta.refToColl:
+        src = self.meta.refToColl[parentColl]
+        self.deleteFromInnerColl(src, parentid, subColl, objid)
+      elif parentColl in self.meta.linkToColl:
+        src = self.meta.linkToColl[parentColl]
+        self.deleteFromInnerColl(src, parentid, subColl, objid)
+      elif parentColl in self.meta.colls:
+        self.deleteFromInnerColl(parentColl, parentid, subColl, objid)
+      else:
+        # if nothing found
+        raise Exception('unknown collection type "%s"' % dotcoll)
 
   def saveImages(self, field, imgs, imagePath):
       """
@@ -657,3 +687,164 @@ class Orm(object):
     # from coll get obj struct fields
     # for each field search id name
     pass
+
+  def deleteFromInnerColl(self, coll, parentId, field, objid):
+    """
+    In coll object with parentId search array field and remove objid.
+    """
+    # get parent object
+    parentObj = mongodb.selectOne(coll, {'id': parentId})
+    # get coll fields
+    parentFields = self.meta.getCollType(coll.split('.'))
+    # get inner coll fields
+    innerFields = self.meta.getStruct(parentFields[field]['type'])
+    # get field
+    arr = parentObj[field]
+    # from arr remove objid element
+    index = -1
+    for i, item in enumerate(arr):
+      if item['id'] == objid:
+        index = i
+        break
+    # if index not found just return
+    if index == -1:
+      return
+
+    # remove images from item
+    item = arr[index]
+    for name, params in innerFields.items():
+      if 'imageSizes' in params:
+        filename = item[name]
+        self.deleteImage(filename, params)
+    # remove element from arr
+    arr.pop(index)
+    # update parentObj
+    mongodb.update(coll, {field: arr}, {'id': parentId})
+
+  def appendInnerColl(self, coll, parentId, field, obj):
+    """
+    In coll object with parentId search array field and append obj.
+    """
+    print coll
+    print parentId
+    print field
+    print repr(obj)
+    # get parent object
+    parentObj = mongodb.selectOne(coll, {'id': parentId})
+    # get field
+    arr = parentObj[field]
+    # to arr add obj
+    arr.append(obj)
+    # update parentObj
+    mongodb.update(coll, {field: arr}, {'id': parentId})
+
+  def deleteCollItem(self, coll, itemId):
+    """
+    Do work in 2 stages:
+      1. search what to do
+      2. process search result
+    Delete inner arrays.
+    Delete images.
+    """
+    # store search results of [name, params]
+    imageFields = []
+    images = []
+    # store search results of [name, params]
+    links = []
+    # store search results of name, name, ...
+    internalColls = []
+
+    # get coll type
+    names = coll.split('.')
+    fields = self.meta.getCollType(names)
+    # search array field, image field in fields
+    for name, params in fields.items():
+      # found image by imageSizes
+      if 'imageSizes' in params:
+        imageFields.append([name, params])
+        continue
+      # found array field
+      if params['isArray']:
+        # ignore ref array
+        if 'ref' in params:
+          continue
+        # for link save
+        if 'link' in params:
+          links.append([name, params])
+          continue
+        # for internal collection save
+        else:
+          internalColls.append(name)
+          continue
+
+    # get item from coll
+    item = mongodb.selectOne(coll, {'id': itemId})
+
+    for imgf in imageFields:
+      imgfFilename = item[imgf[0]]
+      imgfParams = fields[imgf[0]]
+      images.append([imgfFilename, imgfParams])
+
+    # process internalColls
+    for collname in internalColls:
+      intcoll = item[collname]
+      # for each obj in intcoll search images
+      collnames = names + [collname]
+      collfields = self.meta.getCollType(collnames)
+      # in coll fields search images
+      for tmpname, tmpparams in collfields.items():
+        # found image field
+        if 'imageSizes' in tmpparams:
+          # for every intcoll add images
+          for tmpitem in intcoll:
+            tmpfilename = tmpitem[tmpname]
+            images.append([tmpfilename, tmpparams])
+
+
+    # process images
+
+    for image in images:
+      filename = image[0]
+      params = image[1]
+      self.deleteImage(filename, params)
+
+    # process links
+    for link in links:
+      linkname = link[0]
+      linkparams = link[1]
+      # get link ids from item
+      ids = item[linkname]
+      # get src coll
+      src = linkparams['link']
+      # delete from src coll for every id
+      for linkid in ids:
+        self.deleteCollItem(src, linkid)
+
+    # delete from coll
+    mongodb.delete(coll, {'id': itemId})
+
+  def deleteImage(self, filename, params):
+    srcFilename = os.path.join(options.imgpath, filename)
+    if not os.path.exists(srcFilename):
+      return
+
+    # remove srcFilename
+    self.deleteFile(srcFilename)
+
+    # remove imageSizes
+    if 'imageSizes' in params:
+      imageSizes = params['imageSizes']
+      for item in imageSizes:
+        tmpfilename = os.path.join(options.imgpath, "%s_%s" % (item, filename))
+        self.deleteFile(tmpfilename)
+
+    # remove thumbSizes
+    if 'thumbSizes' in params:
+      thumbSizes = params['thumbSizes']
+      for item in thumbSizes:
+        tmpfilename = os.path.join(options.imgpath, "%s_%s" % (item, filename))
+        self.deleteFile(tmpfilename)
+
+  def deleteFile(self, filename):
+    if os.path.exists(filename) and os.path.isfile(filename):
+      os.remove(filename)
