@@ -23,8 +23,8 @@ class Image extends View {
   }
 
   void exitDocument() {
-    this.image.removeListener(this.onChange);
     # unlisten image
+    this.image.removeListener(this.onChange);
     super();
   }
 
@@ -60,5 +60,43 @@ class Thumb extends View {
   void onChange(string oldValue, string newValue) {
     var imgurl = wender.orm.getThumbUrl(this.image);
     this.element.setAttribute('src', imgurl);
+  }
+}
+
+
+class BgImage extends View {
+  object image = none;
+  string uiclass = '';
+  string bgparams = '';
+
+  () {
+    super();
+  }
+
+  tag render() {
+    /* <div id='main_slider' style={background:'url(/static/img/info.jpg) 50% top no-repeat'}></div> */
+    return <div class=[this.uiclass, 'ui_bgimage'] style={background: 'url('+wender.orm.getImageUrl(this.image)+') ' + this.bgparams}/>;
+  }
+
+  string getUrl() {
+    return ;
+  }
+
+  void enterDocument() {
+    super();
+    # listen image
+    this.image.addListener(this.onChange);
+  }
+
+  void exitDocument() {
+    # unlisten image
+    this.image.removeListener(this.onChange);
+    super();
+  }
+
+  void onChange(string oldValue, string newValue) {
+    var imgurl = 'url('+ender.orm.getImageUrl(this.image)+') ' + this.bgparams;
+    var attr = {background: imgurl};
+    this.element.setAttribute('style', attr);
   }
 }

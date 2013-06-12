@@ -269,10 +269,22 @@ class Orm(object):
       coll = names[0]
       field = names[1]
 
+      # update slugs
       slugs = self.updateSlug([coll], field, value['value'])
       values = {field: value['value']}
       if slugs:
         values[slugs[0]] = slugs[1]
+
+      # get value params
+      fieldnames = coll + '.' + field
+      params = self.meta.getValueParams(fieldnames)
+
+      # if imageSizes in params - remove old image value
+      if 'imageSizes' in params:
+        # get object with field
+        obj = mongodb.selectOne(coll, {'id': value['parentid']})
+        filename = obj[field]
+        self.deleteImage(filename, params)
 
       mongodb.update(coll, values, {'id': value['parentid']})
 

@@ -281,3 +281,15 @@ class DbMeta(object):
       if not params['isValueType']:
         fields = self.getStruct(params['type'])
     return params
+
+  def getValueParams(self, dotname):
+    names = dotname.split('.')
+    fields = self.getStruct('World')
+    params = None
+    for name in names:
+      params = fields.get(name, None)
+      if params['isValueType']:
+        break
+
+      fields = self.getStruct(params['type'])
+    return params
