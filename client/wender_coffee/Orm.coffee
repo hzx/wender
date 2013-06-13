@@ -541,18 +541,35 @@ class ns.Orm
     }
     ns.net.post(@urlOp, data, @onNetRemove, @onNetRemoveFail)
 
-  getImageUrl: (filename) ->
+  getImageSize: (filename) ->
     if filename.value.length is 0
-      return ''
+      return null
 
     params = @getFieldParams(filename)
-    if params is null then return ''
+    if params is null then return null
 
     imageSizes = params.imageSizes
     if !!imageSizes is false
-      return ''
+      return null
 
-    return '/static/img/' + imageSizes[0] + '_' + filename.value
+    return imageSizes[0]
+
+  getImageUrl: (filename) ->
+    size = this.getImageSize(filename)
+    if size is null
+      return ''
+    # if filename.value.length is 0
+    #   return ''
+
+    # params = @getFieldParams(filename)
+    # if params is null then return ''
+
+    # imageSizes = params.imageSizes
+    # if !!imageSizes is false
+    #   return ''
+
+    # return '/static/img/' + imageSizes[0] + '_' + filename.value
+    return '/static/img/' + size + '_' + filename.value
 
   getThumbUrl: (filename) ->
     if filename.value.length is 0

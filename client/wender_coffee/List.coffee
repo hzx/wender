@@ -74,11 +74,43 @@ class ns.List
       node.next = before
     node
 
+  ###
+  # Return obj by hash
+  ###
   get: (hash) ->
     if hash of @nodes
       @nodes[hash].obj
     else
       null
+
+  ###
+  # Return next obj to current obj or null
+  ###
+  getNext: (obj) ->
+    hash = obj.getHash()
+    if not (hash of @nodes)
+      return null
+
+    node = @nodes[hash]
+    if node.next is null
+      return null
+
+    return node.next.obj
+
+  ###
+  # Return prev obj to current obj or null
+  ###
+  getPrev: (obj) ->
+    hash = obj.getHash()
+
+    if not (hash of @nodes)
+      return null
+
+    node = @nodes[hash]
+    if node.prev is null
+      return null
+
+    return node.prev.obj
 
   remove: (hash) ->
     if hash of @nodes
