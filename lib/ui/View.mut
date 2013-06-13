@@ -17,6 +17,7 @@ class View {
   string hash = none;
   bool isInDocument = false;
   object obj = none;
+  object data = none;
 
   object[] events = [];
 
