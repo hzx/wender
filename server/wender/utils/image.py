@@ -55,7 +55,7 @@ def calcImageSize(size, image):
   ih = image.size[1]
 
   # don't resize small images to bigger
-  if (iw < size[0]) or (ih < size[1]):
+  if (iw < size[0]) and (ih < size[1]):
     return (iw, ih)
 
   # width / height
