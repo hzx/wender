@@ -1,0 +1,22 @@
+
+
+class Video extends View {
+  # params
+  var video = none;
+  string uiclass = '';
+
+  () {
+    super();
+  }
+
+  tag render() {
+    var videoel = this.renderVideo();
+    videoel.node.innerHTML = this.video.value;
+    return videoel;
+  }
+
+  tag renderVideo() {
+    return <div class=['ui_video', this.uiclass]>
+    </div>;
+  }
+}
