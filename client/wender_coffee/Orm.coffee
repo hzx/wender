@@ -467,6 +467,8 @@ class ns.Orm
     if @isCollectionLazy(coll)
       # load collection from server
       names = getOrmNames(coll)
+      if (names.length > 0) and (names[0] isnt 'world')
+        return null
       hash = @opHashGenerator.generate().toString()
       data = {
         'op': 'select_from',
@@ -511,6 +513,8 @@ class ns.Orm
     # console.log whereFn
     
     names = getOrmNames(coll)
+    if (names.length > 0) and (names[0] isnt 'world')
+      return null
     data = {
       'op': 'update',
       'coll': names.join('.'),
@@ -525,6 +529,8 @@ class ns.Orm
     return false
 
     names = getOrmNames(coll)
+    if (names.length > 0) and (names[0] isnt 'world')
+      return null
 
     # debug
     # console.log('Orm.deleteFrom')
@@ -591,6 +597,8 @@ class ns.Orm
 
   bunchAppend: (coll, objs) ->
     names = getOrmNames(coll)
+    if (names.length > 0) and (names[0] isnt 'world')
+      return null
     data = {
       'op': 'bunch_append',
       'coll': names.join('.'),
@@ -600,6 +608,8 @@ class ns.Orm
     
   bunchInsertBefore: (coll, objs, before) ->
     names = getOrmNames(coll)
+    if (names.length > 0) and (names[0] isnt 'world')
+      return null
     data = {
       'op': 'bunch_insert_before',
       'coll': names.join('.'),
@@ -653,6 +663,8 @@ class ns.Orm
     # change referenced values
     # send changes by net
     names = getOrmNames(coll)
+    if (names.length > 0) and (names[0] isnt 'world')
+      return null
     data = {
       'op': 'insert',
       'coll': names.join('.'),
@@ -665,6 +677,8 @@ class ns.Orm
 
   onAppend: (coll, obj) =>
     names = getOrmNames(coll)
+    if (names.length > 0) and (names[0] isnt 'world')
+      return null
     hash = @opHashGenerator.generate().toString()
     data = {
       'op': 'append',
@@ -684,6 +698,8 @@ class ns.Orm
     # change referenced values
     # send changes by net
     names = getOrmNames(coll)
+    if (names.length > 0) and (names[0] isnt 'world')
+      return null
     hash = @opHashGenerator.generate().toString()
     data = {
       'op': 'insert_after',
@@ -708,6 +724,8 @@ class ns.Orm
     # console.log(before)
     
     names = getOrmNames(obj)
+    if (names.length > 0) and (names[0] isnt 'world')
+      return null
     hash = @opHashGenerator.generate().toString()
     data = {
       'op': 'insert_before',
@@ -724,6 +742,8 @@ class ns.Orm
 
   onRemove: (coll, obj) =>
     names = getOrmNames(coll)
+    if (names.length > 0) and (names[0] isnt 'world')
+      return null
     data = {
       'op': 'delete',
       'coll': names.join('.'),
