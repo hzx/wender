@@ -140,6 +140,12 @@ class ns.DomElement extends ns.DomNode
     @classList = {}
     @classListToString()
 
+  toggleClass: (name) ->
+    if @hasClass(name)
+      @removeClass(name)
+    else
+      @addClass(name)
+
   hasClass: (name) ->
     name of @classList
 
