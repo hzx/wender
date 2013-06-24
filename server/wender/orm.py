@@ -837,7 +837,7 @@ class Orm(object):
 
   def deleteImage(self, filename, params):
     srcFilename = os.path.join(options.imgpath, filename)
-    if not os.path.exists(srcFilename):
+    if (not os.path.exists(srcFilename)) or ('refImage' in params):
       return
 
     # remove srcFilename

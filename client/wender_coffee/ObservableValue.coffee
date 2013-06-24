@@ -15,3 +15,9 @@ class ns.ObservableValue extends ns.Observable
   notify: (oldValue, newValue) ->
     for hash, listener of @listeners
       listener(oldValue, newValue)
+
+
+ns.createValue = (value) ->
+  val = new ns.ObservableValue()
+  val.setValue(value)
+  return val
