@@ -1,7 +1,7 @@
 import os.path
 import hashlib
 import random
-import Image
+from PIL import Image
 
 
 # public method
