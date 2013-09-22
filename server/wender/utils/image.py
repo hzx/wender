@@ -2,6 +2,7 @@ import os.path
 import hashlib
 import random
 from PIL import Image
+import shutil
 
 
 # public method
@@ -116,10 +117,11 @@ def createResizedImage(srcFilename, destFilename, size):
   if image.mode not in ('L', 'RGB', 'RGBA'):
     image = image.convert('RGB')
 
-  # if image.size != size:
-  image = image.resize(calcImageSize(size, image), Image.ANTIALIAS)
-
-  image.save(destFilename, image.format)
+  if image.size != size:
+    image = image.resize(calcImageSize(size, image), Image.ANTIALIAS)
+    image.save(destFilename, image.format)
+  else:
+    shutil.copy(srcFilename, destFilename)
 
 
 def createResizedImageCrop(src, dest, size):
