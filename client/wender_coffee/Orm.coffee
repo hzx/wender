@@ -249,6 +249,7 @@ class ns.Orm
     for item in data
       # clone data from rlarr
       rlobj = rlarr.get(item)
+      if (!!rlobj) is false then continue
       field = rlobj.clone()
       dest.append(field, false)
 
@@ -462,7 +463,25 @@ class ns.Orm
         return coll.getBy('slug', slug)
       return coll.get(whereFn.id.value)
 
-  selectFrom: (dest, coll, whereFn, orderField, sortOrder) ->
+  find: (url, dest, coll, data, success) ->
+    me = this
+    data['coll'] = getOrmNames(coll).slice(1).join('.')
+    ns.net.post(
+      url,
+      data,
+      (response) ->
+        res = JSON.parse(response)
+        dest.emptySilent()
+        dest.setSrc(coll)
+        me.fillArray(dest, res['coll'], coll.ormType)
+        success(res['prev'], res['next'])
+      ,
+      (status) ->
+        console.log('netFindFail:')
+        console.log(status)
+      )
+
+  selectFrom: (dest, coll, whereFn, orderField, limit, success = null) ->
     # if coll is lazy, select from server
     if @isCollectionLazy(coll)
       # load collection from server
@@ -473,13 +492,23 @@ class ns.Orm
       data = {
         'op': 'select_from',
         'hash': hash,
-        'coll': names.join('.')
+        'coll': names.join('.'),
+        'where': JSON.stringify(whereFn)
       }
+      # if (orderField isnt null)
+      #   data['order'] = JSON.stringify(orderField)
       # add parent id if exists
       if (coll.ormParent isnt null) and (coll.ormParent.ormName isnt 'world')
         data['parent'] = coll.ormParent.id.value
+      if !!limit
+        data['limit'] = limit
       # save dest to operations map
-      @selectFromOps[hash] = {'dest': dest, 'coll': coll, 'ormType': coll.ormType}
+      @selectFromOps[hash] = {
+        'dest': dest,
+        'coll': coll,
+        'ormType': coll.ormType,
+        'success': success
+      }
       ns.net.post(@urlOp, data, @onNetSelectFrom, @onNetSelectFromFail)
     else
       # load collection from cache
@@ -491,6 +520,8 @@ class ns.Orm
       while cursor isnt null
         dest.append(cursor.obj.clone(), false)
         cursor = cursor.next
+      if !!success
+        success()
 
   selectConcat: (dest, colls) ->
     dest.emptySilent()
@@ -522,6 +553,67 @@ class ns.Orm
       'id': id.value
     }
     ns.net.post(@urlOp, data, @onNetUpdate, @onNetUpdateFail)
+
+  checkPaging: (coll, wprev, wnext, success) ->
+    hash = @opHashGenerator.generate().toString()
+    names = getOrmNames(coll)
+    data = {
+      'op': 'paging',
+      'hash': hash,
+      'coll': names.join('.'),
+      'wprev': JSON.stringify(wprev),
+      'wnext': JSON.stringify(wnext)
+    }
+
+    @insertOps[hash] = {'success': success}
+
+    ns.net.post(@urlOp, data, @netCheckPaging, @netCheckPagingFail)
+
+  netCheckPaging: (response) =>
+    res = JSON.parse(response)
+    params = @insertOps[res.hash]
+    delete @insertOps[res.hash]
+
+    params['success'](res.prev, res.next)
+
+  netCheckPagingFail: (status) =>
+    console.log('netCheckPagingFail:')
+    console.log(status)
+
+  updateRaw: (coll, vals, wh) ->
+    names = getOrmNames(coll)
+    if (names.length > 0) and (names[0] isnt 'world')
+      return null
+    data = {
+      'op': 'update_raw',
+      'coll': names.join('.'),
+      'values': JSON.stringify(vals),
+      'where': JSON.stringify(wh)
+    }
+    ns.net.post(@urlOp, data, @onNetUpdateRaw, @onNetUpdateRawFail)
+
+  deleteWhere: (coll, where) ->
+    names = getOrmNames(coll)
+    if (names.length > 0) and (names[0] isnt 'world')
+      return null
+
+    data = {
+      'op': 'delete_where',
+      'coll': names.join('.'),
+      'where': JSON.stringify(where)
+    }
+
+    netDeleteWhere = (response) ->
+      res = JSON.parse(response)
+      ids = res['ids']
+      for id in ids
+        coll.remove(id, false)
+
+    netDeleteWhereFail = (status) ->
+      console.log('netDeleteWhereFail')
+      console.log(status)
+
+    ns.net.post(@urlOp, data, netDeleteWhere, netDeleteWhereFail)
 
   # this duplicate onRemove
   deleteFrom: (coll, id) ->
@@ -665,14 +757,18 @@ class ns.Orm
     names = getOrmNames(coll)
     if (names.length > 0) and (names[0] isnt 'world')
       return null
+    hash = @opHashGenerator.generate().toString()
     data = {
       'op': 'insert',
+      'hash': hash,
       'coll': names.join('.'),
       'obj': JSON.stringify(@structToJson(obj))
     }
     # add parent id if exists
     if (coll.ormParent isnt null) and (coll.ormParent.ormName isnt 'world')
       data['parent'] = coll.ormParent.id.value
+    # save operation to buffer
+    @insertOps[hash] = {'coll': coll }
     ns.net.post(@urlOp, data, @onNetInsert, @onNetInsertFail)
 
   onAppend: (coll, obj) =>
@@ -770,7 +866,7 @@ class ns.Orm
     params = @insertOps[parsed.hash]
     delete @insertOps[parsed.hash]
 
-    # TODO(dem) do post insert
+    params.coll.updateId(parsed.oldid, parsed.newid)
 
   onNetInsertFail: (status) =>
     console.log('onNetInsertFail')
@@ -824,6 +920,13 @@ class ns.Orm
     console.log('onNetUpdateFail')
     console.log(status)
 
+  onNetUpdateRaw: (response) =>
+    console.log('onNetUpdateRaw')
+    console.log(response)
+  onNetUpdateRawFail: (status) =>
+    console.log('onNetUpdateRawFail')
+    console.log(status)
+
   onNetRemove: (response) =>
     # console.log('onNetRemove')
     # console.log(response)
@@ -868,6 +971,9 @@ class ns.Orm
     params.dest.ormParent = params.coll.ormParent
 
     @fillArray(params.dest, res.coll, params.ormType)
+
+    if !!params.success
+      params.success()
 
   onNetSelectFromFail: (status) =>
     console.log('onNetSelectFromFail')

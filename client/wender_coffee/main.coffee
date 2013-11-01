@@ -8,4 +8,5 @@ ns.init = ->
   window.browser = ns.browser = new ns.Browser()
   ns.net = new ns.Net()
   ns.orm = new ns.Orm()
+  ns.db = new ns.Db()
 

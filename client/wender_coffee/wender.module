@@ -14,6 +14,7 @@ source OrmValue.coffee
 source OrmList.coffee
 source OrmCacheList.coffee
 source Orm.coffee
+source Db.coffee
 source Statistic.coffee
 source Browser.coffee
 source DomNode.coffee

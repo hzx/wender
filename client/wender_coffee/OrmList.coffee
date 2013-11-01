@@ -28,11 +28,12 @@ class ns.OrmList extends ns.ObservableList
     node.obj.id.setValue(newid, false)
 
   insert: (obj, sync = true) ->
-    # @setTemporaryId(obj)
-    # obj.ormParent = this
-    # super(obj)
-    # ns.orm.onInsert(obj)
-    @append(obj, sync)
+    @setTemporaryId(obj)
+    obj.ormParent = this
+    super(obj)
+    # @append(obj, sync)
+    if sync
+      ns.orm.onInsert(this, obj)
 
   append: (obj, sync = true) ->
     @setTemporaryId(obj)

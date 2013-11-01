@@ -242,6 +242,9 @@ class ns.DomElement extends ns.DomNode
 
         @postAddNode(node)
 
+  getChild: (hash) ->
+    return @objChilds[hash]
+
   removeChild: (node) ->
     if @isInDocument
       node.exitDocument()
@@ -403,7 +406,7 @@ class ns.DomElement extends ns.DomNode
     node = @render(obj)
     node.obj = obj
     if before isnt null
-      beforeNode = @objChilds[before]
+      beforeNode = @objChilds[before.getHash()]
       @insertBefore(node, beforeNode)
     else
       @append(node)

@@ -26,6 +26,10 @@ class ns.Router
   exit: ->
     if "onhashchange" of window then ns.removeEvent(window, 'hashchange', @onHashChange)
 
+  setUrl: (url) ->
+    @isRouterChangeUrl = true
+    window.location.hash = url
+
   # Common methods
 
   _clarifyUrl: (url) ->

@@ -36,7 +36,7 @@ class Image extends View {
 
 
 class Thumb extends View {
-  object image;
+  var image;
   string uiclass = '';
 
   () {

@@ -26,11 +26,26 @@ def selectOne(db, coll, where=None):
 
 
 @storable
-def selectFrom(db, coll, where=None):
+def selectFrom(db, coll, where=None, limit=None):
     if where:
+        if limit:
+          return db[coll].find(where).limit(int(limit))
         return db[coll].find(where)
-
+    if limit:
+      return db[coll].find().limit(int(limit))
     return db[coll].find()
+
+
+@storable
+def find(db, coll, where, order, limit=None):
+  if limit:
+    return db[coll].find(where).sort(order[0], order[1]).limit(limit)
+  return db[coll].find(where).sort(order[0], order[1])
+
+
+@storable
+def findOne(db, coll, where):
+  return db[coll].find_one(where)
 
 
 @storable

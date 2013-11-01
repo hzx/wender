@@ -109,6 +109,40 @@ class OrmLoadHandler(BaseHandler):
 
 
 class OrmOpHandler(BaseHandler):
+
+    def opPaging(self):
+        hsh = self.get_argument('hash', None)
+        coll = self.get_argument('coll', None)
+        wprev = self.get_argument('wprev', None)
+        wnext = self.get_argument('wnext', None)
+
+        if (not hsh) or (not coll) or (not wprev) or (not wnext):
+            raise HTTPError(500, 'hash, coll, wprev, wnext not present')
+
+        wprev = json.loads(wprev)
+        wnext = json.loads(wnext)
+
+        res = self.orm.checkPaging(coll, wprev, wnext)
+        res['hash'] = hsh
+
+        return res
+
+    def opUpdateRaw(self):
+        coll = self.get_argument('coll', None)
+        values = self.get_argument('values', None)
+        wh = self.get_argument('where', None)
+
+        if (not coll) or (not values) or (not wh):
+            raise HTTPError(500, 'coll, values, where not present')
+
+        values = json.loads(values)
+        wh = json.loads(wh)
+
+        self.orm.updateRaw(coll, values, wh)
+
+        return {}
+
+
     def opValue(self):
         rawseq = self.get_argument('seq', None)
         if not rawseq:
@@ -122,17 +156,19 @@ class OrmOpHandler(BaseHandler):
 
     def opInsert(self):
         coll = self.get_argument('coll', None)
+        hsh = self.get_argument('hash', None)
         obj = self.get_argument('obj', None)
-        # parent = self.get_argument('parent', None)
-        if (not coll) or (not obj):
-            raise HTTPError(500)
+        parent = self.get_argument('parent', None)
+        if (not coll) or (not hsh) or (not obj):
+            raise HTTPError(500, 'coll, hash, obj not privided')
 
         obj = json.loads(obj)
 
         oldid = obj['id']
-        newid = self.orm.insert(coll, obj)
+        newid = self.orm.insert(coll, obj, parent)
 
         return {
+            'hash': hsh,
             'coll': coll,
             'oldid': oldid,
             'newid': newid}
@@ -205,6 +241,18 @@ class OrmOpHandler(BaseHandler):
     def opBunchAppend(self):
         pass
 
+    def opDeleteWhere(self):
+      coll = self.get_argument('coll', None)
+      where = self.get_argument('where', None)
+      if (not coll) or (not where):
+        raise HTTPError(500, 'coll, where not found')
+
+      whereobj = json.loads(where)
+
+      ids = self.orm.deleteWhere(coll, whereobj)
+
+      return {'ids': ids}
+
     # TODO(dem) search relations
     def opDelete(self):
         coll = self.get_argument('coll', None)
@@ -233,11 +281,17 @@ class OrmOpHandler(BaseHandler):
     def opSelectFrom(self):
         coll = self.get_argument('coll', None)
         hsh = self.get_argument('hash', None)
+        wherefrom =self.get_argument('where', None)
+        limit = self.get_argument('limit', None)
         parent = self.get_argument('parent', None)
         if (not coll) or (not hsh):
             raise HTTPError(500, 'provide coll, hash')
+        if (not wherefrom):
+          wherefrom = {}
+        else:
+          wherefrom = json.loads(wherefrom)
 
-        items = self.orm.selectFrom(coll, {}, parent)
+        items = self.orm.selectFrom(coll, wherefrom, parent, limit)
 
         return {'hash': hsh, 'coll': items}
 
@@ -283,12 +337,15 @@ class OrmOpHandler(BaseHandler):
             raise HTTPError(500, 'need op')
 
         ops = {
+            'paging': self.opPaging,
+            'update_raw': self.opUpdateRaw,
             'value': self.opValue,
             'insert': self.opInsert,
             'insert_before': self.opInsertBefore,
             'insert_after': self.opInsertAfter,
             'append': self.opAppend,
             'delete': self.opDelete,
+            'delete_where': self.opDeleteWhere,
             'select_one': self.opSelectOne,
             'select_from': self.opSelectFrom,
             'upload_images': self.opUploadImages,

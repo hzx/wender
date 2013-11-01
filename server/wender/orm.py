@@ -252,6 +252,14 @@ class Orm(object):
       else:
         raise Exception('unknown collection type "%s"' % dotcoll)
 
+  def updateRaw(self, coll, values, wh):
+    names = self.collToNames(coll)
+    if not names:
+      return None
+    dotcoll = '.'.join(names)
+
+    mongodb.update(dotcoll, values, wh)
+
   def setValue(self, seq):
     # parse sequences
     # print 'orm.setValue, seq:'
@@ -316,12 +324,13 @@ class Orm(object):
       else:
         raise Exception('unknown list type "%s"' % str(coll))
 
-  def insert(self, coll, obj):
-    names = self.collToNames(coll)
-    if not names:
-      return None
-    self.setSlug(names, obj)
-    return self.append(names[0], obj)
+  def insert(self, coll, obj, parent):
+    # names = self.collToNames(coll)
+    # if not names:
+    #   return None
+    # self.setSlug(names, obj)
+    # return self.append(names[0], obj, parent)
+    return self.append(coll, obj, parent)
 
   def insertBefore(self, coll, obj, parent, before):
     """
@@ -393,7 +402,7 @@ class Orm(object):
       return mongodb.selectOne(dotcoll, where)
     return None
 
-  def selectFrom(self, coll, where, parent):
+  def selectFrom(self, coll, where, parent, limit=None):
     names = self.collToNames(coll)
     if not names:
       return None
@@ -409,7 +418,7 @@ class Orm(object):
       return self.selectFromRefLink(src, names, where, parent)
     # load array
     elif dotcoll in self.meta.colls:
-      return dbutil.cursorToList(mongodb.selectFrom(dotcoll, where))
+      return dbutil.cursorToList(mongodb.selectFrom(dotcoll, where, limit))
 
     raise Exception('unknown collection type "%s"' % dotcoll)
 
@@ -419,6 +428,17 @@ class Orm(object):
       return None
 
     return mongodb.update(coll, values, where)
+
+  def deleteWhere(self, coll, where):
+    names = self.collToNames(coll)
+    dotcoll = '.'.join(names)
+
+    items = mongodb.selectFrom(dotcoll, where)
+    ids = []
+    for item in items:
+      ids.append(item['id'])
+      self.deleteCollItem(dotcoll, item['id'])
+    return ids
 
   def delete(self, coll, objid, parentid):
     names = self.collToNames(coll)
@@ -860,3 +880,12 @@ class Orm(object):
   def deleteFile(self, filename):
     if os.path.exists(filename) and os.path.isfile(filename):
       os.remove(filename)
+
+  def checkPaging(self, coll, wherePrev, whereNext):
+    names = self.collToNames(coll)
+    dotcoll = '.'.join(names)
+
+    po = mongodb.selectOne(dotcoll, wherePrev)
+    no = mongodb.selectOne(dotcoll, whereNext)
+    return { 'prev': po != None, 'next': no != None}
+

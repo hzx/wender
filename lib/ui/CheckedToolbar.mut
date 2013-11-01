@@ -37,7 +37,7 @@ class CheckedToolbar extends View {
   }
 
   void selectToolbarButtonByName(string name) {
-    var button = browser.getElementById('nav_' + name);
+    var button = browser.getElementById('nav-' + name);
     this.selectToolbarButton(button);
   }
 

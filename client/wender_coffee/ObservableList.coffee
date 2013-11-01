@@ -40,10 +40,9 @@ class ns.ObservableList extends ns.List
 
   insert: (obj) ->
     node = super(obj)
-    before = if node.next isnt null
-      node.next.obj
-    else
-      null
+    before = null
+    if node.next isnt null
+      before = node.next.obj
     @notifyInsert(obj, before)
 
   append: (obj) ->
