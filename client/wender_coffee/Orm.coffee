@@ -750,7 +750,7 @@ class ns.Orm
     ns.net.post(@urlOp, data, @onNetSetValue, @onNetSetValueFail)
 
   
-  onInsert: (coll, obj) =>
+  onInsert: (coll, obj, success, error) =>
     # validate
     # change referenced values
     # send changes by net
@@ -768,7 +768,7 @@ class ns.Orm
     if (coll.ormParent isnt null) and (coll.ormParent.ormName isnt 'world')
       data['parent'] = coll.ormParent.id.value
     # save operation to buffer
-    @insertOps[hash] = {'coll': coll }
+    @insertOps[hash] = { 'coll': coll }
     ns.net.post(@urlOp, data, @onNetInsert, @onNetInsertFail)
 
   onAppend: (coll, obj) =>
@@ -845,10 +845,27 @@ class ns.Orm
       'coll': names.join('.'),
       'id': obj.id.value
     }
+
     # add parent id if exists
     if (coll.ormParent isnt null) and (coll.ormParent.ormName isnt 'world')
       data['parent'] = coll.ormParent.id.value
+
+    # console.log('onRemove')
+    # console.log(data)
+
     ns.net.post(@urlOp, data, @onNetRemove, @onNetRemoveFail)
+
+    # names = getOrmNames(obj)
+    # if not @isWorldNames(names)
+    #   return
+    # ormobj = getOrmSequence(obj.id)
+
+    # data = {
+    #   'op': 'delete',
+    #   'seq': JSON.stringify(ormobj)
+    # }
+    
+    # ns.net.post(@urlOp, data, @onNetRemove, @onNetRemoveFail)
 
   onNetSetValue: (response) =>
     abc = ''

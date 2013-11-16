@@ -41,7 +41,10 @@ trimString = (text) ->
 ns.trimString = trimString
 
 tagsRe = /[a-zA-Z0-9а-яА-Я]+/g
-pretexts = {'при':1, 'в':1, 'на':1, 'под':1, 'у':1}
+pretextsRaw = ['в', 'без', 'до', 'из', 'к', 'на', 'по', 'о', 'от', 'перед', 'при', 'через', 'с', 'у', 'за', 'над', 'об', 'под', 'про', 'для']
+pretexts = {}
+for it in pretextsRaw
+  pretexts[it] = null
 extractTags = (text, isFilter = false) ->
   words = text.match(tagsRe)
   filtered = []
@@ -100,3 +103,14 @@ arrayEquals = (a, b) ->
       return false
   return true
 ns.arrayEquals = arrayEquals
+
+ns.newDateString = ->
+  created = new Date()
+  return created.toString()
+
+ns.parseInt = (val) ->
+  n = parseInt(val, 10)
+  if isNaN(n)
+    return 0
+  else
+    return n

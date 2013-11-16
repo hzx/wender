@@ -52,7 +52,8 @@ class ns.DomElement extends ns.DomNode
     return count
 
   setText: (text) ->
-    @node.innerText = text
+    ns.setText(@node, text)
+    # @node.innerText = text
 
   setAttribute: (name, value) ->
     @node.setAttribute(name, value)
@@ -80,6 +81,8 @@ class ns.DomElement extends ns.DomNode
       if name is 'data'
         @data = value
         continue
+      if name is 'value'
+        @node.value = value
 
       if name is 'style'
         for sname, svalue of value
@@ -282,9 +285,11 @@ class ns.DomElement extends ns.DomNode
 
   forEachChild: (func) ->
     cursor = @first
+    next = null
     while cursor isnt null
+      next = cursor.next
       func(cursor)
-      cursor = cursor.next
+      cursor = next
 
   addEvent: (name, handler) ->
     @events[name] = handler
@@ -406,7 +411,8 @@ class ns.DomElement extends ns.DomNode
     node = @render(obj)
     node.obj = obj
     if before isnt null
-      beforeNode = @objChilds[before.getHash()]
+      # beforeNode = @objChilds[before.getHash()]
+      beforeNode = @objChilds[before]
       @insertBefore(node, beforeNode)
     else
       @append(node)
@@ -437,5 +443,6 @@ class ns.DomElement extends ns.DomNode
 
     # stop event propagation (bubbling)
     if isPreventDefault is false
+      ns.stopPropagation(event)
       ns.preventDefault(event)
 

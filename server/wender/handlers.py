@@ -255,17 +255,27 @@ class OrmOpHandler(BaseHandler):
 
     # TODO(dem) search relations
     def opDelete(self):
-        coll = self.get_argument('coll', None)
-        objid = self.get_argument('id', None)
-        parent = self.get_argument('parent', None)
-        if (not coll) or (not objid):
-            raise HTTPError(500, 'coll, id not found')
+      coll = self.get_argument('coll', None)
+      objid = self.get_argument('id', None)
+      parent = self.get_argument('parent', None)
+      if (not coll) or (not objid):
+          raise HTTPError(500, 'coll, id not found')
 
-        self.orm.delete(coll, objid, parent)
+      self.orm.delete(coll, objid, parent)
 
-        return {
-            'coll': coll,
-            'id': objid}
+      return {
+          'coll': coll,
+          'id': objid}
+
+      # rawseq = self.get_argument('seq', None)
+      # if not rawseq:
+      #   raise HTTPError(500, 'send seq parameter')
+
+      # seq = json.loads(rawseq)
+
+      # self.orm.delete(seq)
+
+      return {}
 
     def opSelectOne(self):
         coll = self.get_argument('coll', None)

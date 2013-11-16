@@ -42,7 +42,7 @@ class ns.ObservableList extends ns.List
     node = super(obj)
     before = null
     if node.next isnt null
-      before = node.next.obj
+      before = node.next.obj.getHash()
     @notifyInsert(obj, before)
 
   append: (obj) ->
@@ -56,7 +56,7 @@ class ns.ObservableList extends ns.List
     oldCount = @count
     node = super(obj, after)
     before = if node.next isnt null
-      node.next.obj
+      node.next.obj.getHash()
     else
       null
     if oldCount isnt @count

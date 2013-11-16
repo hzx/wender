@@ -1,0 +1,60 @@
+
+class Edit extends View {
+  string id = none;
+  var value = none;
+  string uiclass = '';
+
+  event eventChange;
+
+  () {
+    super();
+  }
+
+  tag render() {
+    return <div class=['ui_edit', this.uiclass] onclick=this.onClick>
+      <div class=['wrap']>
+        <input class=['edit'] value=this.value.value onkeyup=this.onKeyup onfocus=this.onFocus onblur=this.onBlur/>
+      </div>
+    </div>;
+  }
+
+  void enterDocument() {
+    super();
+    this.value.addListener(this.onValueChange);
+  }
+
+  void exitDocument() {
+    this.value.removeListener(this.onValueChange);
+    super();
+  }
+
+  void focus() {
+    this.element.first.first.node.focus();
+  }
+
+  void onValueChange(string old, string cur) {
+    this.element.first.first.node.value = cur;
+  }
+
+  bool onKeyup(event e) {
+    var rawval = e.element.node.value;
+    var val = wender.trimString(rawval);
+    if val.length > 0 {
+      this.value.setValue(rawval);
+    }
+  }
+
+  bool onFocus(event e) {
+    this.element.addClass('active');
+    this.focus();
+  }
+
+  bool onBlur(event e) {
+    this.element.removeClass('active');
+  }
+
+  bool onClick(event e) {
+    this.focus();
+    return false;
+  }
+}

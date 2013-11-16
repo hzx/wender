@@ -27,7 +27,7 @@ class ns.OrmList extends ns.ObservableList
     # update id
     node.obj.id.setValue(newid, false)
 
-  insert: (obj, sync = true) ->
+  insert: (obj, sync = true, success = null, error = null) ->
     @setTemporaryId(obj)
     obj.ormParent = this
     super(obj)

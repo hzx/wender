@@ -320,6 +320,7 @@ class Orm(object):
       elif coll in self.meta.colls:
         # print 'update list value:'
         # print coll
+        # print repr(lastList)
         self.updateListValue(coll, seq, lastList)
       else:
         raise Exception('unknown list type "%s"' % str(coll))
@@ -447,6 +448,12 @@ class Orm(object):
 
     dotcoll = '.'.join(names)
 
+    # print 'orm.delete'
+    # print 'dotcoll: ' + dotcoll
+    # print 'objid: ' + objid
+    # print 'parentid: ' + parentid
+    # print 'names: ' + repr(names)
+
     # coll is ref
     if dotcoll in self.meta.refToColl:
       # delete id from ref array
@@ -460,11 +467,13 @@ class Orm(object):
       # mongodb.delete(src, {'id': objid})
       self.deleteCollItem(src, objid)
     # just coll
-    elif dotcoll in self.meta.colls:
+    elif len(names) == 1 and dotcoll in self.meta.colls:
+      # print 'dotcoll found in colls'
       # delete from coll
       # mongodb.delete(dotcoll, {'id': objid})
       self.deleteCollItem(dotcoll, objid)
     else:
+      # print 'try to resolve inner coll'
       # try resolve inner coll
       # search parent coll without last names item
       parentColl = '.'.join(names[:-1])
@@ -643,14 +652,36 @@ class Orm(object):
       mongodb.update(parentColl, {fieldName: idsField}, {'id': parentid})
 
   def updateListValue(self, coll, seq, lastList):
+    pices = coll.split('.')
+
     val = lastList['child']
-    values = {val['name']: val['value']}
+    if len(pices) == 1:
+      values = {val['name']: val['value']}
+    elif len(pices) == 2:
+      coll = pices[0]
+      values = {pices[1] + '.$.' + val['name']: val['value']}
+    else:
+      raise Exception('updateListValue: collection inner gt 2')
+
 
     slugs = self.updateSlug(coll.split('.'), val['name'], val['value'])
     if slugs:
-      values[slugs[0]] = slugs[1]
+      if len(pices) == 1:
+        values[slugs[0]] = slugs[1]
+      elif len(pices) == 2:
+        values[pices[1] + '.$.' + slugs[0]] = slugs[1]
 
-    mongodb.update(coll, values, {'id': val['parentid']})
+    if len(pices) == 1:
+      where = {'id': val['parentid']}
+    elif len(pices) == 2:
+      where = {pices[1] + '.id': val['parentid']}
+
+    # print ('updateLastList')
+    # print coll
+    # print repr(values)
+    # print val['parentid']
+
+    mongodb.update(coll, values, where)
 
   def setSlug(self, names, obj):
     """
@@ -757,10 +788,10 @@ class Orm(object):
     """
     In coll object with parentId search array field and append obj.
     """
-    print coll
-    print parentId
-    print field
-    print repr(obj)
+    # print coll
+    # print parentId
+    # print field
+    # print repr(obj)
     # get parent object
     parentObj = mongodb.selectOne(coll, {'id': parentId})
     # get field
