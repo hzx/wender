@@ -37,7 +37,7 @@ ns.extendSingleton = extendSingleton
 
 
 trimString = (text) ->
-  return text.replace(/^\s+|\s+$/g, '')
+  return text.toString().replace(/^\s+|\s+$/g, '')
 ns.trimString = trimString
 
 tagsRe = /[a-zA-Z0-9а-яА-Я]+/g

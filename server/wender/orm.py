@@ -231,7 +231,11 @@ class Orm(object):
       self.appendIdToRefLink(names, newid, parent)
       return newid
     # add obj to coll
-    elif dotcoll in self.meta.colls:
+    elif len(names) == 1 and dotcoll in self.meta.colls:
+      # print 'dotcoll in colls:'
+      # print dotcoll
+      # print repr(names)
+
       self.setSlug(names, obj)
       newid = mongodb.insert(dotcoll, obj)
       return newid
@@ -247,10 +251,14 @@ class Orm(object):
       elif parentColl in self.meta.linkToColl:
         src = self.meta.linkToColl[parentColl]
         self.appendInnerColl(src, parent, subColl, obj)
-      elif parentColl in self.meta.links:
+      # elif parentColl in self.meta.links:
+      #   self.appendInnerColl(parentColl, parent, subColl, obj)
+      elif parentColl in self.meta.colls:
         self.appendInnerColl(parentColl, parent, subColl, obj)
       else:
         raise Exception('unknown collection type "%s"' % dotcoll)
+
+      return obj['id']
 
   def updateRaw(self, coll, values, wh):
     names = self.collToNames(coll)
@@ -445,6 +453,9 @@ class Orm(object):
     names = self.collToNames(coll)
     if not names:
       return None
+
+    # print 'delete:'
+    # print repr(names)
 
     dotcoll = '.'.join(names)
 

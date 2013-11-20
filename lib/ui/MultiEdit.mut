@@ -4,6 +4,8 @@ class MultiEdit extends View {
   var value = none;
   string uiclass = '';
 
+  string text = '';
+
   () {
     super();
   }
@@ -31,6 +33,7 @@ class MultiEdit extends View {
   }
 
   void setValue(string val) {
+    this.text = val;
     this.element.first.node.value = val;
   }
 
@@ -42,7 +45,8 @@ class MultiEdit extends View {
     var rawval = e.element.node.value;
     var val = wender.trimString(rawval);
     if val.length > 0 {
-      this.value.setValue(rawval);
+      /* this.value.setValue(rawval); */
+      this.text = rawval;
     }
   }
 
@@ -53,6 +57,14 @@ class MultiEdit extends View {
 
   bool onBlur(event e) {
     this.element.removeClass('active');
+
+    var oldval = wender.trimString(this.value.value);
+    var cur = wender.trimString(this.text);
+
+    if oldval isnot cur {
+      this.value.setValue(wender.trimString(this.text));
+      this.eventChange.notify(this.value);
+    }
   }
 
   bool onClick(event e) {

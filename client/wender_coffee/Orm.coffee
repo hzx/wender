@@ -938,8 +938,8 @@ class ns.Orm
     console.log(status)
 
   onNetUpdateRaw: (response) =>
-    console.log('onNetUpdateRaw')
-    console.log(response)
+    # console.log('onNetUpdateRaw')
+    # console.log(response)
   onNetUpdateRawFail: (status) =>
     console.log('onNetUpdateRawFail')
     console.log(status)

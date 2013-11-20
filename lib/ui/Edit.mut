@@ -4,6 +4,8 @@ class Edit extends View {
   var value = none;
   string uiclass = '';
 
+  string text = '';
+
   event eventChange;
 
   () {
@@ -20,6 +22,7 @@ class Edit extends View {
 
   void enterDocument() {
     super();
+    this.setValue(this.value.value);
     this.value.addListener(this.onValueChange);
   }
 
@@ -32,15 +35,21 @@ class Edit extends View {
     this.element.first.first.node.focus();
   }
 
+  void setValue(string val) {
+    this.text = val;
+    this.element.first.first.node.value = val;
+  }
+
   void onValueChange(string old, string cur) {
-    this.element.first.first.node.value = cur;
+    this.setValue(cur);
   }
 
   bool onKeyup(event e) {
     var rawval = e.element.node.value;
     var val = wender.trimString(rawval);
     if val.length > 0 {
-      this.value.setValue(rawval);
+      /* this.value.setValue(rawval); */
+      this.text = rawval;
     }
   }
 
@@ -51,6 +60,14 @@ class Edit extends View {
 
   bool onBlur(event e) {
     this.element.removeClass('active');
+
+    var oldval = wender.trimString(this.value.value);
+    var cur = wender.trimString(this.text);
+
+    if oldval isnot cur {
+      this.value.setValue(cur);
+      this.eventChange.notify(this.value);
+    }
   }
 
   bool onClick(event e) {

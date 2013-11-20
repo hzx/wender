@@ -26,6 +26,12 @@ class ns.DomNode
   remove: ->
     @parent.removeChild(this)
 
+  removeRaw: ->
+    if @isInDocument
+      @exitDocument()
+    if !!@node.parentNode
+      @node.parentNode.removeChild(@node)
+
   # private
 
   enterDocument: ->
