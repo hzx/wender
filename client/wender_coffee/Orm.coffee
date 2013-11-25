@@ -463,25 +463,24 @@ class ns.Orm
         return coll.getBy('slug', slug)
       return coll.get(whereFn.id.value)
 
-  find: (url, dest, coll, data, success) ->
+  find: (url, dest, coll, data, success, error) ->
     me = this
     data['coll'] = getOrmNames(coll).slice(1).join('.')
+    dest.emptySilent()
     ns.net.post(
       url,
       data,
       (response) ->
         res = JSON.parse(response)
-        dest.emptySilent()
         dest.setSrc(coll)
         me.fillArray(dest, res['coll'], coll.ormType)
         success(res['prev'], res['next'])
       ,
       (status) ->
-        console.log('netFindFail:')
-        console.log(status)
+        error(status)
       )
 
-  selectFrom: (dest, coll, whereFn, orderField, limit, success = null) ->
+  selectFrom: (dest, coll, whereFn, orderField, limit, success = null, error = null) ->
     # if coll is lazy, select from server
     if @isCollectionLazy(coll)
       # load collection from server
@@ -503,13 +502,33 @@ class ns.Orm
       if !!limit
         data['limit'] = limit
       # save dest to operations map
-      @selectFromOps[hash] = {
-        'dest': dest,
-        'coll': coll,
-        'ormType': coll.ormType,
-        'success': success
-      }
-      ns.net.post(@urlOp, data, @onNetSelectFrom, @onNetSelectFromFail)
+      # @selectFromOps[hash] = {
+      #   'dest': dest,
+      #   'coll': coll,
+      #   'ormType': coll.ormType,
+      #   'success': success
+      # }
+      dest.emptySilent()
+      # @onNetSelectFrom, 
+      # @onNetSelectFromFail
+      me = this
+      ns.net.post(@urlOp, data,
+        (response) ->
+          res = JSON.parse(response)
+          # set dest coll as coll cache, copy orm properties
+          dest.ormType = coll.ormType
+          dest.ormName = coll.ormName
+          dest.ormParent = coll.ormParent
+
+          me.fillArray(dest, res.coll, coll.ormType)
+
+          if !!success
+            success()
+        ,
+        (status) ->
+          if !!error
+            error(status)
+        )
     else
       # load collection from cache
       dest.emptySilent()
@@ -971,30 +990,30 @@ class ns.Orm
   onNetSelectOneFail: (status) =>
     abc = ''
 
-  onNetSelectFrom: (response) =>
-    res = JSON.parse(response)
-    # get dest from cache
-    if not (res.hash of @selectFromOps)
-      return
+  # onNetSelectFrom: (response) =>
+  #   res = JSON.parse(response)
+  #   # get dest from cache
+  #   if not (res.hash of @selectFromOps)
+  #     return
 
-    params = @selectFromOps[res.hash]
-    delete @selectFromOps[res.hash]
+  #   params = @selectFromOps[res.hash]
+  #   delete @selectFromOps[res.hash]
 
-    params.dest.emptySilent()
+  #   params.dest.emptySilent()
 
-    # set dest coll as coll cache, copy orm properties
-    params.dest.ormType = params.coll.ormType
-    params.dest.ormName = params.coll.ormName
-    params.dest.ormParent = params.coll.ormParent
+  #   # set dest coll as coll cache, copy orm properties
+  #   params.dest.ormType = params.coll.ormType
+  #   params.dest.ormName = params.coll.ormName
+  #   params.dest.ormParent = params.coll.ormParent
 
-    @fillArray(params.dest, res.coll, params.ormType)
+  #   @fillArray(params.dest, res.coll, params.ormType)
 
-    if !!params.success
-      params.success()
+  #   if !!params.success
+  #     params.success()
 
-  onNetSelectFromFail: (status) =>
-    console.log('onNetSelectFromFail')
-    console.log(status)
+  # onNetSelectFromFail: (status) =>
+  #   console.log('onNetSelectFromFail')
+  #   console.log(status)
 
   # Helpers
 
