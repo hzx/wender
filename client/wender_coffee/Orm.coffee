@@ -613,7 +613,7 @@ class ns.Orm
 
   deleteWhere: (coll, where) ->
     names = getOrmNames(coll)
-    if (names.length > 0) and (names[0] isnt 'world')
+    if (names.length is 0) or ((names.length > 0) and (names[0] isnt 'world'))
       return null
 
     data = {
