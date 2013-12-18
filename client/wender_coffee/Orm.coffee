@@ -102,6 +102,28 @@ getOrmSequence = (obj, child = null) ->
   return null
 
 
+getSourceArrayString = (arr, field) ->
+  buf = []
+  for item in arr
+    buf.push('"' + item[field] + '"')
+  return '[' + buf.join(', ') + ']'
+
+class Comparator
+  constructor: (field, order) ->
+    @field = field
+    if order is 'asc'
+      @compare = @compareAsc
+    else if order is 'desc'
+      @compare = @compareDesc
+    else
+      throw new Error('sort order not known: "' + order + '"')
+
+  compareAsc: (left, right) ->
+    return left[@field] <= right[@field]
+
+  compareDesc: (left, right) ->
+    return left[@field] >= right[@field]
+
 # base class for struct
 class ns.OrmStruct
   ormKind: 'struct'
@@ -186,6 +208,16 @@ class ns.Orm
     @selectFromOps = {}
     @insertOps = {}
 
+  getStructComparator: (typename) ->
+    meta = @structs[typename]
+
+    for name, params of meta
+      if 'sort' of params
+        # create comparator
+        order = params['sort']
+        return new Comparator(name, order)
+    return null
+
   init: ->
     # parse all structs
 
@@ -228,11 +260,22 @@ class ns.Orm
     @fillRefLinkArrayNow()
 
   fillArray: (dest, data, typename) ->
+    if data.length <= 0
+      return
+
+    @sort(typename, data)
+
     # for every data item create field object and fill
     for item in data
       field = new @model[typename]
       @fillStruct(field, item, typename)
       dest.append(field, false)
+
+  sort: (typename, data) ->
+    # try to sort if needed
+    comparator = @getStructComparator(typename)
+    if comparator isnt null
+      qsort(data, 0, data.length-1, comparator)
 
   fillRefLinkArrayNow: ->
     for item in @reflink
@@ -246,6 +289,12 @@ class ns.Orm
     data = item[1]
     typename = item[2]
     rlarr = item[3]
+
+    if data.length <= 0
+      return
+
+    @sort(typename, data)
+
     for item in data
       # clone data from rlarr
       rlobj = rlarr.get(item)

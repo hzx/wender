@@ -114,3 +114,27 @@ ns.parseInt = (val) ->
     return 0
   else
     return n
+
+qsortPartition = (arr, left, right, pivot, comparator) ->
+  pivotValue = arr[pivot]
+  arr[pivot] = arr[right]
+  arr[right] = pivotValue
+  storeIndex = left
+  value = null
+  for i in [left..(right-1)]
+    if comparator.compare(arr[i], pivotValue)
+      value = arr[i]
+      arr[i] = arr[storeIndex]
+      arr[storeIndex] = value
+      storeIndex = storeIndex + 1
+  value = arr[storeIndex]
+  arr[storeIndex] = arr[right]
+  arr[right] = value
+  return storeIndex
+
+ns.qsort = qsort = (arr, left, right, comparator) ->
+  if left < right
+    pivot = Math.floor((left + right) / 2)
+    pivotNew = qsortPartition(arr, left, right, pivot, comparator)
+    qsort(arr, left, pivotNew - 1, comparator)
+    qsort(arr, pivotNew + 1, right, comparator)
