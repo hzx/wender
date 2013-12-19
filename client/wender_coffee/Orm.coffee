@@ -102,28 +102,6 @@ getOrmSequence = (obj, child = null) ->
   return null
 
 
-getSourceArrayString = (arr, field) ->
-  buf = []
-  for item in arr
-    buf.push('"' + item[field] + '"')
-  return '[' + buf.join(', ') + ']'
-
-class Comparator
-  constructor: (field, order) ->
-    @field = field
-    if order is 'asc'
-      @compare = @compareAsc
-    else if order is 'desc'
-      @compare = @compareDesc
-    else
-      throw new Error('sort order not known: "' + order + '"')
-
-  compareAsc: (left, right) ->
-    return left[@field] <= right[@field]
-
-  compareDesc: (left, right) ->
-    return left[@field] >= right[@field]
-
 # base class for struct
 class ns.OrmStruct
   ormKind: 'struct'

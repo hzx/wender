@@ -51,7 +51,7 @@ def findOne(db, coll, where):
 @storable
 def update(db, coll, values, where=None):
     if where:
-        return db[coll].update(where, {'$set': values})
+        return db[coll].update(where, {'$set': values}, upsert=False, multi=True)
 
     return db[coll].update({}, {'$set': values}, upsert=False, multi=True)
 
