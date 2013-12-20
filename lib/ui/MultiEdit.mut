@@ -4,6 +4,8 @@ class MultiEdit extends View {
   var value = none;
   string uiclass = '';
 
+  event eventChange;
+
   string text = '';
 
   () {
@@ -21,11 +23,21 @@ class MultiEdit extends View {
     super();
     this.setValue(this.value.value);
     /* this.value.addListener(this.onValueChange); */
+    this.tuneHeight();
   }
 
   void exitDocument() {
     /* this.value.removeListener(this.onValueChange); */
     super();
+  }
+
+  void tuneHeight() {
+    var el = this.element.last;
+    var scroll = el.node.scrollHeight;
+    var client = el.node.clientHeight;
+    if scroll > client {
+      this.element.setStyle('height', (scroll + 16) + 'px');
+    }
   }
 
   void focus() {
@@ -48,6 +60,9 @@ class MultiEdit extends View {
       /* this.value.setValue(rawval); */
       this.text = rawval;
     }
+
+    /* tune height */
+    this.tuneHeight();
   }
 
   bool onFocus(event e) {
