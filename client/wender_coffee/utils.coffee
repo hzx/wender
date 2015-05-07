@@ -18,6 +18,53 @@ ns.generateHash = () ->
   return now.toString() + '-' + hashCounter.toString()
 
 
+ns.getTime = ->
+  return (new Date()).getTime()
+
+ns.datetimeToISOString = (dt) ->
+  dy = dt.getUTCFullYear()
+  dm = dt.getUTCMonth()
+  dd = dt.getUTCDay()
+  dh = dt.getUTCHours()
+  dm = dt.getUTCMinutes()
+  ds = dt.getUTCSeconds()
+
+  sdm = null
+  if dm < 10
+    sdm = '0' + dm
+  else
+    sdm = dm.toString()
+
+  sdd = null
+  if dd < 10
+    sdd = '0' + dd
+  else
+    sdd = dd.toString()
+
+  sdh = null
+  if dh < 10
+    sdh = '0' + dh
+  else
+    sdh = dh.toString()
+
+  sdm = null
+  if dm < 10
+    sdm = '0' + dm
+  else
+    sdm = dm.toString()
+
+  sds = null
+  if ds < 10
+    sds = '0' + ds
+  else
+    sds = ds.toString()
+
+  return dy+'-'+sdm+'-'+sdd+' '+sdh+':'+sdm+':'+sds
+
+ns.datetimeFromISOString = (st) ->
+  return new Date(st)
+
+
 encodeDict = (dict) ->
   isFirst = true
   result = ""
@@ -88,6 +135,22 @@ ns.arrayInAnd = (field, arr) ->
     val[field] = item
     fields.push(val)
   return fields
+
+getScrollX = ->
+  de = document.documentElement
+  return self.pageXOffset or
+    (de and de.scrollLeft) or
+    document.body.scrollLeft
+
+ns.getScrollX = getScrollX
+
+getScrollY = ->
+  de = document.documentElement
+  return self.pageYOffset or
+    (de and de.scrollTop) or
+    document.body.scrollTop
+
+ns.getScrollY = getScrollY
 
 arrayEquals = (a, b) ->
   if a is b
@@ -163,3 +226,40 @@ ns.qsort = qsort = (arr, left, right, comparator) ->
     pivotNew = qsortPartition(arr, left, right, pivot, comparator)
     qsort(arr, left, pivotNew - 1, comparator)
     qsort(arr, pivotNew + 1, right, comparator)
+
+ns.createValue = (type, name, parent, value) ->
+  return new ns.OrmValue(type, name, parent, value)
+
+emailRegex = new RegExp('[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+', 'gi')
+ns.extractEmails = (src) ->
+  return src.match(emailRegex)
+
+ns.checkInArray = (arr, val) ->
+  for cur in arr
+    if cur is val
+      return true
+  return false
+
+ns.getElementMouseCoord = (e, element) ->
+  offsetX = 0
+  offsetY = 0
+  cur = element
+  scrollTop = 0
+  scrollLeft = 0
+  # scrX = getScrollX()
+  # scrY = getScrollY()
+
+  while cur.offsetParent
+    offsetX += cur.offsetLeft
+    offsetY += cur.offsetTop
+    scrollTop += cur.scrollTop
+    scrollLeft += cur.scrollLeft
+    cur = cur.offsetParent
+
+  return {x: e.clientX - offsetX + scrollLeft, y: e.clientY - offsetY + scrollTop }
+
+ns.createObj = (cl) ->
+  return new cl()
+
+ns.dateParse = (str) ->
+  return new Date(str)

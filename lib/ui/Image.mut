@@ -64,6 +64,22 @@ class Thumb extends View {
 }
 
 
+class OrigImage extends Image {
+  () {
+    super();
+  }
+
+  tag render() {
+    return <img class=[this.uiclass, 'ui_image'] src=wender.orm.getOrigUrl(this.image)/>;
+  }
+
+  void onChange(string oldValue, string newValue) {
+    var imgurl = wender.orm.getOrigUrl(this.image);
+    this.element.setAttribute('src', imgurl);
+  }
+}
+
+
 class BgImage extends View {
   object image = none;
   string uiclass = '';

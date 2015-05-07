@@ -507,18 +507,26 @@ class ns.Orm
         error(status)
       )
 
+  selectSub: (dest, coll, ids) ->
+    dest.emptySilent()
+    cursor = coll.first
+    while cursor isnt null
+      if cursor.obj.id.value in ids
+        dest.appendUntouched(cursor.obj)
+
   selectFrom: (dest, coll, whereFn, orderField, limit, success = null, error = null) ->
     # if coll is lazy, select from server
     if @isCollectionLazy(coll)
       # load collection from server
       names = getOrmNames(coll)
+      longname = names.join('.')
       if (names.length > 0) and (names[0] isnt 'world')
         return null
       hash = @opHashGenerator.generate().toString()
       data = {
         'op': 'select_from',
         'hash': hash,
-        'coll': names.join('.'),
+        'coll': longname,
         'where': JSON.stringify(whereFn)
       }
       # if (orderField isnt null)
@@ -557,6 +565,9 @@ class ns.Orm
             error(status)
         )
     else
+      # dest.ormType = coll.ormType
+      # dest.ormName = coll.ormName
+      # dest.ormParent = coll.ormParent
       # load collection from cache
       dest.emptySilent()
       # set src collection
@@ -564,7 +575,14 @@ class ns.Orm
       # add nodes
       cursor = coll.first
       while cursor isnt null
-        dest.append(cursor.obj.clone(), false)
+        appendFlag = true
+        for fieldName of whereFn
+          if cursor.obj[fieldName].value isnt whereFn[fieldName]
+            appendFlag = false
+            break
+        if appendFlag
+          dest.append(cursor.obj.clone(), false)
+
         cursor = cursor.next
       if !!success
         success()
@@ -727,6 +745,12 @@ class ns.Orm
       return ''
 
     return '/static/img/' + thumbSizes[0] + '_' + filename.value
+
+  getOrigUrl: (filename) ->
+    if filename.value.length is 0
+      return ''
+
+    return '/static/img/' + filename.value
 
   findImageStruct: (image) ->
 

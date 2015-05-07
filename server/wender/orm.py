@@ -561,6 +561,66 @@ class Orm(object):
                           (int(nums[0]), int(nums[1])))
       return saved
 
+  def saveImages2(self, field, imgs, imagePath):
+      """
+      Return saved images: [{'name': name, 'filename': filename}]
+      """
+      saved = []
+      # get field params
+      params = self.meta.getFieldParams(field)
+      if not params:
+          return None
+      imageSizes = params.get('imageSizes', None)
+      imageCrop = params.get('imageCrop', False)
+      thumbSizes = params.get('thumbSizes', None)
+      thumbCrop = params.get('thumbCrop', None)
+      # save files
+      for img in imgs:
+          # get from src filename extension
+          srcname, srcext = os.path.splitext(img['filename'])
+          # generate filename
+          filename = str(uuid.uuid4()) + srcext
+          # compose filepath
+          filepath = os.path.join(imagePath, filename)
+          # save original image
+          with open(filepath, 'w') as f:
+            f.write(img['body'])
+          # add filename to saved
+          saved.append({'name': img['filename'], 'filename': filename})
+          # generate for imageSizes
+          if imageSizes:
+              for sz in imageSizes:
+                  # generate sized image filename
+                  imagepath = os.path.join(
+                      imagePath,
+                      "%s_%s" % (sz, filename))
+                  nums = sz.split('x')
+                  if imageCrop:
+                      uimage.createResizedImageCrop(
+                          filepath, imagepath,
+                          (int(nums[0]), int(nums[1])))
+                  else:
+                      uimage.createResizedImage(
+                          filepath, imagepath,
+                          (int(nums[0]), int(nums[1])))
+          # generate for thumbSizes
+          if thumbSizes:
+              for sz in thumbSizes:
+                  # generate sized thumb filename
+                  thumbpath = os.path.join(
+                      imagePath,
+                      "%s_%s" % (sz, filename))
+                  nums = sz.split('x')
+                  if thumbCrop:
+                      uimage.createResizedImageCrop(
+                          filepath, thumbpath,
+                          (int(nums[0]), int(nums[1])))
+                  else:
+                      uimage.createResizedImage(
+                          filepath, thumbpath,
+                          (int(nums[0]), int(nums[1])))
+      return saved
+
   # HELPERS
 
   def appendIdToRefLink(self, collNames, objid, parentid):

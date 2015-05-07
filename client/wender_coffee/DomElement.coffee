@@ -248,6 +248,9 @@ class ns.DomElement extends ns.DomNode
   getChild: (hash) ->
     return @objChilds[hash]
 
+  hasChild: (hash) ->
+    return !!@getChild(hash)
+
   removeChild: (node) ->
     if @isInDocument
       node.exitDocument()

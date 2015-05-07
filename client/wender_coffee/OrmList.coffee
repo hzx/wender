@@ -35,6 +35,9 @@ class ns.OrmList extends ns.ObservableList
     if sync
       ns.orm.onInsert(this, obj)
 
+  appendUntouched: (obj) ->
+    super(obj)
+
   append: (obj, sync = true) ->
     @setTemporaryId(obj)
     obj.ormParent = this
@@ -63,6 +66,10 @@ class ns.OrmList extends ns.ObservableList
       if sync
         ns.orm.onRemove(this, orphan)
     return orphan
+
+  removeBunchSilent: (hashes) ->
+    for hash in hashes
+      this.removeSilent(hash)
 
   removeSilent: (hash) ->
     @remove(hash, false)

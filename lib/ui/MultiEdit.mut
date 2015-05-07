@@ -22,12 +22,12 @@ class MultiEdit extends View {
   void enterDocument() {
     super();
     this.setValue(this.value.value);
-    /* this.value.addListener(this.onValueChange); */
+    this.value.addListener(this.onValueChange);
     this.tuneHeight();
   }
 
   void exitDocument() {
-    /* this.value.removeListener(this.onValueChange); */
+    this.value.removeListener(this.onValueChange);
     super();
   }
 

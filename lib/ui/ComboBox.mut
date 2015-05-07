@@ -1,0 +1,29 @@
+
+class ComboBox extends View {
+  /* override it */
+  string uiclass = '';
+  var items = none;
+
+  string selectId = none;
+
+  event eventSelect;
+
+  () {
+    super();
+  }
+
+  tag render() {
+    return <div class=['ui_combobox', this.uiclass] onclick=this.onClick>
+      <div class=['select_item']>  </div>
+      <div class=['items']> rmap(this.items, this.renderItem) </div>
+    </div>;
+  }
+
+  tag renderItem(var item) {
+    return <div class=['item']> item.name </div>;
+  }
+
+  bool onClick(event e) {
+    return false;
+  }
+}

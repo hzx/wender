@@ -7,6 +7,7 @@ source ObservableEvent.coffee
 source ObservableValue.coffee
 source ObservableList.coffee
 source events.coffee
+source canvas.coffee
 source animation.coffee
 source Router.coffee
 source Validator.coffee
@@ -22,6 +23,7 @@ source DomElement.coffee
 source DomRawElement.coffee
 source DomText.coffee
 source Net.coffee
+source Map.coffee
 source World.coffee
 source Loader.coffee
 source main.coffee

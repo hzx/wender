@@ -83,6 +83,18 @@ class ns.List
     else
       null
 
+  hasChild: (hash) ->
+    return !!@get(hash)
+
+  getKeys: ->
+    keys = []
+    cursor = @first
+    while cursor isnt null
+      hash = cursor.obj.getHash()
+      cursor = cursor.next
+      keys.push(hash)
+    return keys
+
   ###
   # Return next obj to current obj or null
   ###
